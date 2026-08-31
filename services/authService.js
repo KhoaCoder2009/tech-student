@@ -1,30 +1,29 @@
-/* services/authService.js — TOÀN BỘ logic xác thực đi qua đây.
-   Không còn nhánh demo/mock — mọi thao tác gọi thẳng Supabase Auth thật. */
+/* services/authService.js — logic xác thực bằng email ảo đã cấp qua Supabase Auth.
+   Không dùng mật khẩu cho màn hình login. */
 import { supabase, ROLE_LABEL } from '../assets/js/supabaseClient.js';
 
 export function toEmail(identifier){
-  const v = identifier.trim();
-  return v.includes('@') ? v : `${v.toLowerCase()}@student.techstudent.local`;
+  const v = String(identifier || '').trim();
+  return v.includes('@') ? v.toLowerCase() : `${v.toLowerCase()}@student.techstudent.local`;
 }
 
-/** Đăng nhập. Trả về { user: {id, full_name, role, roleLabel} } hoặc throw Error. */
-export async function signIn(identifier, password){
+/** Gửi link đăng nhập bằng email ảo đã cấp. */
+export async function signIn(identifier){
   const email = toEmail(identifier);
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if(error) throw new Error(error.message === 'Invalid login credentials' ? 'Sai mật khẩu hoặc tài khoản không tồn tại.' : error.message);
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: `${window.location.origin}/admin/dashboard.html`
+    }
+  });
 
-  const { data: profile, error: pErr } = await supabase
-    .from('profiles').select('role, full_name, is_active').eq('id', data.user.id).single();
-  if(pErr || !profile) throw new Error('Không tìm thấy hồ sơ người dùng trong bảng profiles. Liên hệ quản trị viên để tạo hồ sơ cho tài khoản này.');
-  if(!profile.is_active){
-    await supabase.auth.signOut();
-    throw new Error('Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên.');
-  }
-  return { user: { id: data.user.id, full_name: profile.full_name, role: profile.role, roleLabel: ROLE_LABEL[profile.role] || profile.role } };
+  if(error) throw new Error(error.message || 'Không thể gửi liên kết đăng nhập bằng email.');
+
+  return { email };
 }
 
-/** Trả về user hiện tại (session Supabase thật, dựa trên JWT — không phải password) hoặc null. */
+/** Trả về user hiện tại (session Supabase thật, dựa trên JWT) hoặc null. */
 export async function getCurrentUser(){
   const { data:{ session } } = await supabase.auth.getSession();
   if(!session) return null;

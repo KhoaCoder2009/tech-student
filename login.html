@@ -96,26 +96,14 @@ body{background:var(--bg);}
 
         <form id="login-form" novalidate>
           <div class="field" style="margin-bottom:16px;">
-            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Email hoặc mã học sinh</label>
-            <div class="input-wrap" id="wrap-user"><input type="text" id="f-user" placeholder="12A2001 hoặc ten@truong.edu.vn" autocomplete="username"></div>
-            <div class="err-msg" id="err-user">Vui lòng nhập email hoặc mã học sinh.</div>
+            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Email ảo đã cấp</label>
+            <div class="input-wrap" id="wrap-user"><input type="email" id="f-user" placeholder="ten@student.techstudent.local" autocomplete="username"></div>
+            <div class="err-msg" id="err-user">Vui lòng nhập email ảo hợp lệ.</div>
           </div>
-          <div class="field" style="margin-bottom:16px;">
-            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Mật khẩu</label>
-            <div class="input-wrap" id="wrap-pass">
-              <input type="password" id="f-pass" placeholder="••••••••" autocomplete="current-password">
-              <button type="button" class="toggle-eye" id="toggle-eye">👁️</button>
-            </div>
-            <div class="err-msg" id="err-pass">Sai mật khẩu hoặc tài khoản không tồn tại.</div>
-          </div>
-          <div class="row-between">
-            <label class="remember"><input type="checkbox" checked> Ghi nhớ đăng nhập</label>
-            <button type="button" class="link" id="btn-forgot">Quên mật khẩu?</button>
-          </div>
-          <button type="submit" class="btn-submit" id="btn-submit"><span class="spinner"></span><span class="btxt">Đăng nhập</span></button>
+          <button type="submit" class="btn-submit" id="btn-submit"><span class="spinner"></span><span class="btxt">Gửi link đăng nhập</span></button>
         </form>
 
-        <div class="note"><span>ℹ️</span><span>Tài khoản do quản trị viên nhà trường cấp. Nếu chưa có tài khoản, hãy liên hệ giáo viên chủ nhiệm.</span></div>
+        <div class="note"><span>ℹ️</span><span>Nhập email ảo do quản trị viên cấp. Hệ thống sẽ gửi liên kết đăng nhập trực tiếp tới hộp thư của bạn.</span></div>
       </div>
 
       <div class="success-view" id="success-block">
@@ -152,43 +140,19 @@ body{background:var(--bg);}
 </div>
 
 <script type="module">
-import { signIn, getCurrentUser, sendPasswordReset } from './services/authService.js';
-import { toast } from './assets/js/ui.js';
+import { signIn, getCurrentUser } from './services/authService.js';
 
 const $=(s,r=document)=>r.querySelector(s);
-const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 
 $('#conn-badge').textContent = '● Đã kết nối Supabase';
 
-const userInput=$('#f-user'), passInput=$('#f-pass');
-const wrapUser=$('#wrap-user'), wrapPass=$('#wrap-pass');
+const userInput=$('#f-user');
+const wrapUser=$('#wrap-user');
 const btnSubmit=$('#btn-submit');
 
-$('#toggle-eye').addEventListener('click', () => {
-  passInput.type = passInput.type==='password' ? 'text' : 'password';
-  $('#toggle-eye').textContent = passInput.type==='password' ? '👁️' : '🙈';
-});
-
-function clearErrors(){ wrapUser.classList.remove('err'); wrapPass.classList.remove('err'); }
+function clearErrors(){ wrapUser.classList.remove('err'); }
 function shake(){ const c=$('.form-card'); c.classList.add('shake'); setTimeout(()=>c.classList.remove('shake'),350); }
 function setLoading(on){ btnSubmit.classList.toggle('loading', on); btnSubmit.disabled = on; }
-
-$('#login-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  clearErrors();
-  const u = userInput.value.trim(), p = passInput.value;
-  if(!u){ wrapUser.classList.add('err'); shake(); return; }
-  if(!p){ wrapPass.classList.add('err'); shake(); return; }
-  setLoading(true);
-  try{
-    const { user } = await signIn(u, p);
-    showSuccess(user);
-  }catch(err){
-    wrapPass.classList.add('err'); $('#err-pass').textContent = err.message; shake();
-  }finally{
-    setLoading(false);
-  }
-});
 
 function showSuccess(user){
   $('#login-block').style.display = 'none';
@@ -201,30 +165,44 @@ function showSuccess(user){
   $('#btn-continue').onclick = () => { if(target) window.location.href = target; };
 }
 
-// Nếu đã có phiên đăng nhập hợp lệ (Supabase SDK tự lưu session),
-// bỏ qua form và báo đã đăng nhập thay vì bắt đăng nhập lại.
+$('#login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  clearErrors();
+  const email = userInput.value.trim();
+  if(!email){ wrapUser.classList.add('err'); shake(); return; }
+
+  const normalized = email.toLowerCase();
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+  if(!emailOk){
+    wrapUser.classList.add('err');
+    $('#err-user').textContent = 'Vui lòng nhập email ảo hợp lệ.';
+    shake();
+    return;
+  }
+
+  setLoading(true);
+  try{
+    await signIn(normalized);
+    $('#login-block').style.display = 'none';
+    $('#success-block').classList.add('show');
+    $('#success-sub').textContent = `Liên kết đăng nhập đã được gửi tới ${normalized}. Vui lòng kiểm tra hộp thư và nhấn vào link để hoàn tất.`;
+    $('#role-preview').innerHTML = `<div class="rp-top"><div class="av">${normalized.charAt(0).toUpperCase()}</div><div><div class="nm">${normalized}</div><div class="rl">Email ảo được cấp</div></div></div>`;
+    $('#pending-note').style.display = 'block';
+    $('#pending-note').textContent = 'Bạn đang dùng email ảo được cấp. Mở email và click vào liên kết trong hộp thư để đăng nhập.';
+    $('#btn-continue').style.display = 'none';
+  }catch(err){
+    wrapUser.classList.add('err');
+    $('#err-user').textContent = err.message;
+    shake();
+  }finally{
+    setLoading(false);
+  }
+});
+
 (async () => {
   const user = await getCurrentUser();
   if(user) showSuccess(user);
 })();
-
-$('#btn-forgot').addEventListener('click', () => {
-  $('#forgot-overlay').classList.add('show');
-  $('#forgot-form-wrap').style.display='block';
-  $('#reset-success').style.display='none';
-  $('#forgot-foot').style.display='flex';
-  $('#forgot-email').value='';
-});
-$('#forgot-close').addEventListener('click', ()=>$('#forgot-overlay').classList.remove('show'));
-$('#forgot-cancel').addEventListener('click', ()=>$('#forgot-overlay').classList.remove('show'));
-$('#forgot-send').addEventListener('click', async () => {
-  const email = $('#forgot-email').value.trim();
-  if(!email){ $('#forgot-email').style.borderColor='var(--coral-500)'; return; }
-  try{ await sendPasswordReset(email); } catch(err){ /* không lộ email có tồn tại hay không */ }
-  $('#forgot-form-wrap').style.display='none';
-  $('#reset-success').style.display='block';
-  $('#forgot-foot').style.display='none';
-});
 </script>
 </body>
 </html>
