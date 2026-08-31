@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Nề nếp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+
+      <div class="toolbar">
+        <div class="search-box"><span class="ic">🔎</span><input id="search" placeholder="Tìm học sinh hoặc sự kiện..."></div>
+        <select class="filter" id="type-filter">
+          <option value="all">Tất cả loại</option>
+          <option value="add">Cộng điểm</option>
+          <option value="subtract">Trừ điểm</option>
+        </select>
+        <button class="btn btn-primary" id="btn-add-log">＋ Ghi nhận mới</button>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:18px;">
+        <div class="panel">
+          <h3>Điểm nề nếp học sinh</h3>
+          <div class="panel-sub">Bảng điểm tất cả học sinh</div>
+          <div class="table-card" style="margin-top:14px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>STT</th>
+                  <th>Học sinh</th>
+                  <th>Tổ</th>
+                  <th>Điểm</th>
+                </tr>
+              </thead>
+              <tbody id="student-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div>
+          <div class="panel" style="margin-bottom:14px;">
+            <h3>Top học sinh xuất sắc</h3>
+            <div class="panel-sub">10 học sinh có điểm cao nhất</div>
+            <div id="top-students"></div>
+          </div>
+          <div class="panel">
+            <h3>Cần chú ý</h3>
+            <div class="panel-sub">Học sinh có điểm dưới 80</div>
+            <div id="low-students"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Lịch sử cộng/trừ điểm</h3>
+        <div class="table-card" style="margin-top:14px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Ngày</th>
+                <th>Học sinh</th>
+                <th>Loại</th>
+                <th>Điểm</th>
+                <th>Lý do</th>
+                <th>Người ghi</th>
+                <th style="text-align:right;">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="log-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="log-empty" style="display:none;">
+          <div class="ic">📋</div>
+          <div class="t">Chưa có ghi nhận nào</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal ghi nhận -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Ghi nhận nề nếp</h3><button class="close-x" id="modal-close">✕</button></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Học sinh</label>
+        <select id="f-student"></select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Loại</label>
+          <select id="f-type">
+            <option value="add">Cộng điểm</option>
+            <option value="subtract">Trừ điểm</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Danh mục</label>
+          <select id="f-category"></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Điểm</label>
+          <input type="number" id="f-points" min="0" max="10" step="0.5" value="2.0">
+        </div>
+        <div class="field">
+          <label>Ngày</label>
+          <input type="date" id="f-date">
+        </div>
+      </div>
+      <div class="field">
+        <label>Lý do</label>
+        <textarea id="f-reason" rows="3" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:13.5px;font-family:inherit;resize:vertical;" placeholder="Mô tả chi tiết..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="modal-cancel">Huỷ</button>
+      <button class="btn btn-mint" id="modal-save">Lưu ghi nhận</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initLayout } from '../assets/js/layout.js';
+import { toast, confirmModal, errorBanner } from '../assets/js/ui.js';
+import * as studentService from '../services/studentService.js';
+import * as disciplineService from '../services/disciplineService.js';
+import * as groupService from '../services/groupService.js';
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+let STUDENTS = [];
+let GROUPS = [];
+let CATEGORIES = [];
+let LOGS = [];
+let CURRENT_USER = null;
+
+function initials(name) {
+  const p = (name || '?').trim().split(' ');
+  return (p[p.length - 1][0] || '').toUpperCase();
+}
+
+function groupOf(id) {
+  return GROUPS.find(g => g.id === id) || { name: '—', color: '#9aa1b8' };
+}
+
+async function loadData() {
+  try {
+    [STUDENTS, GROUPS, CATEGORIES, LOGS] = await Promise.all([
+      studentService.listStudents({}),
+      groupService.listGroups(),
+      disciplineService.listCategories(),
+      disciplineService.listDisciplineLogs({}),
+    ]);
+
+    $('#f-student').innerHTML = STUDENTS.map(s => `<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
+    updateCategoryOptions();
+    renderStudentScores();
+    renderTopStudents();
+    renderLogs();
+  } catch (err) {
+    errorBanner($('#content'), 'Không tải được dữ liệu: ' + err.message, loadData);
+  }
+}
+
+function renderStudentScores() {
+  const tbody = $('#student-tbody');
+  tbody.innerHTML = '';
+  
+  STUDENTS.forEach((s, idx) => {
+    const g = groupOf(s.group_id);
+    const scoreClass = s.score >= 90 ? 'good' : s.score >= 75 ? 'mid' : 'low';
+    
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${idx + 1}</td>
+        <td>
+          <div class="stu">
+            <div class="av" style="background:${g.color}">${initials(s.name)}</div>
+            <div><div class="nm">${s.name}</div><div class="cd">${s.code}</div></div>
+          </div>
+        </td>
+        <td><span class="badge" style="background:color-mix(in srgb, ${g.color} 16%, white); color:${g.color}"><span class="badge-dot" style="background:${g.color}"></span>${g.name}</span></td>
+        <td><span class="score ${scoreClass}">${s.score}</span></td>
+      </tr>`);
+  });
+}
+
+function renderTopStudents() {
+  const top = [...STUDENTS].sort((a, b) => b.score - a.score).slice(0, 10);
+  const low = STUDENTS.filter(s => s.score < 80).sort((a, b) => a.score - b.score).slice(0, 5);
+
+  const topDiv = $('#top-students');
+  topDiv.innerHTML = '';
+  if (top.length === 0) {
+    topDiv.innerHTML = '<div class="empty" style="padding:20px 0;"><div class="t">Chưa có dữ liệu</div></div>';
+  } else {
+    top.forEach((s, idx) => {
+      topDiv.insertAdjacentHTML('beforeend', `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
+          <div style="font-weight:700;font-size:14px;color:var(--ink-400);min-width:20px;">#${idx + 1}</div>
+          <div class="av" style="width:30px;height:30px;border-radius:50%;background:var(--mint-500);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">${initials(s.name)}</div>
+          <div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:13px;">${s.name}</div><div style="font-size:11px;color:var(--ink-600);">${s.code}</div></div>
+          <div style="font-weight:700;font-size:15px;font-family:'Sora',sans-serif;color:#0f9d70;">${s.score}</div>
+        </div>`);
+    });
+  }
+
+  const lowDiv = $('#low-students');
+  lowDiv.innerHTML = '';
+  if (low.length === 0) {
+    lowDiv.innerHTML = '<div class="empty" style="padding:20px 0;"><div class="ic">🎉</div><div class="t">Không có học sinh cần chú ý</div></div>';
+  } else {
+    low.forEach(s => {
+      lowDiv.insertAdjacentHTML('beforeend', `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
+          <div class="av" style="width:30px;height:30px;border-radius:50%;background:var(--coral-500);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">${initials(s.name)}</div>
+          <div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:13px;">${s.name}</div><div style="font-size:11px;color:var(--ink-600);">${s.code}</div></div>
+          <div style="font-weight:700;font-size:15px;font-family:'Sora',sans-serif;color:var(--coral-500);">${s.score}</div>
+        </div>`);
+    });
+  }
+}
+
+function renderLogs() {
+  const tbody = $('#log-tbody');
+  const typeFilter = $('#type-filter').value;
+  const search = $('#search').value.trim().toLowerCase();
+
+  let filtered = LOGS;
+  if (typeFilter !== 'all') filtered = filtered.filter(l => l.type === typeFilter);
+  if (search) filtered = filtered.filter(l =>
+    l.studentName.toLowerCase().includes(search) ||
+    l.reason.toLowerCase().includes(search)
+  );
+
+  tbody.innerHTML = '';
+  $('#log-empty').style.display = filtered.length ? 'none' : 'block';
+
+  filtered.forEach(log => {
+    const typeLabel = log.type === 'add' ? '＋ Cộng' : '− Trừ';
+    const typeColor = log.type === 'add' ? 'var(--mint-500)' : 'var(--coral-500)';
+    const pointsDisplay = log.type === 'add' ? `+${log.points}` : `-${log.points}`;
+
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${new Date(log.date).toLocaleDateString('vi-VN')}</td>
+        <td><div style="font-weight:600;font-size:13px;">${log.studentName}</div><div style="font-size:11px;color:var(--ink-600);">${log.studentCode}</div></td>
+        <td><span class="badge" style="background:color-mix(in srgb, ${typeColor} 16%, white); color:${typeColor}">${typeLabel}</span></td>
+        <td><span style="font-weight:700;font-family:'Sora',sans-serif;color:${typeColor}">${pointsDisplay}</span></td>
+        <td><div style="font-weight:600;font-size:12.5px;">${log.categoryLabel}</div><div style="font-size:11.5px;color:var(--ink-600);">${log.reason}</div></td>
+        <td style="font-size:12px;color:var(--ink-600);">${log.recordedBy}</td>
+        <td><div class="row-actions"><button class="icon-sm del-btn" data-id="${log.id}" title="Xoá">🗑️</button></div></td>
+      </tr>`);
+  });
+
+  $$('.del-btn').forEach(btn => btn.addEventListener('click', () => handleDelete(btn.dataset.id)));
+}
+
+$('#type-filter').addEventListener('change', renderLogs);
+$('#search').addEventListener('input', renderLogs);
+
+// Modal
+$('#btn-add-log').addEventListener('click', () => {
+  $('#f-type').value = 'add';
+  $('#f-points').value = '2.0';
+  $('#f-date').value = new Date().toISOString().split('T')[0];
+  $('#f-reason').value = '';
+  $('#modal-overlay').classList.add('show');
+});
+
+$('#modal-close').addEventListener('click', () => $('#modal-overlay').classList.remove('show'));
+$('#modal-cancel').addEventListener('click', () => $('#modal-overlay').classList.remove('show'));
+
+$('#f-type').addEventListener('change', updateCategoryOptions);
+
+function updateCategoryOptions() {
+  const type = $('#f-type').value;
+  const filtered = CATEGORIES.filter(c => c.type === type);
+  const fc = $('#f-category');
+  fc.innerHTML = filtered.map(c => `<option value="${c.id}" data-points="${c.default_points}">${c.label} (${c.default_points} điểm)</option>`).join('');
+
+  if (fc.selectedOptions[0]) {
+    $('#f-points').value = fc.selectedOptions[0].dataset.points;
+  }
+}
+
+$('#f-category').addEventListener('change', e => {
+  if (e.target.selectedOptions[0]) {
+    $('#f-points').value = e.target.selectedOptions[0].dataset.points;
+  }
+});
+
+$('#modal-save').addEventListener('click', async () => {
+  const studentId = $('#f-student').value;
+  const type = $('#f-type').value;
+  const categoryId = $('#f-category').value;
+  const points = parseFloat($('#f-points').value);
+  const date = $('#f-date').value;
+  const reason = $('#f-reason').value.trim();
+
+  if (!studentId || !reason) { toast('Vui lòng chọn học sinh và nhập lý do', 'err'); return; }
+  if (points <= 0 || points > 10) { toast('Điểm phải từ 0.5 đến 10', 'err'); return; }
+
+  const btn = $('#modal-save');
+  btn.disabled = true;
+  btn.textContent = 'Đang lưu...';
+
+  try {
+    await disciplineService.createDisciplineLog({
+      studentId,
+      categoryId,
+      type,
+      points,
+      reason,
+      date,
+      notes: '',
+      recordedBy: CURRENT_USER.id,
+      status: 'approved',
+    });
+
+    toast('✓ Đã ghi nhận thành công');
+    $('#modal-overlay').classList.remove('show');
+    await loadData();
+  } catch (err) {
+    toast('Không thể lưu: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Lưu ghi nhận';
+  }
+});
+
+async function handleDelete(id) {
+  const ok = await confirmModal({
+    title: 'Xoá ghi nhận này?',
+    desc: 'Điểm nề nếp của học sinh sẽ được tự động cập nhật lại.',
+    confirmText: 'Xoá',
+    icon: '🗑️'
+  });
+  if (!ok) return;
+
+  try {
+    await disciplineService.deleteDisciplineLog(id);
+    toast('✓ Đã xoá ghi nhận');
+    await loadData();
+  } catch (err) {
+    toast('Không thể xoá: ' + err.message, 'err');
+  }
+}
+
+(async () => {
+  CURRENT_USER = await initLayout({
+    page: 'discipline',
+    title: 'Nề nếp',
+    sub: 'Quản lý nề nếp học sinh',
+    allowedRoles: ['admin']
+  });
+  if (!CURRENT_USER) return;
+
+  await loadData();
+})();
+</script>
+</body>
+</html>

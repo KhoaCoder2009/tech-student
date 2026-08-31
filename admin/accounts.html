@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Tài khoản</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+      <div class="toolbar">
+        <div class="search-box"><span class="ic">🔎</span><input id="acc-search" placeholder="Tìm theo tên hoặc email..."></div>
+        <button class="btn btn-primary" id="btn-add-account">＋ Cấp tài khoản mới</button>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>Người dùng</th><th>Vai trò</th><th>Trạng thái</th><th style="text-align:right;">Thao tác</th></tr></thead>
+          <tbody id="acc-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Cấp tài khoản mới</h3><button class="close-x" id="modal-close">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Họ và tên</label><input id="f-name" placeholder="Nguyễn Văn A"></div>
+      <div class="field"><label>Email</label><input id="f-email" placeholder="ten@truong.edu.vn"></div>
+      <div class="field"><label>Vai trò</label>
+        <select id="f-role"><option value="student">Học sinh</option><option value="teacher">Giáo viên</option><option value="admin">Quản trị viên</option></select>
+      </div>
+      <div class="note" style="background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:11.5px;color:var(--ink-600);">
+        Mật khẩu tạm thời và liên kết thiết lập tài khoản sẽ được gửi qua email (xử lý bởi Supabase Edge Function <code>create-account</code>, dùng service_role key ở phía server — không lộ ra frontend).
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="modal-cancel">Huỷ</button>
+      <button class="btn btn-mint" id="modal-save"><span id="save-label">Cấp tài khoản</span></button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initLayout } from '../assets/js/layout.js';
+import { toast, confirmModal, skeletonRows, errorBanner } from '../assets/js/ui.js';
+import * as accountService from '../services/accountService.js';
+import { createAccount } from '../services/authService.js';
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+let ACCOUNTS = [];
+
+async function load(){
+  const tbody = $('#acc-tbody');
+  skeletonRows(tbody, 4, 5);
+  try{
+    ACCOUNTS = await accountService.listAccounts();
+    renderList();
+  }catch(err){
+    tbody.innerHTML='';
+    errorBanner($('#content'), 'Không tải được danh sách tài khoản: ' + err.message, load);
+  }
+}
+
+function renderList(){
+  const q = $('#acc-search').value.trim().toLowerCase();
+  const tbody = $('#acc-tbody'); tbody.innerHTML='';
+  const filtered = ACCOUNTS.filter(a => !q || a.full_name.toLowerCase().includes(q) || (a.email||'').toLowerCase().includes(q));
+  filtered.forEach(a => {
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr data-id="${a.id}">
+        <td><div class="stu"><div class="av" style="background:var(--navy-950)">${(a.full_name||'?').trim().slice(-1).toUpperCase()}</div><div><div class="nm">${a.full_name}</div><div class="cd">${a.email||''}</div></div></div></td>
+        <td><span class="badge pos-badge">${a.roleLabel}</span></td>
+        <td><span class="badge" style="background:${a.is_active?'var(--mint-100)':'var(--coral-100)'};color:${a.is_active?'#0f8f76':'var(--coral-500)'}">${a.is_active?'Đang hoạt động':'Đã khoá'}</span></td>
+        <td><div class="row-actions"><button class="icon-sm toggle-btn" title="${a.is_active?'Khoá':'Mở khoá'}">${a.is_active?'🔒':'🔓'}</button></div></td>
+      </tr>`);
+  });
+  $$('.toggle-btn').forEach(b => b.addEventListener('click', async e => {
+    const id = e.target.closest('[data-id]').dataset.id;
+    const acc = ACCOUNTS.find(a=>a.id===id);
+    const ok = await confirmModal({ title: acc.is_active ? 'Khoá tài khoản này?' : 'Mở khoá tài khoản này?', desc: acc.full_name, confirmText: acc.is_active ? 'Khoá tài khoản' : 'Mở khoá', danger: acc.is_active, icon: acc.is_active?'🔒':'🔓' });
+    if(!ok) return;
+    try{ await accountService.setAccountActive(id, !acc.is_active); toast('Đã cập nhật trạng thái tài khoản'); load(); }
+    catch(err){ toast(err.message, 'err'); }
+  }));
+}
+$('#acc-search').addEventListener('input', renderList);
+
+$('#btn-add-account').addEventListener('click', () => {
+  $('#f-name').value=''; $('#f-email').value=''; $('#f-role').value='student';
+  $('#modal-overlay').classList.add('show');
+});
+$('#modal-close').addEventListener('click', ()=>$('#modal-overlay').classList.remove('show'));
+$('#modal-cancel').addEventListener('click', ()=>$('#modal-overlay').classList.remove('show'));
+$('#modal-save').addEventListener('click', async () => {
+  const full_name=$('#f-name').value.trim(), email=$('#f-email').value.trim(), role=$('#f-role').value;
+  if(!full_name || !email){ toast('Vui lòng nhập đầy đủ họ tên và email', 'err'); return; }
+  const btn=$('#modal-save'); btn.disabled=true; $('#save-label').textContent='Đang tạo...';
+  try{
+    await createAccount({ email, full_name, role });
+    toast('Đã cấp tài khoản mới — email hướng dẫn đã được gửi');
+    $('#modal-overlay').classList.remove('show');
+    load();
+  }catch(err){
+    toast(err.message, 'err');
+  }finally{
+    btn.disabled=false; $('#save-label').textContent='Cấp tài khoản';
+  }
+});
+
+(async () => {
+  const user = await initLayout({ page:'accounts', title:'Tài khoản', sub:'Cấp và quản lý tài khoản đăng nhập', allowedRoles:['admin'] });
+  if(!user) return;
+  load();
+})();
+</script>
+</body>
+</html>

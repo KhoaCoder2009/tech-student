@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Tổ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+      <div class="group-cards" id="group-cards"></div>
+      <div class="table-card" id="group-detail-card" style="display:none;">
+        <table>
+          <thead><tr><th>Học sinh</th><th>Chức vụ</th><th>Điểm nề nếp</th><th style="text-align:right;">Thao tác</th></tr></thead>
+          <tbody id="group-detail-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initLayout } from '../assets/js/layout.js';
+import { errorBanner } from '../assets/js/ui.js';
+import * as studentService from '../services/studentService.js';
+import * as groupService from '../services/groupService.js';
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+function initials(name){ const p=(name||'?').trim().split(' '); return (p[p.length-1][0]||'').toUpperCase(); }
+
+let GROUPS = [], STUDENTS = [];
+let selectedGroup = null;
+
+function renderGroups(){
+  const cards = $('#group-cards'); cards.innerHTML = '';
+  GROUPS.forEach(g => {
+    const mem = STUDENTS.filter(s => s.group_id === g.id);
+    const leader = mem.find(s => s.position === 'Tổ trưởng');
+    const deputy = mem.find(s => s.position === 'Phó tổ trưởng');
+    const avg = mem.length ? (mem.reduce((a,s)=>a+s.score,0)/mem.length).toFixed(1) : '0.0';
+    cards.insertAdjacentHTML('beforeend', `
+      <div class="group-card ${selectedGroup===g.id?'sel':''}" data-g="${g.id}">
+        <div class="top"><div class="g-chip" style="background:${g.color}">${g.name.slice(-1)}</div>
+          <div><div class="nm">${g.name}</div><div class="cnt">${mem.length} học sinh · Điểm TB ${avg}</div></div></div>
+        <div class="group-leader">👑 Tổ trưởng: <b>${leader?leader.name:'—'}</b></div>
+        <div class="group-leader">🎗️ Phó tổ trưởng: <b>${deputy?deputy.name:'—'}</b></div>
+      </div>`);
+  });
+  $$('.group-card').forEach(c => c.addEventListener('click', () => {
+    selectedGroup = selectedGroup===c.dataset.g ? null : c.dataset.g;
+    renderGroups(); renderGroupDetail();
+  }));
+  renderGroupDetail();
+}
+
+function renderGroupDetail(){
+  const card = $('#group-detail-card');
+  if(!selectedGroup){ card.style.display='none'; return; }
+  card.style.display='block';
+  const g = GROUPS.find(x=>x.id===selectedGroup);
+  const mem = STUDENTS.filter(s => s.group_id === selectedGroup);
+  const tbody = $('#group-detail-tbody'); tbody.innerHTML='';
+  mem.forEach(s => {
+    tbody.insertAdjacentHTML('beforeend', `
+      <tr data-id="${s.id}" class="clickable">
+        <td><div class="stu"><div class="av" style="background:${g.color}">${initials(s.name)}</div><div><div class="nm">${s.name}</div><div class="cd">${s.code}</div></div></div></td>
+        <td><span class="badge pos-badge">${s.position}</span></td>
+        <td><span class="score">${s.score}</span></td>
+        <td><div class="row-actions"><button class="icon-sm view-btn">👁️</button></div></td>
+      </tr>`);
+  });
+  $$('#group-detail-tbody tr').forEach(tr => tr.addEventListener('click', () => {
+    window.location.href = `students-detail.html?id=${tr.dataset.id}`;
+  }));
+}
+
+async function load(){
+  try{
+    [GROUPS, STUDENTS] = await Promise.all([groupService.listGroups(), studentService.listStudents({})]);
+    renderGroups();
+  }catch(err){
+    errorBanner($('#content'), 'Không tải được dữ liệu tổ: ' + err.message, load);
+  }
+}
+
+(async () => {
+  const user = await initLayout({ page:'groups', title:'Tổ', sub:'Quản lý các tổ trong lớp', allowedRoles:['admin'] });
+  if(!user) return;
+  load();
+})();
+</script>
+</body>
+</html>

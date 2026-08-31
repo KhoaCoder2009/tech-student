@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Chấm điểm nề nếp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+<style>
+.score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.student-card{background:#fff;border:2px solid var(--line);border-radius:var(--radius-lg);padding:20px;transition:all .2s;}
+.student-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+
+.student-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.student-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#4f6df5,#14b8a6);color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.student-info{flex:1;margin-left:12px;}
+.student-name{font-size:15px;font-weight:700;color:var(--navy-900);}
+.student-code{font-size:12px;color:var(--ink-500);}
+.student-group{font-size:12px;color:var(--mint-700);background:var(--mint-100);padding:2px 8px;border-radius:8px;display:inline-block;}
+
+.score-display{text-align:center;margin:16px 0;}
+.current-score{font-size:48px;font-weight:800;background:linear-gradient(135deg,#4f6df5,#14b8a6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.score-label{font-size:12px;color:var(--ink-600);margin-top:4px;}
+
+.score-input-group{display:flex;gap:8px;align-items:center;}
+.score-input{flex:1;padding:10px 12px;border:2px solid var(--line);border-radius:var(--radius-md);font-size:16px;font-weight:600;text-align:center;}
+.score-input:focus{outline:none;border-color:var(--mint-500);background:var(--mint-50);}
+.btn-save{padding:10px 16px;border:none;background:var(--mint-500);color:#fff;border-radius:var(--radius-md);cursor:pointer;font-weight:600;font-size:14px;}
+.btn-save:hover{background:var(--mint-600);}
+
+.score-badge{position:absolute;top:12px;right:12px;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;}
+.badge-excellent{background:var(--mint-100);color:var(--mint-700);}
+.badge-good{background:var(--sky-100);color:var(--sky-700);}
+.badge-average{background:var(--amber-100);color:var(--amber-700);}
+.badge-poor{background:var(--red-100);color:var(--red-700);}
+
+.filters{display:flex;gap:12px;margin-bottom:20px;}
+.filter-btn{padding:10px 16px;border:2px solid var(--line);background:#fff;border-radius:20px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;}
+.filter-btn:hover{border-color:var(--mint-500);background:var(--mint-50);}
+.filter-btn.active{border-color:var(--mint-500);background:var(--mint-500);color:#fff;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+
+      <div class="page-header">
+        <h1 class="page-title">⭐ Chấm điểm nề nếp</h1>
+        <p class="page-subtitle">Cập nhật điểm nề nếp cho từng học sinh (thang điểm 0-100)</p>
+      </div>
+
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">Tất cả (0)</button>
+        <button class="filter-btn" data-filter="excellent">Xuất sắc ≥90 (0)</button>
+        <button class="filter-btn" data-filter="good">Tốt 80-89 (0)</button>
+        <button class="filter-btn" data-filter="average">Trung bình 65-79 (0)</button>
+        <button class="filter-btn" data-filter="poor">Yếu <65 (0)</button>
+      </div>
+
+      <div class="score-grid" id="score-grid"></div>
+
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initLayout } from '../assets/js/layout.js';
+import { errorBanner, toast } from '../assets/js/ui.js';
+import { supabase } from '../assets/js/supabaseClient.js';
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+let CLASS_ID = null;
+let STUDENTS = [];
+let CURRENT_FILTER = 'all';
+
+function getScoreBadge(score) {
+  if (score >= 90) return { class: 'excellent', label: 'Xuất sắc' };
+  if (score >= 80) return { class: 'good', label: 'Tốt' };
+  if (score >= 65) return { class: 'average', label: 'Trung bình' };
+  return { class: 'poor', label: 'Yếu' };
+}
+
+function renderStudents() {
+  const filtered = CURRENT_FILTER === 'all' ? STUDENTS : STUDENTS.filter(s => {
+    const score = s.discipline_score || 0;
+    switch(CURRENT_FILTER) {
+      case 'excellent': return score >= 90;
+      case 'good': return score >= 80 && score < 90;
+      case 'average': return score >= 65 && score < 80;
+      case 'poor': return score < 65;
+      default: return true;
+    }
+  });
+
+  const grid = $('#score-grid');
+  
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--ink-500);">Không có học sinh nào</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(s => {
+    const score = s.discipline_score || 0;
+    const badge = getScoreBadge(score);
+    const initial = (s.profile?.full_name || '?').trim().slice(-1).toUpperCase();
+
+    return `
+      <div class="student-card" style="position:relative;">
+        <span class="score-badge badge-${badge.class}">${badge.label}</span>
+        
+        <div class="student-header">
+          <div class="student-avatar">${initial}</div>
+          <div class="student-info">
+            <div class="student-name">${s.profile?.full_name || 'N/A'}</div>
+            <div class="student-code">Mã: ${s.student_code}</div>
+          </div>
+        </div>
+
+        <div class="student-group">${s.group?.name || 'Chưa có tổ'}</div>
+
+        <div class="score-display">
+          <div class="current-score">${score}</div>
+          <div class="score-label">Điểm hiện tại</div>
+        </div>
+
+        <div class="score-input-group">
+          <input 
+            type="number" 
+            class="score-input" 
+            min="0" 
+            max="100" 
+            step="1"
+            value="${score}"
+            data-student-id="${s.id}"
+            placeholder="0-100"
+          >
+          <button class="btn-save" data-student-id="${s.id}">💾</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Add save listeners
+  $$('.btn-save').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const studentId = btn.dataset.studentId;
+      const input = $(`.score-input[data-student-id="${studentId}"]`);
+      const score = parseFloat(input.value);
+
+      if (isNaN(score) || score < 0 || score > 100) {
+        toast('⚠️ Điểm phải từ 0 đến 100', 'err');
+        return;
+      }
+
+      try {
+        const { error } = await supabase
+          .from('students')
+          .update({ discipline_score: score })
+          .eq('id', studentId);
+
+        if (error) throw error;
+
+        toast('✅ Đã cập nhật điểm');
+        await loadStudents();
+      } catch (err) {
+        toast('⚠️ Lỗi: ' + err.message, 'err');
+      }
+    });
+  });
+
+  // Update filter counts
+  const counts = {
+    all: STUDENTS.length,
+    excellent: STUDENTS.filter(s => (s.discipline_score || 0) >= 90).length,
+    good: STUDENTS.filter(s => (s.discipline_score || 0) >= 80 && (s.discipline_score || 0) < 90).length,
+    average: STUDENTS.filter(s => (s.discipline_score || 0) >= 65 && (s.discipline_score || 0) < 80).length,
+    poor: STUDENTS.filter(s => (s.discipline_score || 0) < 65).length
+  };
+
+  $$('.filter-btn').forEach(btn => {
+    const filter = btn.dataset.filter;
+    const label = btn.textContent.split('(')[0].trim();
+    btn.textContent = `${label} (${counts[filter]})`;
+  });
+}
+
+async function loadStudents() {
+  try {
+    const { data, error } = await supabase
+      .from('students')
+      .select(`
+        id,
+        student_code,
+        discipline_score,
+        profile:profiles(full_name),
+        group:groups(name)
+      `)
+      .eq('class_id', CLASS_ID)
+      .order('student_code');
+
+    if (error) throw error;
+    STUDENTS = data || [];
+    renderStudents();
+  } catch (err) {
+    errorBanner($('#content'), 'Lỗi tải dữ liệu: ' + err.message, loadStudents);
+  }
+}
+
+// Filter buttons
+$$('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    CURRENT_FILTER = btn.dataset.filter;
+    renderStudents();
+  });
+});
+
+(async () => {
+  const user = await initLayout({ 
+    page: 'set-discipline-score', 
+    title: 'Chấm điểm nề nếp', 
+    sub: 'Cập nhật điểm nề nếp học sinh', 
+    allowedRoles: ['admin', 'teacher'] 
+  });
+  if (!user) return;
+
+  // Get class
+  const { data: classData } = await supabase
+    .from('classes')
+    .select('id')
+    .eq('name', '12A2')
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  CLASS_ID = classData?.[0]?.id;
+
+  if (!CLASS_ID) {
+    errorBanner($('#content'), 'Không tìm thấy lớp 12A2');
+    return;
+  }
+
+  await loadStudents();
+})();
+</script>
+</body>
+</html>

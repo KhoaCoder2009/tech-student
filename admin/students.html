@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Học sinh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+
+      <div class="toolbar">
+        <div class="search-box"><span class="ic">🔎</span><input id="stu-search" placeholder="Tìm theo mã học sinh hoặc họ tên..."></div>
+        <select class="filter" id="stu-group-filter"><option value="all">Tất cả tổ</option></select>
+        <select class="filter" id="stu-sort">
+          <option value="name">Sắp xếp: Tên</option>
+          <option value="code">Sắp xếp: Mã HS</option>
+          <option value="score">Sắp xếp: Điểm nề nếp</option>
+          <option value="attendance">Sắp xếp: Chuyên cần</option>
+        </select>
+        <button class="btn btn-primary" id="btn-add-student">＋ Thêm học sinh</button>
+      </div>
+
+      <div class="chip-tabs" id="chip-tabs"></div>
+
+      <div class="table-card">
+        <table>
+          <thead><tr><th>Học sinh</th><th>Tổ</th><th>Chức vụ</th><th>Điểm nề nếp</th><th>Chuyên cần</th><th style="text-align:right;">Thao tác</th></tr></thead>
+          <tbody id="stu-tbody"></tbody>
+        </table>
+        <div class="empty" id="stu-empty" style="display:none;">
+          <div class="ic">🗒️</div><div class="t">Không tìm thấy học sinh phù hợp</div>
+          <div>Hãy thử đổi bộ lọc hoặc từ khoá tìm kiếm.</div>
+        </div>
+      </div>
+      <div class="mobile-cards" id="stu-mobile"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal thêm/sửa -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modal-title">Thêm học sinh</h3><button class="close-x" id="modal-close">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Họ và tên</label><input id="f-name" placeholder="Nguyễn Văn A"></div>
+      <div class="field-row">
+        <div class="field"><label>Mã học sinh</label><input id="f-code" placeholder="12A2001"></div>
+        <div class="field"><label>Giới tính</label><select id="f-gender"><option>Nam</option><option>Nữ</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Tổ</label><select id="f-group"></select></div>
+        <div class="field"><label>Chức vụ</label><select id="f-position"></select></div>
+      </div>
+      <div class="field"><label>Ngày sinh</label><input type="date" id="f-dob"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="modal-cancel">Huỷ</button>
+      <button class="btn btn-mint" id="modal-save"><span id="save-label">Lưu học sinh</span></button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initLayout } from '../assets/js/layout.js';
+import { toast, confirmModal, skeletonRows, errorBanner } from '../assets/js/ui.js';
+import * as studentService from '../services/studentService.js';
+import * as groupService from '../services/groupService.js';
+import * as positionService from '../services/positionService.js';
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+let GROUPS = [], POSITIONS = [];
+let activeGroupFilter = 'all';
+function groupOf(id){ return GROUPS.find(g=>g.id===id) || { name:'—', color:'#9aa1b8' }; }
+function initials(name){ const p=(name||'?').trim().split(' '); return (p[p.length-1][0]||'').toUpperCase(); }
+function scoreClass(v){ return v>=90?'good':v>=75?'mid':'low'; }
+
+async function loadFilters(){
+  [GROUPS, POSITIONS] = await Promise.all([groupService.listGroups(), positionService.listPositions()]);
+  const gf = $('#stu-group-filter'); gf.innerHTML = '<option value="all">Tất cả tổ</option>' + GROUPS.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
+  const fg = $('#f-group'); fg.innerHTML = GROUPS.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
+  const fp = $('#f-position'); fp.innerHTML = POSITIONS.map(p=>`<option value="${p}">${p}</option>`).join('');
+  const chips = $('#chip-tabs');
+  chips.innerHTML = `<button class="chip-tab active" data-g="all">Tất cả tổ</button>` + GROUPS.map(g=>`<button class="chip-tab" data-g="${g.id}">${g.name}</button>`).join('');
+  $$('.chip-tab').forEach(c=>c.addEventListener('click',()=>{
+    activeGroupFilter=c.dataset.g; $('#stu-group-filter').value=c.dataset.g;
+    $$('.chip-tab').forEach(x=>x.classList.remove('active')); c.classList.add('active');
+    renderStudents();
+  }));
+}
+
+async function renderStudents(){
+  const tbody=$('#stu-tbody'), mobile=$('#stu-mobile');
+  skeletonRows(tbody, 6, 5);
+  mobile.innerHTML = '';
+  $('#stu-empty').style.display='none';
+
+  try{
+    const list = await studentService.listStudents({
+      groupId: $('#stu-group-filter').value,
+      search: $('#stu-search').value,
+      sort: $('#stu-sort').value,
+    });
+
+    tbody.innerHTML=''; mobile.innerHTML='';
+    $('#stu-empty').style.display = list.length ? 'none' : 'block';
+
+    list.forEach(s=>{
+      const g=groupOf(s.group_id);
+      const isLeader = s.position.includes('Tổ trưởng')||s.position.includes('Lớp trưởng')||s.position==='Bí thư';
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr data-id="${s.id}" class="clickable">
+          <td><div class="stu"><div class="av" style="background:${g.color}">${initials(s.name)}</div><div><div class="nm">${s.name}</div><div class="cd">${s.code}</div></div></div></td>
+          <td><span class="badge" style="background:color-mix(in srgb, ${g.color} 16%, white); color:${g.color}"><span class="badge-dot" style="background:${g.color}"></span>${g.name}</span></td>
+          <td><span class="badge pos-badge ${isLeader?'leader':''}">${s.position}</span></td>
+          <td><span class="score ${scoreClass(s.score)}">${s.score}</span></td>
+          <td>${s.attendance}%</td>
+          <td><div class="row-actions">
+            <button class="icon-sm edit-btn" title="Sửa">✏️</button>
+            <button class="icon-sm del-btn" title="Xoá">🗑️</button>
+          </div></td>
+        </tr>`);
+      mobile.insertAdjacentHTML('beforeend', `
+        <div class="mstu-card" data-id="${s.id}">
+          <div class="mstu-top">
+            <div class="av" style="background:${g.color};width:38px;height:38px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">${initials(s.name)}</div>
+            <div class="info"><div class="nm" style="font-weight:600;font-size:13.5px;">${s.name}</div><div class="cd" style="font-size:11.5px;color:var(--ink-600);">${s.code} · ${g.name}</div></div>
+            <div class="row-actions"><button class="icon-sm edit-btn">✏️</button><button class="icon-sm del-btn">🗑️</button></div>
+          </div>
+          <div class="mstu-meta"><div>Chức vụ<br><b>${s.position}</b></div><div>Nề nếp<br><b>${s.score}</b></div><div>Chuyên cần<br><b>${s.attendance}%</b></div></div>
+        </div>`);
+    });
+
+    $$('#stu-tbody tr').forEach(tr => tr.addEventListener('click', e => {
+      if(e.target.closest('.row-actions')) return;
+      window.location.href = `students-detail.html?id=${tr.dataset.id}`;
+    }));
+    $$('.edit-btn').forEach(b=>b.addEventListener('click', e=>{ e.stopPropagation(); openEdit(e.target.closest('[data-id]').dataset.id); }));
+    $$('.del-btn').forEach(b=>b.addEventListener('click', e=>{ e.stopPropagation(); handleDelete(e.target.closest('[data-id]').dataset.id); }));
+  }catch(err){
+    tbody.innerHTML=''; mobile.innerHTML='';
+    errorBanner($('#content'), 'Không tải được danh sách học sinh: ' + err.message, renderStudents);
+  }
+}
+
+$('#stu-search').addEventListener('input', () => renderStudents());
+$('#stu-group-filter').addEventListener('change', e => {
+  activeGroupFilter = e.target.value;
+  $$('.chip-tab').forEach(c => c.classList.toggle('active', c.dataset.g === activeGroupFilter));
+  renderStudents();
+});
+$('#stu-sort').addEventListener('change', () => renderStudents());
+
+/* ---- modal thêm/sửa ---- */
+let editingId = null;
+function openAdd(){
+  editingId = null;
+  $('#modal-title').textContent = 'Thêm học sinh';
+  $('#f-name').value=''; $('#f-code').value=''; $('#f-gender').value='Nam';
+  $('#f-group').value = activeGroupFilter!=='all' ? activeGroupFilter : (GROUPS[0]?.id||'');
+  $('#f-position').value = 'Thành viên'; $('#f-dob').value='';
+  $('#modal-overlay').classList.add('show');
+}
+async function openEdit(id){
+  try{
+    const s = await studentService.getStudent(id); if(!s) return;
+    editingId = id;
+    $('#modal-title').textContent = 'Chỉnh sửa học sinh';
+    $('#f-name').value=s.name; $('#f-code').value=s.code; $('#f-gender').value=s.gender||'Nam';
+    $('#f-group').value=s.group_id; $('#f-position').value=s.position; $('#f-dob').value=s.dob||'';
+    $('#modal-overlay').classList.add('show');
+  }catch(err){ toast('Không tải được thông tin học sinh: ' + err.message, 'err'); }
+}
+$('#btn-add-student').addEventListener('click', openAdd);
+$('#modal-close').addEventListener('click', ()=>$('#modal-overlay').classList.remove('show'));
+$('#modal-cancel').addEventListener('click', ()=>$('#modal-overlay').classList.remove('show'));
+
+$('#modal-save').addEventListener('click', async () => {
+  const name=$('#f-name').value.trim(), code=$('#f-code').value.trim();
+  if(!name || !code){ toast('Vui lòng nhập đầy đủ họ tên và mã học sinh', 'err'); return; }
+  const payload = { name, code, gender:$('#f-gender').value, group_id:$('#f-group').value, position:$('#f-position').value, dob:$('#f-dob').value };
+  const saveBtn = $('#modal-save'); saveBtn.disabled = true; $('#save-label').textContent = 'Đang lưu...';
+  try{
+    if(editingId){ await studentService.updateStudent(editingId, payload); toast('Đã cập nhật thông tin học sinh'); }
+    else { await studentService.createStudent(payload); toast('Đã thêm học sinh mới'); }
+    $('#modal-overlay').classList.remove('show');
+    renderStudents();
+  }catch(err){
+    toast('Không thể lưu học sinh: ' + err.message, 'err');
+  }finally{
+    saveBtn.disabled = false; $('#save-label').textContent = 'Lưu học sinh';
+  }
+});
+
+async function handleDelete(id){
+  const ok = await confirmModal({ title:'Xoá học sinh này?', desc:'Hành động này không thể hoàn tác. Toàn bộ dữ liệu nề nếp liên quan sẽ được lưu trữ trong lịch sử.', confirmText:'Xoá học sinh', icon:'🗑️' });
+  if(!ok) return;
+  try{
+    await studentService.deleteStudent(id);
+    toast('Đã xoá học sinh khỏi lớp');
+    renderStudents();
+  }catch(err){
+    toast('Không thể xoá học sinh: ' + err.message, 'err');
+  }
+}
+
+(async () => {
+  const user = await initLayout({ page:'students', title:'Học sinh', sub:'Quản lý danh sách học sinh toàn lớp', allowedRoles:['admin'] });
+  if(!user) return;
+  await loadFilters();
+  renderStudents();
+})();
+</script>
+</body>
+</html>

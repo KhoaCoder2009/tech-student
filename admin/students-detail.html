@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Hồ sơ học sinh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+<style>
+.profile-head{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+.profile-head .av{width:64px;height:64px;border-radius:50%;color:#fff;font-weight:700;font-size:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.profile-head h2{margin:0 0 4px;font-size:19px;}
+.profile-head .meta{font-size:12.5px;color:var(--ink-600);}
+.detail-tabs{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--line);}
+.detail-tab{padding:10px 14px;font-size:13px;font-weight:600;color:var(--ink-600);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;}
+.detail-tab.active{color:var(--navy-950);border-bottom-color:var(--navy-950);}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.info-row{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+.info-row .k{font-size:11px;color:var(--ink-600);margin-bottom:3px;}
+.info-row .v{font-size:13.5px;font-weight:600;}
+@media (max-width:640px){ .info-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+
+      <a href="students.html" class="btn btn-ghost" style="margin-bottom:16px;">← Quay lại danh sách học sinh</a>
+
+      <div id="detail-loading" class="panel"><div class="skeleton" style="height:64px;border-radius:50%;width:64px;margin-bottom:12px;"></div><div class="skeleton skel-bar" style="width:40%;"></div></div>
+
+      <div id="detail-body" style="display:none;">
+        <div class="profile-head">
+          <div class="av" id="d-avatar"></div>
+          <div>
+            <h2 id="d-name"></h2>
+            <div class="meta" id="d-meta"></div>
+          </div>
+        </div>
+
+        <div class="detail-tabs">
+          <button class="detail-tab active" data-tab="info">Thông tin</button>
+          <button class="detail-tab" data-tab="study">Học tập</button>
+          <button class="detail-tab" data-tab="attendance">Chuyên cần</button>
+          <button class="detail-tab" data-tab="discipline">Nề nếp</button>
+          <button class="detail-tab" data-tab="achievement">Thành tích</button>
+        </div>
+
+        <div class="tab-panel" data-panel="info">
+          <div class="info-grid">
+            <div class="info-row"><div class="k">Mã học sinh</div><div class="v" id="d-code">—</div></div>
+            <div class="info-row"><div class="k">Tổ</div><div class="v" id="d-group">—</div></div>
+            <div class="info-row"><div class="k">Chức vụ</div><div class="v" id="d-position">—</div></div>
+            <div class="info-row"><div class="k">Giới tính</div><div class="v" id="d-gender">—</div></div>
+            <div class="info-row"><div class="k">Ngày sinh</div><div class="v" id="d-dob">—</div></div>
+            <div class="info-row"><div class="k">Điểm nề nếp hiện tại</div><div class="v" id="d-score">—</div></div>
+          </div>
+        </div>
+        <div class="tab-panel" data-panel="study" style="display:none;">
+          <div class="panel">
+            <h3>Điểm trung bình học kỳ</h3>
+            <div style="font-family:'Sora',sans-serif;font-size:32px;font-weight:700;margin:12px 0;" id="d-gpa">—</div>
+          </div>
+          <div class="panel" style="margin-top:14px;">
+            <h3>Bảng điểm theo môn</h3>
+            <div class="table-card" style="margin-top:10px;">
+              <table>
+                <thead><tr><th>Môn học</th><th>Điểm TB</th></tr></thead>
+                <tbody id="grades-tbody"></tbody>
+              </table>
+            </div>
+            <div class="empty" id="grades-empty" style="display:none;"><div class="ic">📚</div><div class="t">Chưa có điểm</div></div>
+          </div>
+        </div>
+        <div class="tab-panel" data-panel="attendance" style="display:none;">
+          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="stat-card"><div class="lbl">✓ Có mặt</div><div class="val" style="color:#0f9d70;" id="att-present">0</div></div>
+            <div class="stat-card"><div class="lbl">📝 Nghỉ có phép</div><div class="val" style="color:#f5a524;" id="att-excused">0</div></div>
+            <div class="stat-card"><div class="lbl">✗ Nghỉ không phép</div><div class="val" style="color:#f2545b;" id="att-unexcused">0</div></div>
+            <div class="stat-card"><div class="lbl">⏰ Đi muộn</div><div class="val" style="color:#f5a524;" id="att-late">0</div></div>
+            <div class="stat-card"><div class="lbl">🏃 Về sớm</div><div class="val" style="color:#9aa1b8;" id="att-early">0</div></div>
+            <div class="stat-card"><div class="lbl">📊 Tỷ lệ</div><div class="val" style="color:#0f9d70;" id="att-rate">0%</div></div>
+          </div>
+          <div class="panel" style="margin-top:14px;">
+            <h3>Lịch sử điểm danh gần đây</h3>
+            <div class="table-card" style="margin-top:10px;">
+              <table>
+                <thead><tr><th>Ngày</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead>
+                <tbody id="att-tbody"></tbody>
+              </table>
+            </div>
+            <div class="empty" id="att-empty" style="display:none;"><div class="ic">📅</div><div class="t">Chưa có dữ liệu chuyên cần</div></div>
+          </div>
+        </div>
+        <div class="tab-panel" data-panel="discipline" style="display:none;">
+          <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="stat-card"><div class="lbl">Điểm hiện tại</div><div class="val" id="disc-score">100</div></div>
+            <div class="stat-card"><div class="lbl">＋ Cộng điểm</div><div class="val" style="color:#0f9d70;" id="disc-add">0</div></div>
+            <div class="stat-card"><div class="lbl">− Trừ điểm</div><div class="val" style="color:#f2545b;" id="disc-sub">0</div></div>
+          </div>
+          <div class="panel" style="margin-top:14px;">
+            <h3>Lịch sử cộng/trừ điểm</h3>
+            <div class="table-card" style="margin-top:10px;">
+              <table>
+                <thead><tr><th>Ngày</th><th>Loại</th><th>Điểm</th><th>Lý do</th></tr></thead>
+                <tbody id="disc-tbody"></tbody>
+              </table>
+            </div>
+            <div class="empty" id="disc-empty" style="display:none;"><div class="ic">📋</div><div class="t">Chưa có ghi nhận nề nếp</div></div>
+          </div>
+        </div>
+        <div class="tab-panel" data-panel="achievement" style="display:none;">
+          <div class="empty"><div class="ic">🏆</div><div class="t">Chưa có thành tích được ghi nhận</div></div>
+        </div>
+      </div>
+
+      <div id="detail-notfound" class="empty" style="display:none;">
+        <div class="ic">🔍</div><div class="t">Không tìm thấy học sinh</div><div>Học sinh có thể đã bị xoá hoặc mã không hợp lệ.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initLayout } from '../assets/js/layout.js';
+import { errorBanner } from '../assets/js/ui.js';
+import * as studentService from '../services/studentService.js';
+import * as groupService from '../services/groupService.js';
+import * as gradeService from '../services/gradeService.js';
+import * as attendanceService from '../services/attendanceService.js';
+import * as disciplineService from '../services/disciplineService.js';
+import { supabase } from '../assets/js/supabaseClient.js';
+
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+let STUDENT_ID = null;
+let SCHOOL_YEAR_ID = null;
+
+$$('.detail-tab').forEach(t => t.addEventListener('click', () => {
+  $$('.detail-tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+  $$('.tab-panel').forEach(p => p.style.display = p.dataset.panel===t.dataset.tab ? 'block' : 'none');
+}));
+
+async function loadGrades() {
+  try {
+    const [gpa, sheet] = await Promise.all([
+      gradeService.getStudentGPA(STUDENT_ID, SCHOOL_YEAR_ID, 1),
+      gradeService.getStudentGradeSheet(STUDENT_ID, SCHOOL_YEAR_ID, 1),
+    ]);
+
+    $('#d-gpa').textContent = gpa?.gpa || '—';
+    
+    const tbody = $('#grades-tbody');
+    tbody.innerHTML = '';
+    
+    const hasData = sheet.filter(s => s.average !== null).length > 0;
+    $('#grades-empty').style.display = hasData ? 'none' : 'block';
+
+    sheet.forEach(s => {
+      if (s.average !== null) {
+        const avgClass = s.average >= 8 ? 'good' : s.average >= 6.5 ? 'mid' : s.average >= 5 ? '' : 'low';
+        tbody.insertAdjacentHTML('beforeend', `
+          <tr>
+            <td>${s.subjectName}</td>
+            <td><span class="score ${avgClass}">${parseFloat(s.average).toFixed(1)}</span></td>
+          </tr>`);
+      }
+    });
+  } catch (err) {
+    console.error('Load grades error:', err);
+  }
+}
+
+async function loadAttendance() {
+  try {
+    const [stats, records] = await Promise.all([
+      attendanceService.getStudentAttendanceStats(STUDENT_ID),
+      attendanceService.listAttendance({ studentId: STUDENT_ID }),
+    ]);
+
+    $('#att-present').textContent = stats.present;
+    $('#att-excused').textContent = stats.absentExcused;
+    $('#att-unexcused').textContent = stats.absentUnexcused;
+    $('#att-late').textContent = stats.late;
+    $('#att-early').textContent = stats.leftEarly;
+    $('#att-rate').textContent = stats.rate + '%';
+
+    const tbody = $('#att-tbody');
+    tbody.innerHTML = '';
+    $('#att-empty').style.display = records.length ? 'none' : 'block';
+
+    records.slice(0, 10).forEach(r => {
+      const statusColor = r.status === 'present' ? '#0f9d70' : 
+                         r.status === 'absent_excused' ? '#f5a524' : '#f2545b';
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td>${new Date(r.date).toLocaleDateString('vi-VN')}</td>
+          <td><span class="badge" style="background:color-mix(in srgb, ${statusColor} 16%, white); color:${statusColor}">${r.statusLabel}</span></td>
+          <td style="font-size:12px;color:var(--ink-600);">${r.notes || '—'}</td>
+        </tr>`);
+    });
+  } catch (err) {
+    console.error('Load attendance error:', err);
+  }
+}
+
+async function loadDiscipline() {
+  try {
+    const [stats, logs] = await Promise.all([
+      disciplineService.getStudentDisciplineStats(STUDENT_ID),
+      disciplineService.listDisciplineLogs({ studentId: STUDENT_ID }),
+    ]);
+
+    $('#disc-score').textContent = stats.currentScore;
+    $('#disc-add').textContent = '+' + stats.totalAdd;
+    $('#disc-sub').textContent = '-' + stats.totalSubtract;
+
+    const tbody = $('#disc-tbody');
+    tbody.innerHTML = '';
+    $('#disc-empty').style.display = logs.length ? 'none' : 'block';
+
+    logs.slice(0, 10).forEach(log => {
+      const typeColor = log.type === 'add' ? '#0f9d70' : '#f2545b';
+      const pointsDisplay = log.type === 'add' ? `+${log.points}` : `-${log.points}`;
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td>${new Date(log.date).toLocaleDateString('vi-VN')}</td>
+          <td><span class="badge" style="background:color-mix(in srgb, ${typeColor} 16%, white); color:${typeColor}">${log.type === 'add' ? 'Cộng' : 'Trừ'}</span></td>
+          <td><span style="font-weight:700;color:${typeColor}">${pointsDisplay}</span></td>
+          <td style="font-size:12.5px;">${log.reason}</td>
+        </tr>`);
+    });
+  } catch (err) {
+    console.error('Load discipline error:', err);
+  }
+}
+
+async function load(){
+  STUDENT_ID = new URLSearchParams(window.location.search).get('id');
+  if(!STUDENT_ID){ $('#detail-loading').style.display='none'; $('#detail-notfound').style.display='block'; return; }
+
+  try{
+    const { data: sy } = await supabase.from('school_years').select('id').eq('is_current', true).single();
+    SCHOOL_YEAR_ID = sy?.id;
+
+    const [student, groups] = await Promise.all([studentService.getStudent(STUDENT_ID), groupService.listGroups()]);
+    if(!student){ $('#detail-loading').style.display='none'; $('#detail-notfound').style.display='block'; return; }
+
+    const g = groups.find(x=>x.id===student.group_id) || { name:'—', color:'#9aa1b8' };
+    $('#d-avatar').style.background = g.color;
+    $('#d-avatar').textContent = (student.name||'?').trim().slice(-1).toUpperCase();
+    $('#d-name').textContent = student.name;
+    $('#d-meta').textContent = `${student.code} · ${g.name} · ${student.position}`;
+    $('#d-code').textContent = student.code;
+    $('#d-group').textContent = g.name;
+    $('#d-position').textContent = student.position;
+    $('#d-gender').textContent = student.gender || '—';
+    $('#d-dob').textContent = student.dob || '—';
+    $('#d-score').textContent = student.score;
+
+    $('#detail-loading').style.display='none';
+    $('#detail-body').style.display='block';
+
+    // Load data for tabs
+    await Promise.all([loadGrades(), loadAttendance(), loadDiscipline()]);
+  }catch(err){
+    $('#detail-loading').style.display='none';
+    errorBanner($('#content'), 'Không tải được hồ sơ học sinh: ' + err.message, load);
+  }
+}
+
+(async () => {
+  const user = await initLayout({ page:'students', title:'Hồ sơ học sinh', sub:'Chi tiết thông tin học sinh', allowedRoles:['admin'] });
+  if(!user) return;
+  load();
+})();
+</script>
+</body>
+</html>
