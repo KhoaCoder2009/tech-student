@@ -189,13 +189,16 @@ function showSettingsMenu() {
   menu.onclick = (e) => { if(e.target === menu) { document.body.removeChild(menu); } };
 }
 
-function toggleDarkMode() {
-  const isDark = document.body.classList.toggle('dark-mode');
+function applyDarkModeState(isDark) {
+  document.body.classList.toggle('dark-mode', isDark);
   localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
-  alert(isDark ? '🌙 Đã bật chế độ tối' : '☀️ Đã tắt chế độ tối');
+}
+
+function toggleDarkMode() {
+  const isDark = !document.body.classList.contains('dark-mode');
+  applyDarkModeState(isDark);
 }
 
 // Load dark mode preference
-if (localStorage.getItem('darkMode') === 'enabled') {
-  document.body.classList.add('dark-mode');
-}
+const savedDarkMode = localStorage.getItem('darkMode');
+applyDarkModeState(savedDarkMode === 'enabled');

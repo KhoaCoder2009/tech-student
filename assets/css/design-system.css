@@ -40,11 +40,22 @@ body{
   color:var(--ink-900);
   -webkit-font-smoothing:antialiased;
 }
+body.dark-mode{
+  --bg:#0b1020;
+  --card:#111827;
+  --line:#1f2a3d;
+  --ink-900:#e5e7eb;
+  --ink-600:#b7bfd3;
+  --ink-400:#8190b1;
+  background:var(--bg);
+  color:var(--ink-900);
+}
 h1,h2,h3,.display{font-family:'Sora',sans-serif;}
 button{font-family:inherit;cursor:pointer;}
 input,select{font-family:inherit;}
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-thumb{background:#d7dbe8;border-radius:8px;}
+body.dark-mode ::-webkit-scrollbar-thumb{background:#2a374d;}
 
 /* ---------- shell ---------- */
 .shell{display:flex;min-height:100vh;}
@@ -116,7 +127,97 @@ input,select{font-family:inherit;}
   position:sticky;top:0;z-index:20;background:rgba(245,247,251,.9);backdrop-filter:blur(8px);
   display:flex;align-items:center;gap:12px;padding:18px 32px;border-bottom:1px solid var(--line);
 }
+body.dark-mode .topbar{
+  background:rgba(11,16,32,.88);
+}
 .hamburger{display:none;background:#fff;border:1px solid var(--line);border-radius:9px;width:36px;height:36px;align-items:center;justify-content:center;font-size:16px;}
+body.dark-mode .hamburger,
+body.dark-mode .icon-btn,
+body.dark-mode .search-box input,
+body.dark-mode select.filter,
+body.dark-mode .field input,
+body.dark-mode .field select,
+body.dark-mode .btn-ghost,
+body.dark-mode .icon-sm,
+body.dark-mode .modal,
+body.dark-mode .panel,
+body.dark-mode .table-card,
+body.dark-mode .stat-card,
+body.dark-mode .group-card,
+body.dark-mode .pos-card,
+body.dark-mode .mstu-card{
+  background:var(--card);
+  border-color:var(--line);
+  color:var(--ink-900);
+}
+body.dark-mode .search-box input,
+body.dark-mode select.filter,
+body.dark-mode .field input,
+body.dark-mode .field select,
+body.dark-mode .search-box .ic,
+body.dark-mode .icon-btn,
+body.dark-mode .field label,
+body.dark-mode .search-box input::placeholder,
+body.dark-mode .modal-head h3,
+body.dark-mode .modal-body,
+body.dark-mode .panel h3,
+body.dark-mode .group-card .top .nm,
+body.dark-mode .group-card .group-leader b,
+body.dark-mode .pos-card .nm,
+body.dark-mode .mstu-top .info .nm,
+body.dark-mode .stu .nm,
+body.dark-mode .topbar h1,
+body.dark-mode .side-user .name,
+body.dark-mode .nav-item,
+body.dark-mode .empty .t,
+body.dark-mode .field input,
+body.dark-mode .field select,
+body.dark-mode .form-label,
+body.dark-mode .form-input,
+body.dark-mode .password-title,
+body.dark-mode .password-subtitle,
+body.dark-mode .modal-head h3{ color:var(--ink-900); }
+body.dark-mode .search-box .ic,
+body.dark-mode .icon-btn,
+body.dark-mode .topbar .sub,
+body.dark-mode .g-info .s,
+body.dark-mode .attn-item .txt .r,
+body.dark-mode .stu .cd,
+body.dark-mode .badge,
+body.dark-mode .panel .panel-sub,
+body.dark-mode .group-leader,
+body.dark-mode .field label,
+body.dark-mode .password-hint,
+body.dark-mode .password-subtitle,
+body.dark-mode .modal-head h3,
+body.dark-mode .card-sub,
+body.dark-mode .mstu-meta,
+body.dark-mode .empty{ color:var(--ink-600); }
+body.dark-mode .nav-item{ color:#dfe6f7; }
+body.dark-mode .btn-primary{ background:#dfe6f7; color:#0b1020; }
+body.dark-mode .btn-primary:hover{ background:#ffffff; }
+body.dark-mode .btn-ghost{ color:var(--ink-900); }
+body.dark-mode .btn-danger{ background:rgba(242,84,91,.15); }
+body.dark-mode .toast{ background:#0f172a; }
+body.dark-mode .overlay{ background:rgba(2,6,23,.7); }
+body.dark-mode .bottom-nav{ background:rgba(17,24,39,.94); border-top-color:var(--line); }
+body.dark-mode .bn-item{ color:var(--ink-600); }
+body.dark-mode .bn-item.active{ background:rgba(34,201,168,.12); color:var(--mint-500); }
+body.dark-mode .nav-item.active .ic{ box-shadow:0 2px 8px rgba(34,201,168,0.25); }
+body.dark-mode .table-card,
+body.dark-mode .panel,
+body.dark-mode .stat-card,
+body.dark-mode .group-card,
+body.dark-mode .pos-card,
+body.dark-mode .modal,
+body.dark-mode .mstu-card,
+body.dark-mode .search-box input,
+body.dark-mode select.filter,
+body.dark-mode .field input,
+body.dark-mode .field select,
+body.dark-mode .icon-btn,
+body.dark-mode .btn-ghost,
+body.dark-mode .icon-sm{ box-shadow:none; }
 .topbar h1{font-size:19px;margin:0;font-weight:700;}
 .topbar .sub{font-size:12.5px;color:var(--ink-600);margin-top:1px;}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
