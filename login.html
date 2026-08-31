@@ -96,14 +96,14 @@ body{background:var(--bg);}
 
         <form id="login-form" novalidate>
           <div class="field" style="margin-bottom:16px;">
-            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Email ảo đã cấp</label>
-            <div class="input-wrap" id="wrap-user"><input type="email" id="f-user" placeholder="ten@student.techstudent.local" autocomplete="username"></div>
-            <div class="err-msg" id="err-user">Vui lòng nhập email ảo hợp lệ.</div>
+            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Tài khoản ảo</label>
+            <div class="input-wrap" id="wrap-user"><input type="text" id="f-user" placeholder="stt hoặc admin hoặc 01" autocomplete="username"></div>
+            <div class="err-msg" id="err-user">Vui lòng nhập tài khoản ảo hợp lệ.</div>
           </div>
-          <button type="submit" class="btn-submit" id="btn-submit"><span class="spinner"></span><span class="btxt">Gửi link đăng nhập</span></button>
+          <button type="submit" class="btn-submit" id="btn-submit"><span class="spinner"></span><span class="btxt">Đăng nhập</span></button>
         </form>
 
-        <div class="note"><span>ℹ️</span><span>Nhập email ảo do quản trị viên cấp. Hệ thống sẽ gửi liên kết đăng nhập trực tiếp tới hộp thư của bạn.</span></div>
+        <div class="note"><span>ℹ️</span><span>Chỉ cần nhập tài khoản ảo như <strong>admin</strong>, <strong>stt</strong> hoặc <strong>01</strong>. Hệ thống sẽ đăng nhập ngay mà không cần mật khẩu hay link.</span></div>
       </div>
 
       <div class="success-view" id="success-block">
@@ -168,28 +168,25 @@ function showSuccess(user){
 $('#login-form').addEventListener('submit', async e => {
   e.preventDefault();
   clearErrors();
-  const email = userInput.value.trim();
-  if(!email){ wrapUser.classList.add('err'); shake(); return; }
+  const raw = userInput.value.trim();
+  if(!raw){ wrapUser.classList.add('err'); shake(); return; }
 
-  const normalized = email.toLowerCase();
-  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
-  if(!emailOk){
+  const normalized = raw.toLowerCase();
+  const valid = /^[a-z0-9._-]+$/.test(normalized) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+  if(!valid){
     wrapUser.classList.add('err');
-    $('#err-user').textContent = 'Vui lòng nhập email ảo hợp lệ.';
+    $('#err-user').textContent = 'Vui lòng nhập tài khoản ảo hợp lệ.';
     shake();
     return;
   }
 
   setLoading(true);
   try{
-    await signIn(normalized);
-    $('#login-block').style.display = 'none';
-    $('#success-block').classList.add('show');
-    $('#success-sub').textContent = `Liên kết đăng nhập đã được gửi tới ${normalized}. Vui lòng kiểm tra hộp thư và nhấn vào link để hoàn tất.`;
-    $('#role-preview').innerHTML = `<div class="rp-top"><div class="av">${normalized.charAt(0).toUpperCase()}</div><div><div class="nm">${normalized}</div><div class="rl">Email ảo được cấp</div></div></div>`;
-    $('#pending-note').style.display = 'block';
-    $('#pending-note').textContent = 'Bạn đang dùng email ảo được cấp. Mở email và click vào liên kết trong hộp thư để đăng nhập.';
-    $('#btn-continue').style.display = 'none';
+    const result = await signIn(normalized);
+    const user = result.user || { full_name: normalized, role: 'student', roleLabel: 'Học sinh' };
+    showSuccess(user);
+    $('#success-sub').textContent = `Đăng nhập thành công với tài khoản ${result.email || normalized}.`;
+    $('#role-preview').innerHTML = `<div class="rp-top"><div class="av">${(user.full_name || normalized).trim().charAt(0).toUpperCase()}</div><div><div class="nm">${user.full_name || result.email || normalized}</div><div class="rl">${user.roleLabel || 'Tài khoản ảo'}</div></div></div>`;
   }catch(err){
     wrapUser.classList.add('err');
     $('#err-user').textContent = err.message;

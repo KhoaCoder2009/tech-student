@@ -90,7 +90,7 @@ Mở: `http://localhost:5500/login.html`
 - Password: `Admin@123`
 
 **Học sinh (40 học sinh):**
-- Email: `01@student.techstudent.local` → `40@student.techstudent.local`
+- Email: `01@techstudent.local` → `40@techstudent.local`
 - Password: `Student@123`
 
 ## 🎯 Phân tổ (theo sơ đồ lớp học chính xác)
