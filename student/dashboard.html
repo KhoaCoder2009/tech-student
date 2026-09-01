@@ -136,44 +136,73 @@ async function loadStudentData() {
     const { data: { user } } = await supabase.auth.getUser();
 
     // Get student info
-    const { data: student } = await supabase
+    const { data: student, error: studentError } = await supabase
       .from('students')
       .select(`
         id,
         student_code,
         discipline_score,
-        profile:profiles(full_name),
-        group:groups(id, name, color),
-        position:student_positions(position:positions(name))
+        group_id
       `)
       .eq('id', user.id)
       .single();
 
-    if (!student) {
+    if (studentError || !student) {
+      console.error('Student error:', studentError);
       throw new Error('Không tìm thấy thông tin học sinh');
     }
 
+    // Get profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .single();
+
+    // Get group
+    let groupData = null;
+    if (student.group_id) {
+      const { data } = await supabase
+        .from('groups')
+        .select('id, name, color')
+        .eq('id', student.group_id)
+        .single();
+      groupData = data;
+    }
+
+    // Get position
+    const { data: positions } = await supabase
+      .from('student_positions')
+      .select(`
+        position_id,
+        positions (name)
+      `)
+      .eq('student_id', user.id);
+
     // Update UI
-    $('#student-name').textContent = student.profile?.full_name || 'Học sinh';
+    $('#student-name').textContent = profile?.full_name || 'Học sinh';
     $('#student-code').textContent = student.student_code || '--';
-    $('#student-group').textContent = student.group?.name || '--';
-    $('#student-position').textContent = student.position?.[0]?.position?.name || 'Học sinh';
+    $('#student-group').textContent = groupData?.name || '--';
+    
+    const positionName = positions?.[0]?.positions?.name || 'Học sinh';
+    $('#student-position').textContent = positionName;
+    
     $('#discipline-score').textContent = student.discipline_score || 100;
 
     // Load group info
-    if (student.group) {
+    if (groupData) {
       const { data: groupStudents } = await supabase
         .from('students')
-        .select('profile:profiles(full_name)')
-        .eq('group_id', student.group.id);
+        .select('id')
+        .eq('group_id', groupData.id);
 
-      $('#group-name').textContent = student.group.name;
-      $('#group-name').style.color = student.group.color;
+      $('#group-name').textContent = groupData.name;
+      $('#group-name').style.color = groupData.color;
       $('#group-info').innerHTML = `
         Số lượng: ${groupStudents?.length || 0} học sinh<br>
         Trưởng tổ: <strong>Đang cập nhật</strong>
       `;
-      $('.group-card').style.borderColor = student.group.color;
+      document.querySelector('.group-card').style.borderColor = groupData.color;
     }
 
     // Load announcements
@@ -183,49 +212,51 @@ async function loadStudentData() {
       .eq('name', '12A2')
       .single();
 
-    const { data: announcements } = await supabase
-      .from('announcements')
-      .select(`
-        id,
-        title,
-        content,
-        created_at,
-        author:profiles(full_name),
-        position_tag
-      `)
-      .eq('class_id', classData.id)
-      .order('created_at', { ascending: false })
-      .limit(3);
+    if (classData) {
+      const { data: announcements } = await supabase
+        .from('announcements')
+        .select(`
+          id,
+          title,
+          content,
+          created_at,
+          author_id,
+          position_tag
+        `)
+        .eq('class_id', classData.id)
+        .order('created_at', { ascending: false })
+        .limit(3);
 
-    const announcementsList = $('#announcements-list');
-    if (announcements && announcements.length > 0) {
-      announcementsList.innerHTML = announcements.map(a => {
-        const timeAgo = getTimeAgo(new Date(a.created_at));
-        const tag = a.position_tag || 'GVCN';
-        const tagColors = {
-          'GVCN': { bg: '#e3f9f4', color: '#22c9a8' },
-          'Lớp trưởng': { bg: '#e3f5ff', color: '#0ea5e9' },
-          'Bí thư': { bg: '#fef3c7', color: '#f59e0b' },
-          'Phó học tập': { bg: '#fce7f3', color: '#ec4899' },
-          'Phó lao động': { bg: '#ede9fe', color: '#8b5cf6' }
-        };
-        const colors = tagColors[tag] || tagColors['GVCN'];
-        
-        return `
-          <div class="announcement-card" onclick="location.href='../admin/announcements.html'">
-            <div class="announcement-header">
-              <span class="announcement-tag" style="background:${colors.bg};color:${colors.color};">
-                📢 ${tag}
-              </span>
-              <span class="announcement-time">${timeAgo}</span>
+      const announcementsList = $('#announcements-list');
+      if (announcements && announcements.length > 0) {
+        announcementsList.innerHTML = announcements.map(a => {
+          const timeAgo = getTimeAgo(new Date(a.created_at));
+          const tag = a.position_tag || 'GVCN';
+          const tagColors = {
+            'GVCN': { bg: '#e3f9f4', color: '#22c9a8' },
+            'Lớp trưởng': { bg: '#e3f5ff', color: '#0ea5e9' },
+            'Bí thư': { bg: '#fef3c7', color: '#f59e0b' },
+            'Phó học tập': { bg: '#fce7f3', color: '#ec4899' },
+            'Phó lao động': { bg: '#ede9fe', color: '#8b5cf6' }
+          };
+          const colors = tagColors[tag] || tagColors['GVCN'];
+          
+          return `
+            <div class="announcement-card" onclick="location.href='../admin/announcements.html'">
+              <div class="announcement-header">
+                <span class="announcement-tag" style="background:${colors.bg};color:${colors.color};">
+                  📢 ${tag}
+                </span>
+                <span class="announcement-time">${timeAgo}</span>
+              </div>
+              <div class="announcement-title">${a.title}</div>
+              <div class="announcement-content">${a.content.substring(0, 100)}${a.content.length > 100 ? '...' : ''}</div>
             </div>
-            <div class="announcement-title">${a.title}</div>
-            <div class="announcement-content">${a.content.substring(0, 100)}${a.content.length > 100 ? '...' : ''}</div>
-          </div>
-        `;
-      }).join('');
-    } else {
-      announcementsList.innerHTML = '<p style="color:var(--ink-500);text-align:center;padding:40px 0;">Chưa có thông báo nào</p>';
+          `;
+        }).join('');
+      } else {
+        announcementsList.innerHTML = '<p style="color:var(--ink-500);text-align:center;padding:40px 0;">Chưa có thông báo nào</p>';
+      }
     }
 
   } catch (err) {
