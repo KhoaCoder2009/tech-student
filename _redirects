@@ -20,7 +20,6 @@
 
 # Student routes
 /student/dashboard /student/dashboard.html 200
-/student/grades /student/grades.html 200
 /student/schedule /student/schedule.html 200
 /student/classmates /student/classmates.html 200
 /student/mygroup /student/mygroup.html 200

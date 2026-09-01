@@ -213,39 +213,53 @@ async function loadStudentData() {
       .single();
 
     if (classData) {
-      const { data: announcements } = await supabase
+      const { data: announcements, error: annError } = await supabase
         .from('announcements')
-        .select(`
-          id,
-          title,
-          content,
-          created_at,
-          author_id,
-          position_tag
-        `)
+        .select('id, title, content, created_at, created_by, is_pinned')
         .eq('class_id', classData.id)
         .order('created_at', { ascending: false })
         .limit(3);
+      
+      if (annError) {
+        console.error('Announcements error:', annError);
+      }
 
       const announcementsList = $('#announcements-list');
       if (announcements && announcements.length > 0) {
+        // Get author info for each announcement
+        const authorIds = [...new Set(announcements.map(a => a.created_by))];
+        const { data: authors } = await supabase
+          .from('profiles')
+          .select('id, full_name, role')
+          .in('id', authorIds);
+        
+        const authorMap = {};
+        authors?.forEach(a => {
+          authorMap[a.id] = a;
+        });
+
         announcementsList.innerHTML = announcements.map(a => {
           const timeAgo = getTimeAgo(new Date(a.created_at));
-          const tag = a.position_tag || 'GVCN';
-          const tagColors = {
-            'GVCN': { bg: '#e3f9f4', color: '#22c9a8' },
-            'Lớp trưởng': { bg: '#e3f5ff', color: '#0ea5e9' },
-            'Bí thư': { bg: '#fef3c7', color: '#f59e0b' },
-            'Phó học tập': { bg: '#fce7f3', color: '#ec4899' },
-            'Phó lao động': { bg: '#ede9fe', color: '#8b5cf6' }
-          };
-          const colors = tagColors[tag] || tagColors['GVCN'];
+          const author = authorMap[a.created_by];
+          
+          let tag = 'Thông báo';
+          let tagColor = { bg: '#e3f9f4', color: '#22c9a8' };
+          
+          if (author) {
+            if (author.role === 'admin') {
+              tag = '👨‍💼 Admin';
+              tagColor = { bg: '#ede9fe', color: '#8b5cf6' };
+            } else if (author.role === 'teacher') {
+              tag = '👨‍🏫 GVCN';
+              tagColor = { bg: '#e3f9f4', color: '#22c9a8' };
+            }
+          }
           
           return `
             <div class="announcement-card" onclick="location.href='../admin/announcements.html'">
               <div class="announcement-header">
-                <span class="announcement-tag" style="background:${colors.bg};color:${colors.color};">
-                  📢 ${tag}
+                <span class="announcement-tag" style="background:${tagColor.bg};color:${tagColor.color};">
+                  ${tag}${a.is_pinned ? ' 📌' : ''}
                 </span>
                 <span class="announcement-time">${timeAgo}</span>
               </div>

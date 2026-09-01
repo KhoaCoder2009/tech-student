@@ -6,7 +6,6 @@ import { confirmModal } from './ui.js';
 
 export const STUDENT_NAV_ITEMS = [
   { group: null, page: 'dashboard', href: 'dashboard.html', icon: '🏠', label: 'Tổng quan' },
-  { group: 'Học tập', page: 'grades', href: 'grades.html', icon: '📊', label: 'Điểm số' },
   { group: 'Học tập', page: 'schedule', href: 'schedule.html', icon: '🗓️', label: 'Thời khóa biểu' },
   { group: 'Lớp & Tổ', page: 'classmates', href: 'classmates.html', icon: '👥', label: 'Bạn cùng lớp' },
   { group: 'Lớp & Tổ', page: 'mygroup', href: 'mygroup.html', icon: '🗂️', label: 'Tổ của tôi' },
