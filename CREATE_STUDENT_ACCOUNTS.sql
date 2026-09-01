@@ -37,12 +37,20 @@ BEGIN
     -- Tạo email từ student_code
     v_email := 'student' || v_student.student_code || '@12a2.edu.vn';
     
-    -- Kiểm tra xem user đã tồn tại trong auth.users chưa
-    IF EXISTS (SELECT 1 FROM auth.users WHERE email = v_email) THEN
-      -- Nếu đã có, chỉ update password
+    -- Kiểm tra xem user đã tồn tại trong auth.users chưa (check by ID, not email)
+    IF EXISTS (SELECT 1 FROM auth.users WHERE id = v_student.id) THEN
+      -- Nếu đã có, update email và password
       UPDATE auth.users
-      SET encrypted_password = crypt(v_password, gen_salt('bf'))
-      WHERE email = v_email;
+      SET 
+        email = v_email,
+        encrypted_password = crypt(v_password, gen_salt('bf')),
+        updated_at = now()
+      WHERE id = v_student.id;
+      
+      -- Update profile email
+      UPDATE profiles
+      SET email = v_email
+      WHERE id = v_student.id;
       
       RAISE NOTICE '[UPDATE] % - % - %', v_student.student_code, v_student.full_name, v_email;
     ELSE
@@ -93,7 +101,7 @@ SELECT
   s.student_code as "Mã HS",
   p.full_name as "Họ tên",
   p.email as "Email",
-  '12a2@2025' as "Password",
+  '123456' as "Password",
   g.name as "Tổ"
 FROM students s
 JOIN profiles p ON p.id = s.id

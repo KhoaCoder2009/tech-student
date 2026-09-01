@@ -1,6 +1,14 @@
 /* services/disciplineService.js — Quản lý nề nếp (cộng/trừ điểm) */
 import { supabase } from '../assets/js/supabaseClient.js';
 
+function normalizeDisciplineSchemaError(error) {
+  const message = String(error?.message || '');
+  if (message.includes('does not exist') || message.includes('relation') || message.includes('not found')) {
+    throw new Error('Nề nếp: chưa chạy SQL setup của bảng discipline trong Supabase.');
+  }
+  throw new Error(error.message || 'Không thể tải dữ liệu nề nếp.');
+}
+
 /**
  * Lấy danh mục cộng/trừ điểm
  */
@@ -11,7 +19,7 @@ export async function listCategories() {
     .order('type')
     .order('label');
 
-  if (error) throw new Error(error.message);
+  if (error) normalizeDisciplineSchemaError(error);
   return data;
 }
 
@@ -35,7 +43,7 @@ export async function listDisciplineLogs({ studentId, dateFrom, dateTo, status =
   if (status) query = query.eq('status', status);
 
   const { data, error } = await query;
-  if (error) throw new Error(error.message);
+  if (error) normalizeDisciplineSchemaError(error);
 
   return data.map(row => ({
     id: row.id,
@@ -64,7 +72,7 @@ export async function getStudentDisciplineStats(studentId) {
     .eq('student_id', studentId)
     .eq('status', 'approved');
 
-  if (error) throw new Error(error.message);
+  if (error) normalizeDisciplineSchemaError(error);
 
   const totalAdd = data
     .filter(r => r.type === 'add')
@@ -116,7 +124,7 @@ export async function createDisciplineLog({
     .select()
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) normalizeDisciplineSchemaError(error);
   return data;
 }
 
@@ -131,7 +139,7 @@ export async function updateDisciplineLog(id, updates) {
     .select()
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) normalizeDisciplineSchemaError(error);
   return data;
 }
 
@@ -144,7 +152,7 @@ export async function deleteDisciplineLog(id) {
     .delete()
     .eq('id', id);
 
-  if (error) throw new Error(error.message);
+  if (error) normalizeDisciplineSchemaError(error);
 }
 
 /**
@@ -165,7 +173,7 @@ export async function getTopStudentsByDiscipline(classId, limit = 10) {
     .order('discipline_score', { ascending: false })
     .limit(limit);
 
-  if (error) throw new Error(error.message);
+  if (error) normalizeDisciplineSchemaError(error);
 
   return data.map(s => ({
     id: s.id,

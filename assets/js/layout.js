@@ -6,7 +6,7 @@
 import { getCurrentUser, signOut } from '../../services/authService.js';
 import { confirmModal } from './ui.js';
 
-const NAV_ITEMS = [
+export const ADMIN_NAV_ITEMS = [
   { group: null, page: 'dashboard',    href: 'dashboard.html',    icon: '🏠', label: 'Tổng quan' },
   { group: 'Lớp học', page: 'students',    href: 'students.html',    icon: '👥', label: 'Học sinh' },
   { group: 'Lớp học', page: 'groups',      href: 'groups.html',      icon: '🗂️', label: 'Tổ' },
@@ -17,18 +17,41 @@ const NAV_ITEMS = [
   { group: 'Quản lý', page: 'announcements', href: 'announcements.html', icon: '📢', label: 'Thông báo' },
   { group: 'Quản lý', page: 'accounts',    href: 'accounts.html',    icon: '🔐', label: 'Tài khoản' },
 ];
+
+export const GVCN_NAV_ITEMS = [
+  { group: null, page: 'dashboard', href: 'dashboard.html', icon: '🏠', label: 'Tổng quan' },
+  { group: 'Lớp chủ nhiệm', page: 'students', href: 'students.html', icon: '👥', label: 'Học sinh' },
+  { group: 'Lớp chủ nhiệm', page: 'groups', href: 'groups.html', icon: '🗂️', label: 'Tổ' },
+  { group: 'Lớp chủ nhiệm', page: 'positions', href: 'positions.html', icon: '🎖️', label: 'Chức vụ' },
+  { group: 'Nề nếp', page: 'discipline', href: 'discipline.html', icon: '⭐', label: 'Nề nếp' },
+  { group: 'Nề nếp', page: 'attendance', href: 'attendance.html', icon: '📅', label: 'Chuyên cần' },
+  { group: 'Giao tiếp', page: 'announcements', href: 'announcements.html', icon: '📢', label: 'Thông báo' },
+  { group: 'Cá nhân', page: 'profile', href: 'profile.html', icon: '👤', label: 'Hồ sơ' },
+];
+
+export const STUDENT_NAV_ITEMS = [
+  { group: null, page: 'dashboard', href: 'dashboard.html', icon: '🏠', label: 'Tổng quan' },
+  { group: 'Học tập', page: 'grades', href: 'grades.html', icon: '📊', label: 'Điểm số' },
+  { group: 'Học tập', page: 'schedule', href: 'schedule.html', icon: '🗓️', label: 'Thời khóa biểu' },
+  { group: 'Lớp & Tổ', page: 'groups', href: 'groups.html', icon: '🧩', label: 'Tổ của tôi' },
+  { group: 'Nề nếp', page: 'discipline', href: 'discipline.html', icon: '⭐', label: 'Nề nếp' },
+  { group: 'Nề nếp', page: 'attendance', href: 'attendance.html', icon: '✅', label: 'Chuyên cần' },
+  { group: 'Khác', page: 'announcements', href: 'announcements.html', icon: '📢', label: 'Thông báo' },
+  { group: 'Khác', page: 'profile', href: 'profile.html', icon: '👤', label: 'Hồ sơ' },
+];
+
 const BOTTOM_NAV_PAGES = ['dashboard', 'students', 'groups', 'discipline'];
 
-function sidebarHtml(activePage){
+function sidebarHtml(activePage, navItems = ADMIN_NAV_ITEMS){
   let html = `
     <div class="sidebar-scrim" id="scrim"></div>
     <aside class="sidebar" id="sidebar">
       <nav class="nav-group">
-        ${navLink(NAV_ITEMS[0], activePage)}
+        ${navLink(navItems[0], activePage)}
       </nav>`;
 
   let currentGroup = null;
-  NAV_ITEMS.slice(1).forEach(item => {
+  navItems.slice(1).forEach(item => {
     if(item.group !== currentGroup){
       if(currentGroup !== null) html += `</div>`;
       html += `<div class="nav-group"><div class="nav-label">${item.group}</div>`;
@@ -92,8 +115,8 @@ function bottomNavHtml(activePage){
  * đã xác nhận hợp lệ — page-specific script chỉ nên chạy phần render dữ liệu
  * SAU khi promise này resolve.
  */
-export async function initLayout({ page, title, sub, allowedRoles = ['admin'] }){
-  document.getElementById('sidebar-slot').outerHTML = sidebarHtml(page);
+export async function initLayout({ page, title, sub, allowedRoles = ['admin'], navItems = ADMIN_NAV_ITEMS }){
+  document.getElementById('sidebar-slot').outerHTML = sidebarHtml(page, navItems);
   document.getElementById('topbar-slot').outerHTML = topbarHtml(title, sub);
   document.body.insertAdjacentHTML('beforeend', bottomNavHtml(page));
 

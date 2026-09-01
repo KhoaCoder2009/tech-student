@@ -96,14 +96,21 @@ body{background:var(--bg);}
 
         <form id="login-form" novalidate>
           <div class="field" style="margin-bottom:16px;">
-            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Tài khoản ảo</label>
-            <div class="input-wrap" id="wrap-user"><input type="text" id="f-user" placeholder="stt hoặc admin hoặc 01" autocomplete="username"></div>
-            <div class="err-msg" id="err-user">Vui lòng nhập tài khoản ảo hợp lệ.</div>
+            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Tài khoản</label>
+            <div class="input-wrap" id="wrap-user"><input type="text" id="f-user" placeholder="Tài khoản" autocomplete="username"></div>
+            <div class="err-msg" id="err-user">Vui lòng nhập tài khoản hợp lệ.</div>
           </div>
+
+          <div class="field" style="margin-bottom:18px;">
+            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Mật khẩu</label>
+            <div class="input-wrap" id="wrap-password"><input type="password" id="f-password" placeholder="Mật khẩu" autocomplete="current-password"></div>
+            <div class="err-msg" id="err-password">Vui lòng nhập mật khẩu.</div>
+          </div>
+
           <button type="submit" class="btn-submit" id="btn-submit"><span class="spinner"></span><span class="btxt">Đăng nhập</span></button>
         </form>
 
-        <div class="note"><span>ℹ️</span><span>Chỉ cần nhập tài khoản ảo như <strong>admin</strong>, <strong>stt</strong> hoặc <strong>01</strong>. Hệ thống sẽ đăng nhập ngay mà không cần mật khẩu hay link.</span></div>
+        <div class="note"><span>ℹ️</span><span>Nhập tài khoản và mật khẩu được tạo trong Supabase Auth. Hệ thống sẽ xác thực qua Auth rồi kiểm tra hồ sơ người dùng trong bảng profiles.</span></div>
       </div>
 
       <div class="success-view" id="success-block">
@@ -147,10 +154,15 @@ const $=(s,r=document)=>r.querySelector(s);
 $('#conn-badge').textContent = '● Đã kết nối Supabase';
 
 const userInput=$('#f-user');
+const passwordInput=$('#f-password');
 const wrapUser=$('#wrap-user');
+const wrapPassword=$('#wrap-password');
 const btnSubmit=$('#btn-submit');
 
-function clearErrors(){ wrapUser.classList.remove('err'); }
+function clearErrors(){
+  wrapUser.classList.remove('err');
+  wrapPassword.classList.remove('err');
+}
 function shake(){ const c=$('.form-card'); c.classList.add('shake'); setTimeout(()=>c.classList.remove('shake'),350); }
 function setLoading(on){ btnSubmit.classList.toggle('loading', on); btnSubmit.disabled = on; }
 
@@ -160,7 +172,11 @@ function showSuccess(user){
   $('#success-sub').textContent = `Xin chào ${user.full_name.split(' ').slice(-1)[0]} 👋 — vai trò: ${user.roleLabel}.`;
   $('#role-preview').innerHTML = `<div class="rp-top"><div class="av">${(user.full_name||'?').trim().slice(-1).toUpperCase()}</div><div><div class="nm">${user.full_name}</div><div class="rl">${user.roleLabel}</div></div></div>`;
 
-  const target = { admin: 'admin/dashboard.html' }[user.role];
+  const target = {
+    admin: 'admin/dashboard.html',
+    teacher: 'teacher/dashboard.html',
+    student: 'student/dashboard.html'
+  }[user.role];
   $('#pending-note').style.display = target ? 'none' : 'block';
   $('#btn-continue').onclick = () => { if(target) window.location.href = target; };
 }
@@ -168,28 +184,48 @@ function showSuccess(user){
 $('#login-form').addEventListener('submit', async e => {
   e.preventDefault();
   clearErrors();
+
   const raw = userInput.value.trim();
-  if(!raw){ wrapUser.classList.add('err'); shake(); return; }
+  const password = passwordInput.value;
+
+  if(!raw){
+    wrapUser.classList.add('err');
+    shake();
+    return;
+  }
+
+  if(!password){
+    wrapPassword.classList.add('err');
+    $('#err-password').textContent = 'Vui lòng nhập mật khẩu.';
+    shake();
+    return;
+  }
 
   const normalized = raw.toLowerCase();
   const valid = /^[a-z0-9._-]+$/.test(normalized) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
   if(!valid){
     wrapUser.classList.add('err');
-    $('#err-user').textContent = 'Vui lòng nhập tài khoản ảo hợp lệ.';
+    $('#err-user').textContent = 'Vui lòng nhập tài khoản hợp lệ.';
     shake();
     return;
   }
 
   setLoading(true);
   try{
-    const result = await signIn(normalized);
+    const result = await signIn(normalized, password);
     const user = result.user || { full_name: normalized, role: 'student', roleLabel: 'Học sinh' };
     showSuccess(user);
     $('#success-sub').textContent = `Đăng nhập thành công với tài khoản ${result.email || normalized}.`;
-    $('#role-preview').innerHTML = `<div class="rp-top"><div class="av">${(user.full_name || normalized).trim().charAt(0).toUpperCase()}</div><div><div class="nm">${user.full_name || result.email || normalized}</div><div class="rl">${user.roleLabel || 'Tài khoản ảo'}</div></div></div>`;
+    $('#role-preview').innerHTML = `<div class="rp-top"><div class="av">${(user.full_name || normalized).trim().charAt(0).toUpperCase()}</div><div><div class="nm">${user.full_name || result.email || normalized}</div><div class="rl">${user.roleLabel || 'Tài khoản'}</div></div></div>`;
   }catch(err){
-    wrapUser.classList.add('err');
-    $('#err-user').textContent = err.message;
+    const message = err.message || 'Đăng nhập thất bại.';
+    if(message.toLowerCase().includes('mật khẩu') || message.toLowerCase().includes('password')){
+      wrapPassword.classList.add('err');
+      $('#err-password').textContent = message;
+    } else {
+      wrapUser.classList.add('err');
+      $('#err-user').textContent = message;
+    }
     shake();
   }finally{
     setLoading(false);

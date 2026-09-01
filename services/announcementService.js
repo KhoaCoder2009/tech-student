@@ -1,5 +1,13 @@
 import { supabase } from '../assets/js/supabaseClient.js';
 
+function normalizeSchemaError(error, featureName) {
+  const message = String(error?.message || '');
+  if (message.includes('does not exist') || message.includes('relation') || message.includes('not found')) {
+    throw new Error(`${featureName}: data chưa sẵn sàng trong Supabase. Hãy chạy SQL setup tương ứng trong SQL Editor.`);
+  }
+  throw error;
+}
+
 /**
  * Get all announcements for a class (grouped by position)
  */
@@ -19,7 +27,7 @@ export async function listAnnouncements(classId, options = {}) {
 
   const { data, error } = await query;
 
-  if (error) throw error;
+  if (error) normalizeSchemaError(error, 'Thông báo');
   return data || [];
 }
 
@@ -51,6 +59,10 @@ export async function canPostAnnouncement(classId) {
     });
 
   if (error) {
+    const message = String(error?.message || '');
+    if (message.includes('does not exist') || message.includes('function') || message.includes('relation')) {
+      throw new Error('Thông báo: chưa chạy SQL chức năng quyền đăng thông báo trong Supabase.');
+    }
     console.error('Error checking permissions:', error);
     return false;
   }
@@ -83,7 +95,7 @@ export async function createAnnouncement(classId, announcement) {
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) normalizeSchemaError(error, 'Thông báo');
   return data;
 }
 
