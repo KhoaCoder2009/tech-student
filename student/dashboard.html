@@ -171,20 +171,33 @@ async function loadStudentData() {
     }
 
     // Get position
-    const { data: positions } = await supabase
+    const { data: studentPositions, error: posError } = await supabase
       .from('student_positions')
-      .select(`
-        position_id,
-        positions (name)
-      `)
-      .eq('student_id', user.id);
+      .select('position_id')
+      .eq('student_id', user.id)
+      .limit(1);
+    
+    if (posError) {
+      console.error('Position error:', posError);
+    }
+    
+    let positionName = 'Học sinh';
+    if (studentPositions && studentPositions.length > 0) {
+      const { data: positionData } = await supabase
+        .from('positions')
+        .select('label')
+        .eq('id', studentPositions[0].position_id)
+        .single();
+      
+      if (positionData) {
+        positionName = positionData.label;
+      }
+    }
 
     // Update UI
     $('#student-name').textContent = profile?.full_name || 'Học sinh';
     $('#student-code').textContent = student.student_code || '--';
     $('#student-group').textContent = groupData?.name || '--';
-    
-    const positionName = positions?.[0]?.positions?.name || 'Học sinh';
     $('#student-position').textContent = positionName;
     
     $('#discipline-score').textContent = student.discipline_score || 100;
