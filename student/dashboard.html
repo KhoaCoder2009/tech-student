@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Học sinh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+<style>
+.welcome-header{margin-bottom:32px;}
+.welcome-title{font-size:28px;font-weight:700;color:var(--navy-900);margin-bottom:4px;}
+.welcome-subtitle{font-size:15px;color:var(--ink-600);}
+
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:32px;}
+.info-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-sm);}
+.info-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.info-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.info-title{font-size:15px;font-weight:700;color:var(--navy-900);}
+.info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-size:13px;color:var(--ink-600);font-weight:600;}
+.info-value{font-size:14px;color:var(--navy-900);font-weight:600;}
+
+.score-card{background:linear-gradient(135deg,#4f6df5,#22c9a8);color:#fff;border-radius:var(--radius-lg);padding:32px;text-align:center;}
+.score-label{font-size:14px;opacity:.9;margin-bottom:8px;}
+.score-value{font-size:64px;font-weight:800;margin-bottom:4px;}
+.score-max{font-size:16px;opacity:.8;}
+
+.announcement-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;cursor:pointer;transition:all .2s;}
+.announcement-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.announcement-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.announcement-tag{font-size:11px;padding:4px 8px;border-radius:6px;font-weight:600;}
+.announcement-time{font-size:12px;color:var(--ink-500);margin-left:auto;}
+.announcement-title{font-size:15px;font-weight:700;color:var(--navy-900);margin-bottom:8px;}
+.announcement-content{font-size:13px;color:var(--ink-600);line-height:1.6;}
+
+.group-card{background:#fff;border-left:4px solid var(--g2);border-radius:var(--radius-lg);padding:20px;}
+.group-name{font-size:18px;font-weight:700;color:var(--navy-900);margin-bottom:12px;}
+.group-info{font-size:13px;color:var(--ink-600);line-height:1.8;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+
+      <div class="welcome-header">
+        <h1 class="welcome-title">Xin chào <span id="student-name">...</span> 👋</h1>
+        <p class="welcome-subtitle">Học sinh lớp <strong>12A2</strong></p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-header">
+            <div class="info-icon" style="background:var(--mint-100);color:var(--mint-500);">👤</div>
+            <div class="info-title">Thông tin cá nhân</div>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Mã học sinh</span>
+            <span class="info-value" id="student-code">--</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Tổ</span>
+            <span class="info-value" id="student-group">--</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Chức vụ</span>
+            <span class="info-value" id="student-position">Học sinh</span>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-label">Điểm nề nếp</div>
+          <div class="score-value" id="discipline-score">--</div>
+          <div class="score-max">/ 100 điểm</div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-header">
+            <div class="info-icon" style="background:#e3f5ff;color:#0ea5e9;">✅</div>
+            <div class="info-title">Chuyên cần</div>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Tháng này</span>
+            <span class="info-value" style="color:var(--mint-500);">20/20 buổi</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Tổng cộng</span>
+            <span class="info-value">158/160 buổi</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Tỷ lệ</span>
+            <span class="info-value" style="color:var(--mint-500);">98.8%</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:32px;">
+        <div>
+          <h3 class="section-title">📢 Thông báo mới nhất</h3>
+          <div id="announcements-list">
+            <div class="announcement-card">
+              <div class="announcement-header">
+                <span class="announcement-tag" style="background:var(--mint-100);color:var(--mint-500);">📢 GVCN</span>
+                <span class="announcement-time">2 giờ trước</span>
+              </div>
+              <div class="announcement-title">Đang tải...</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="section-title">🗂️ Tổ của tôi</h3>
+          <div class="group-card" id="group-card">
+            <div class="group-name" id="group-name">Đang tải...</div>
+            <div class="group-info" id="group-info"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initStudentLayout } from '../assets/js/studentLayout.js';
+import { supabase } from '../assets/js/supabaseClient.js';
+
+const $ = s => document.querySelector(s);
+
+async function loadStudentData() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Get student info
+    const { data: student } = await supabase
+      .from('students')
+      .select(`
+        id,
+        student_code,
+        discipline_score,
+        profile:profiles(full_name),
+        group:groups(id, name, color),
+        position:student_positions(position:positions(name))
+      `)
+      .eq('id', user.id)
+      .single();
+
+    if (!student) {
+      throw new Error('Không tìm thấy thông tin học sinh');
+    }
+
+    // Update UI
+    $('#student-name').textContent = student.profile?.full_name || 'Học sinh';
+    $('#student-code').textContent = student.student_code || '--';
+    $('#student-group').textContent = student.group?.name || '--';
+    $('#student-position').textContent = student.position?.[0]?.position?.name || 'Học sinh';
+    $('#discipline-score').textContent = student.discipline_score || 100;
+
+    // Load group info
+    if (student.group) {
+      const { data: groupStudents } = await supabase
+        .from('students')
+        .select('profile:profiles(full_name)')
+        .eq('group_id', student.group.id);
+
+      $('#group-name').textContent = student.group.name;
+      $('#group-name').style.color = student.group.color;
+      $('#group-info').innerHTML = `
+        Số lượng: ${groupStudents?.length || 0} học sinh<br>
+        Trưởng tổ: <strong>Đang cập nhật</strong>
+      `;
+      $('.group-card').style.borderColor = student.group.color;
+    }
+
+    // Load announcements
+    const { data: classData } = await supabase
+      .from('classes')
+      .select('id')
+      .eq('name', '12A2')
+      .single();
+
+    const { data: announcements } = await supabase
+      .from('announcements')
+      .select(`
+        id,
+        title,
+        content,
+        created_at,
+        author:profiles(full_name),
+        position_tag
+      `)
+      .eq('class_id', classData.id)
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    const announcementsList = $('#announcements-list');
+    if (announcements && announcements.length > 0) {
+      announcementsList.innerHTML = announcements.map(a => {
+        const timeAgo = getTimeAgo(new Date(a.created_at));
+        const tag = a.position_tag || 'GVCN';
+        const tagColors = {
+          'GVCN': { bg: '#e3f9f4', color: '#22c9a8' },
+          'Lớp trưởng': { bg: '#e3f5ff', color: '#0ea5e9' },
+          'Bí thư': { bg: '#fef3c7', color: '#f59e0b' },
+          'Phó học tập': { bg: '#fce7f3', color: '#ec4899' },
+          'Phó lao động': { bg: '#ede9fe', color: '#8b5cf6' }
+        };
+        const colors = tagColors[tag] || tagColors['GVCN'];
+        
+        return `
+          <div class="announcement-card" onclick="location.href='../admin/announcements.html'">
+            <div class="announcement-header">
+              <span class="announcement-tag" style="background:${colors.bg};color:${colors.color};">
+                📢 ${tag}
+              </span>
+              <span class="announcement-time">${timeAgo}</span>
+            </div>
+            <div class="announcement-title">${a.title}</div>
+            <div class="announcement-content">${a.content.substring(0, 100)}${a.content.length > 100 ? '...' : ''}</div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      announcementsList.innerHTML = '<p style="color:var(--ink-500);text-align:center;padding:40px 0;">Chưa có thông báo nào</p>';
+    }
+
+  } catch (err) {
+    console.error('Load student data error:', err);
+    alert('Lỗi tải dữ liệu: ' + err.message);
+  }
+}
+
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  if (seconds < 60) return 'Vừa xong';
+  if (seconds < 3600) return Math.floor(seconds / 60) + ' phút trước';
+  if (seconds < 86400) return Math.floor(seconds / 3600) + ' giờ trước';
+  return Math.floor(seconds / 86400) + ' ngày trước';
+}
+
+(async () => {
+  const user = await initStudentLayout({ 
+    page: 'dashboard', 
+    title: 'Tổng quan', 
+    sub: 'Dashboard học sinh'
+  });
+  if (!user) return;
+
+  await loadStudentData();
+})();
+</script>
+</body>
+</html>

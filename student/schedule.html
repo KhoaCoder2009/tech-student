@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech-Student · Thời khóa biểu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+      <div class="panel">
+        <h3>Thời khóa biểu</h3>
+        <div class="panel-sub">Lớp 12A2 · Tuần này</div>
+        <div class="table-card">
+          <table>
+            <thead><tr><th>Thứ</th><th>Tiết</th><th>Môn</th><th>Giáo viên</th></tr></thead>
+            <tbody>
+              <tr><td>Thứ 2</td><td>1</td><td>Toán</td><td>Cô Hạnh</td></tr>
+              <tr><td>Thứ 2</td><td>2</td><td>Vật lý</td><td>Thầy Nam</td></tr>
+              <tr><td>Thứ 3</td><td>1</td><td>Tiếng Anh</td><td>Cô Lan</td></tr>
+              <tr><td>Thứ 4</td><td>3</td><td>Hóa học</td><td>Thầy Bình</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initLayout, STUDENT_NAV_ITEMS } from '../assets/js/layout.js';
+(async () => {
+  await initLayout({ page: 'schedule', title: 'Thời khóa biểu', sub: 'Kế hoạch học tập', allowedRoles: ['student'], navItems: STUDENT_NAV_ITEMS });
+})();
+</script>
+</body>
+</html>

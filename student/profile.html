@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech-Student · Hồ sơ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+      <div class="profile-container" style="max-width:760px; margin:0 auto;">
+        <div class="profile-card" style="background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); padding:32px; box-shadow:var(--shadow-sm);">
+          <div class="profile-header" style="text-align:center; padding-bottom:24px; border-bottom:1px solid var(--line); margin-bottom:24px;">
+            <div class="profile-avatar" style="width:90px; height:90px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:linear-gradient(135deg, var(--g1), var(--g2)); color:#fff; font-weight:700; font-size:32px; margin:0 auto 16px;">A</div>
+            <h2 style="margin:0; font-size:24px;">Nguyễn Văn A</h2>
+            <span class="profile-role" style="display:inline-block; margin-top:10px; padding:6px 16px; border-radius:999px; background:var(--mint-100); color:var(--navy-900); font-size:13px; font-weight:600;">Học sinh · 12A2</span>
+          </div>
+
+          <div class="info-grid" style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px;">
+            <div class="info-item" style="padding:14px; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-md);"><div class="info-label" style="font-size:12px; color:var(--ink-600);">Mã học sinh</div><div class="info-value" style="font-weight:700; margin-top:6px;">12A2001</div></div>
+            <div class="info-item" style="padding:14px; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-md);"><div class="info-label" style="font-size:12px; color:var(--ink-600);">Lớp</div><div class="info-value" style="font-weight:700; margin-top:6px;">12A2</div></div>
+            <div class="info-item" style="padding:14px; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-md);"><div class="info-label" style="font-size:12px; color:var(--ink-600);">Tổ</div><div class="info-value" style="font-weight:700; margin-top:6px;">Tổ 1</div></div>
+            <div class="info-item" style="padding:14px; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-md);"><div class="info-label" style="font-size:12px; color:var(--ink-600);">Chức vụ</div><div class="info-value" style="font-weight:700; margin-top:6px;">Tổ viên</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initLayout, STUDENT_NAV_ITEMS } from '../assets/js/layout.js';
+
+(async () => {
+  await initLayout({ page: 'profile', title: 'Hồ sơ cá nhân', sub: 'Thông tin học sinh', allowedRoles: ['student'], navItems: STUDENT_NAV_ITEMS });
+})();
+</script>
+</body>
+</html>

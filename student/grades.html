@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech-Student · Điểm số</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="lbl">🧮 Điểm TB</div><div class="val">8.7</div><div class="delta up">Học kỳ này</div></div>
+        <div class="stat-card"><div class="lbl">📘 Toán</div><div class="val">9.2</div><div class="delta up">Giỏi</div></div>
+        <div class="stat-card"><div class="lbl">🧪 Lý</div><div class="val">8.6</div><div class="delta up">Khá</div></div>
+        <div class="stat-card"><div class="lbl">📚 Anh</div><div class="val">8.5</div><div class="delta up">Khá</div></div>
+      </div>
+
+      <div class="panel">
+        <h3>Bảng điểm</h3>
+        <div class="panel-sub">Theo môn</div>
+        <div class="table-card">
+          <table>
+            <thead><tr><th>Môn</th><th>Điểm miệng</th><th>Điểm 15'</th><th>Điểm 45'</th><th>TB</th></tr></thead>
+            <tbody>
+              <tr><td>Toán</td><td>8.5</td><td>9.0</td><td>9.5</td><td>9.2</td></tr>
+              <tr><td>Vật lý</td><td>8.0</td><td>8.8</td><td>8.8</td><td>8.6</td></tr>
+              <tr><td>Tiếng Anh</td><td>8.4</td><td>8.6</td><td>8.7</td><td>8.5</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initLayout, STUDENT_NAV_ITEMS } from '../assets/js/layout.js';
+(async () => {
+  await initLayout({ page: 'grades', title: 'Điểm số', sub: 'Theo dõi kết quả học tập', allowedRoles: ['student'], navItems: STUDENT_NAV_ITEMS });
+})();
+</script>
+</body>
+</html>

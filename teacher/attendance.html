@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech-Student · Chuyên cần</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+      <div class="toolbar">
+        <div class="search-box"><span class="ic">🔎</span><input placeholder="Tìm học sinh..."></div>
+        <select class="filter"><option>Hôm nay</option><option>Tuần này</option><option>Tháng này</option></select>
+        <button class="btn btn-primary">＋ Cập nhật điểm danh</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="lbl">📅 Hôm nay</div><div class="val">42</div><div class="delta up">Tổng học sinh</div></div>
+        <div class="stat-card"><div class="lbl">✅ Có mặt</div><div class="val">39</div><div class="delta up">92.9%</div></div>
+        <div class="stat-card"><div class="lbl">⏰ Đi muộn</div><div class="val">1</div><div class="delta down">Cần nhắc nhở</div></div>
+        <div class="stat-card"><div class="lbl">❌ Vắng</div><div class="val">2</div><div class="delta down">Cần xử lý</div></div>
+      </div>
+
+      <div class="panel">
+        <h3>Điểm danh lớp</h3>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Học sinh</th>
+                <th>Tổ</th>
+                <th>Trạng thái</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Nguyễn Văn A</td><td>Tổ 1</td><td><span class="badge" style="background:rgba(15,157,112,.12);color:#0f9d70;">Có mặt</span></td><td>—</td></tr>
+              <tr><td>Trần Văn B</td><td>Tổ 2</td><td><span class="badge" style="background:rgba(245,165,36,.12);color:#f5a524;">Đi muộn</span></td><td>10 phút</td></tr>
+              <tr><td>Phạm Thị C</td><td>Tổ 3</td><td><span class="badge" style="background:rgba(242,84,91,.12);color:#f2545b;">Vắng</span></td><td>Xin phép</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initLayout, GVCN_NAV_ITEMS } from '../assets/js/layout.js';
+(async () => {
+  await initLayout({ page: 'attendance', title: 'Chuyên cần', sub: 'Điểm danh và trạng thái lớp', allowedRoles: ['teacher'], navItems: GVCN_NAV_ITEMS });
+})();
+</script>
+</body>
+</html>

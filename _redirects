@@ -15,6 +15,17 @@
 /admin/profile /admin/profile.html 200
 /admin/change-password /admin/change-password.html 200
 
+# Teacher (GVCN) routes
+/teacher/dashboard /teacher/dashboard.html 200
+
+# Student routes
+/student/dashboard /student/dashboard.html 200
+/student/grades /student/grades.html 200
+/student/schedule /student/schedule.html 200
+/student/classmates /student/classmates.html 200
+/student/mygroup /student/mygroup.html 200
+/student/discipline /student/discipline.html 200
+
 # Login
 /login /login.html 200
 /unauthorized /unauthorized.html 200

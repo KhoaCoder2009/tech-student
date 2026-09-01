@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech-Student · Nề nếp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/design-system.css">
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+      <div class="toolbar">
+        <div class="search-box"><span class="ic">🔎</span><input placeholder="Tìm học sinh hoặc nội dung..."></div>
+        <select class="filter"><option>Tuần này</option><option>Tháng này</option><option>Toàn năm</option></select>
+        <select class="filter"><option>Tất cả tổ</option><option>Tổ 1</option><option>Tổ 2</option><option>Tổ 3</option><option>Tổ 4</option></select>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="lbl">⭐ Điểm TB</div><div class="val">94.8</div><div class="delta up">Toàn lớp</div></div>
+        <div class="stat-card"><div class="lbl">✅ Khen thưởng</div><div class="val">12</div><div class="delta up">Tháng này</div></div>
+        <div class="stat-card"><div class="lbl">⚠️ Vi phạm</div><div class="val">5</div><div class="delta down">Cần chú ý</div></div>
+        <div class="stat-card"><div class="lbl">📊 Xếp hạng</div><div class="val">3</div><div class="delta up">Tổ tốt nhất</div></div>
+      </div>
+
+      <div class="panel">
+        <h3>Nề nếp lớp</h3>
+        <div class="panel-sub">Bảng ghi nhận trong tuần</div>
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Ngày</th>
+                <th>Học sinh</th>
+                <th>Tổ</th>
+                <th>Nội dung</th>
+                <th>Điểm</th>
+                <th>Người ghi nhận</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>08/08</td>
+                <td>Nguyễn Văn A</td>
+                <td>Tổ 1</td>
+                <td>Đúng giờ, mặc đồng phục đúng quy định</td>
+                <td><span class="score good">+2</span></td>
+                <td>Cô Hạnh</td>
+              </tr>
+              <tr>
+                <td>07/08</td>
+                <td>Trần Văn B</td>
+                <td>Tổ 2</td>
+                <td>Đi muộn 10 phút</td>
+                <td><span class="score low">-1</span></td>
+                <td>Cô Hạnh</td>
+              </tr>
+              <tr>
+                <td>06/08</td>
+                <td>Phạm Thị C</td>
+                <td>Tổ 3</td>
+                <td>Tham gia vệ sinh khu vực lớp</td>
+                <td><span class="score good">+3</span></td>
+                <td>Cô Hạnh</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initLayout, GVCN_NAV_ITEMS } from '../assets/js/layout.js';
+(async () => {
+  await initLayout({ page: 'discipline', title: 'Nề nếp', sub: 'Theo dõi điểm và vi phạm lớp', allowedRoles: ['teacher'], navItems: GVCN_NAV_ITEMS });
+})();
+</script>
+</body>
+</html>
