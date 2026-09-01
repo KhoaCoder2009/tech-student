@@ -1,1 +1,23 @@
-/ /login.html 302
+# Redirect root to login
+/ /login.html 200
+
+# Admin routes - serve HTML without extension
+/admin/dashboard /admin/dashboard.html 200
+/admin/students /admin/students.html 200
+/admin/students-detail /admin/students-detail.html 200
+/admin/groups /admin/groups.html 200
+/admin/positions /admin/positions.html 200
+/admin/seating /admin/seating.html 200
+/admin/discipline /admin/discipline.html 200
+/admin/set-discipline-score /admin/set-discipline-score.html 200
+/admin/announcements /admin/announcements.html 200
+/admin/accounts /admin/accounts.html 200
+/admin/profile /admin/profile.html 200
+/admin/change-password /admin/change-password.html 200
+
+# Login
+/login /login.html 200
+/unauthorized /unauthorized.html 200
+
+# Fallback
+/* /login.html 404
