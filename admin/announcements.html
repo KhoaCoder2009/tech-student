@@ -492,11 +492,12 @@ function renderAnnouncements() {
   container.innerHTML = filtered.map(a => {
     const isPinned = a.is_pinned ? 'pinned' : '';
     const isImportant = a.is_important ? 'important' : '';
-    const positionTag = a.position_label 
-      ? `<span class="position-tag" style="background:${a.position_color};">
-           ${a.position_icon} ${a.position_label}
-         </span>`
-      : '';
+    const positionLabel = a.position_label || 'Thành viên';
+    const positionIcon = a.position_icon || '👤';
+    const positionColor = a.position_color || 'rgba(79, 109, 245, 0.12)';
+    const positionTag = `<span class="position-tag" style="background:${positionColor};">
+      ${positionIcon} ${positionLabel}
+    </span>`;
     
     // Hiển thị nút xóa nếu là người đăng hoặc admin
     const canDelete = CURRENT_USER && (a.created_by === CURRENT_USER.id || CURRENT_USER.role === 'admin');

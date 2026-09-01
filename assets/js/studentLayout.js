@@ -6,10 +6,10 @@ import { getCurrentUser, signOut } from '../../services/authService.js';
 import { confirmModal } from './ui.js';
 
 export const STUDENT_NAV_ITEMS = [
-  { page: 'home', href: '/student/home.html', icon: '🏠', label: 'Trang chủ' },
+  { page: 'home', href: '/student/home.html', icon: '🏠', label: 'Tổng quan' },
   { page: 'friends', href: '/student/friends.html', icon: '👥', label: 'Bạn bè' },
-  { page: 'mygroup', href: '/student/mygroup.html', icon: '🗂️', label: 'Tổ của tôi' },
-  { page: 'discipline', href: '/student/discipline.html', icon: '⭐', label: 'Điểm nề nếp' },
+  { page: 'mygroup', href: '/student/mygroup.html', icon: '🗂️', label: 'Tổ' },
+  { page: 'discipline', href: '/student/discipline.html', icon: '⭐', label: 'Nề nếp' },
   { page: 'announcements', href: '/student/announcements.html', icon: '📢', label: 'Thông báo' },
 ];
 
@@ -19,7 +19,7 @@ function sidebarHtml(activePage, navItems = STUDENT_NAV_ITEMS) {
     <aside class="sidebar" id="sidebar">
       <div class="brand">
         <div class="brand-mark">
-          <img src="../assets/images/logo.png" alt="Tech-Student" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:20px;font-weight:800;color:#4f6df5;&quot;>TS</span>'">
+          <img src="../assets/images/logo.png" alt="12A2" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:20px;font-weight:800;color:#d94750;&quot;>12A2</span>'">
         </div>
       </div>
       <nav class="nav-group">
@@ -42,27 +42,39 @@ function navLink(item, activePage) {
 function topbarHtml(title, subtitle) {
   return `
     <header class="topbar">
-      <button class="hamburger" id="menu-toggle" style="display:none;">☰</button>
-      <h1>${title}</h1>
-      ${subtitle ? `<div class="sub">${subtitle}</div>` : ''}
+      <button class="hamburger" id="menu-toggle" aria-label="Mở menu">☰</button>
+      <div class="topbar-left">
+        <h1>${title}</h1>
+        ${subtitle ? `<div class="sub">${subtitle}</div>` : ''}
+      </div>
       <div class="topbar-right">
-        <div class="side-user" id="btn-profile">
+        <div class="quick-action-group">
+          <button class="icon-btn" id="btn-notif" title="Thông báo" aria-label="Thông báo">
+            <span>🔔</span>
+            <span class="dot-badge" style="display:none;"></span>
+          </button>
+          <button class="icon-btn" id="btn-profile" title="Hồ sơ cá nhân" aria-label="Hồ sơ cá nhân">
+            <span>👤</span>
+          </button>
+          <button class="icon-btn" id="btn-theme-toggle" title="Chế độ tối" aria-label="Chế độ tối">
+            <span>🌙</span>
+          </button>
+          <button class="icon-btn" id="btn-settings" title="Cài đặt" aria-label="Cài đặt">
+            <span>⚙️</span>
+          </button>
+        </div>
+        <div class="side-user" id="user-summary" style="cursor:pointer;">
           <div class="avatar">👤</div>
           <div>
             <div class="name" id="user-name">Học sinh</div>
             <div class="role">Học sinh</div>
           </div>
         </div>
-        <button class="icon-btn" id="btn-settings" title="Cài đặt">⚙️</button>
-        <button class="icon-btn" id="btn-notif" title="Thông báo">
-          <span>🔔</span>
-          <div class="dot-badge"></div>
-        </button>
       </div>
       <div class="dropdown-menu" id="settings-menu" style="display:none;position:absolute;top:100%;right:20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-md);box-shadow:var(--shadow-md);padding:8px;min-width:200px;z-index:50;">
         <a href="/student/profile.html" class="dropdown-item" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">👤 Hồ sơ cá nhân</a>
-        <a href="#" class="dropdown-item" id="toggle-dark-mode" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🌙 Chế độ tối</a>
         <a href="/student/change-password.html" class="dropdown-item" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🔒 Đổi mật khẩu</a>
+        <a href="#" class="dropdown-item" id="toggle-dark-mode" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🌙 Chế độ tối</a>
         <a href="#" class="dropdown-item" id="btn-logout" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🚪 Đăng xuất</a>
       </div>
     </header>
@@ -108,19 +120,39 @@ export async function initStudentLayout(opts = {}) {
   // Settings dropdown
   const btnSettings = document.getElementById('btn-settings');
   const btnProfile = document.getElementById('btn-profile');
+  const btnThemeToggle = document.getElementById('btn-theme-toggle');
   const settingsMenu = document.getElementById('settings-menu');
+  const userSummary = document.getElementById('user-summary');
+  const btnDarkMode = document.getElementById('toggle-dark-mode');
+  const updateThemeButton = () => {
+    const isDark = document.body.classList.contains('dark-mode');
+    if (btnThemeToggle) btnThemeToggle.innerHTML = isDark ? '<span>☀️</span>' : '<span>🌙</span>';
+    if (btnDarkMode) btnDarkMode.textContent = isDark ? '☀️ Chế độ sáng' : '🌙 Chế độ tối';
+  };
+  const toggleDarkMode = () => {
+    const isDark = !document.body.classList.contains('dark-mode');
+    document.body.classList.toggle('dark-mode', isDark);
+    localStorage.setItem('darkMode', String(isDark));
+    updateThemeButton();
+  };
   
   const toggleSettings = (e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
+    if (!settingsMenu) return;
     const isVisible = settingsMenu.style.display === 'block';
     settingsMenu.style.display = isVisible ? 'none' : 'block';
   };
   
   btnSettings?.addEventListener('click', toggleSettings);
-  btnProfile?.addEventListener('click', toggleSettings);
+  btnProfile?.addEventListener('click', () => { window.location.href = '/student/profile.html'; });
+  userSummary?.addEventListener('click', () => { window.location.href = '/student/profile.html'; });
+  btnThemeToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDarkMode();
+  });
   
   document.addEventListener('click', () => {
-    settingsMenu.style.display = 'none';
+    if (settingsMenu) settingsMenu.style.display = 'none';
   });
 
   // Hover effects for dropdown items
@@ -135,15 +167,14 @@ export async function initStudentLayout(opts = {}) {
   });
 
   // Dark mode toggle
-  const btnDarkMode = document.getElementById('toggle-dark-mode');
   btnDarkMode?.addEventListener('click', (e) => {
     e.preventDefault();
-    document.body.classList.toggle('dark-mode');
-    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    toggleDarkMode();
   });
   if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
   }
+  updateThemeButton();
 
   // Notification button
   const btnNotif = document.getElementById('btn-notif');

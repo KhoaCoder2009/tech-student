@@ -19,7 +19,7 @@ function sidebarHtml(activePage, navItems = GVCN_NAV_ITEMS) {
     <aside class="sidebar" id="sidebar">
       <div class="brand">
         <div class="brand-logo">
-          <span class="brand-text">TECH STUDENT</span>
+          <span class="brand-text">12A2</span>
         </div>
       </div>
       <nav class="nav-group">
@@ -74,16 +74,15 @@ function topbarHtml(title, subtitle) {
           <span class="icon">🔔</span>
           <span class="badge">3</span>
         </button>
-        <button class="top-btn" id="btn-settings" title="Cài đặt">⚙️</button>
-        <button class="top-btn" id="btn-profile">
+        <button class="top-btn" id="user-summary" style="display:flex;align-items:center;gap:8px;">
           <span class="avatar">👤</span>
           <span class="uname" id="user-name">GVCN</span>
         </button>
       </div>
       <div class="dropdown-menu" id="settings-menu">
         <a href="../admin/profile.html" class="dropdown-item">👤 Hồ sơ cá nhân</a>
-        <a href="#" class="dropdown-item" id="toggle-dark-mode">🌙 Chế độ tối</a>
         <a href="../admin/change-password.html" class="dropdown-item">🔒 Đổi mật khẩu</a>
+        <a href="#" class="dropdown-item" id="toggle-dark-mode">🌙 Chế độ tối</a>
         <a href="#" class="dropdown-item" id="btn-logout">🚪 Đăng xuất</a>
       </div>
     </header>
@@ -128,23 +127,47 @@ export async function initTeacherLayout(opts = {}) {
 
   // Settings dropdown
   const btnSettings = document.getElementById('btn-settings');
+  const btnProfile = document.getElementById('btn-profile');
+  const btnThemeToggle = document.getElementById('btn-theme-toggle');
   const settingsMenu = document.getElementById('settings-menu');
+  const userSummary = document.getElementById('user-summary');
+  const btnDarkMode = document.getElementById('toggle-dark-mode');
+  const updateThemeButton = () => {
+    const isDark = document.body.classList.contains('dark-mode');
+    if (btnThemeToggle) btnThemeToggle.innerHTML = isDark ? '☀️' : '🌙';
+    if (btnDarkMode) btnDarkMode.textContent = isDark ? '☀️ Chế độ sáng' : '🌙 Chế độ tối';
+  };
+  const toggleDarkMode = () => {
+    const isDark = !document.body.classList.contains('dark-mode');
+    document.body.classList.toggle('dark-mode', isDark);
+    localStorage.setItem('darkMode', String(isDark));
+    updateThemeButton();
+  };
   btnSettings?.addEventListener('click', (e) => {
     e.stopPropagation();
     settingsMenu.classList.toggle('show');
   });
+  btnProfile?.addEventListener('click', () => {
+    window.location.href = '../admin/profile.html';
+  });
+  userSummary?.addEventListener('click', () => {
+    window.location.href = '../admin/profile.html';
+  });
+  btnThemeToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDarkMode();
+  });
   document.addEventListener('click', () => settingsMenu.classList.remove('show'));
 
   // Dark mode toggle
-  const btnDarkMode = document.getElementById('toggle-dark-mode');
   btnDarkMode?.addEventListener('click', (e) => {
     e.preventDefault();
-    document.body.classList.toggle('dark-mode');
-    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    toggleDarkMode();
   });
   if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
   }
+  updateThemeButton();
 
   // Notification button
   const btnNotif = document.getElementById('btn-notif');

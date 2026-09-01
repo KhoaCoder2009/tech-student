@@ -2,11 +2,12 @@ import { supabase } from './supabaseClient.js';
 import { getCurrentUser, signOut } from '../../services/authService.js';
 
 export const ADMIN_NAV_ITEMS = [
-  { page: 'dashboard', href: '/admin/dashboard.html', icon: '📊', label: 'Dashboard' },
+  { page: 'dashboard', href: '/admin/dashboard.html', icon: '🏠', label: 'Tổng quan' },
   { page: 'students', href: '/admin/students.html', icon: '👥', label: 'Học sinh' },
-  { page: 'groups', href: '/admin/groups.html', icon: '🗂️', label: 'Tổ học tập' },
-  { page: 'positions', href: '/admin/positions.html', icon: '⭐', label: 'Chức vụ' },
-  { page: 'discipline', href: '/admin/discipline.html', icon: '📋', label: 'Nề nếp' },
+  { page: 'groups', href: '/admin/groups.html', icon: '🗂️', label: 'Tổ' },
+  { page: 'positions', href: '/admin/positions.html', icon: '🎖️', label: 'Chức vụ' },
+  { page: 'set-discipline-score', href: '/admin/set-discipline-score.html', icon: '⭐', label: 'Điểm nề nếp' },
+  { page: 'discipline', href: '/admin/discipline.html', icon: '📝', label: 'Lịch sử nề nếp' },
   { page: 'announcements', href: '/admin/announcements.html', icon: '📢', label: 'Thông báo' },
   { page: 'accounts', href: '/admin/accounts.html', icon: '🔐', label: 'Tài khoản' },
 ];
@@ -55,7 +56,7 @@ function renderSidebar(activePage, profile) {
     <aside class="sidebar" id="sidebar">
       <div class="brand">
         <div class="brand-logo">
-          <span class="brand-text">TECH STUDENT</span>
+          <span class="brand-text">12A2</span>
         </div>
       </div>
       <nav class="nav-group">
@@ -68,12 +69,6 @@ function renderSidebar(activePage, profile) {
             <div class="name">${profile && profile.full_name ? profile.full_name : 'Admin'}</div>
             <div class="role">Quản trị viên</div>
           </div>
-        </div>
-        <div class="side-actions">
-          <button class="side-action-btn" id="side-theme-toggle" title="Đổi giao diện">
-            <span id="side-theme-icon">🌙</span>
-          </button>
-          <button class="side-action-btn" id="side-settings" title="Cài đặt">⚙️</button>
         </div>
       </div>
     </aside>
@@ -114,12 +109,6 @@ function renderSidebar(activePage, profile) {
   
   updateThemeIcon();
 
-  const menuToggle = document.getElementById('menu-toggle');
-  menuToggle?.addEventListener('click', () => {
-    sidebar?.classList.toggle('open');
-    scrim?.classList.toggle('show');
-  });
-
   scrim?.addEventListener('click', () => {
     sidebar?.classList.remove('open');
     scrim?.classList.remove('show');
@@ -155,7 +144,7 @@ function renderTopbar(title, subtitle, profile) {
 
   topbarSlot.innerHTML = `
     <header class="topbar">
-      <button class="hamburger" id="menu-toggle" style="display:none;">☰</button>
+      <button class="hamburger" id="menu-toggle">☰</button>
       <div class="topbar-left">
         <h1>${title || 'Admin'}</h1>
         ${subtitle ? `<div class="sub">${subtitle}</div>` : ''}
@@ -164,7 +153,7 @@ function renderTopbar(title, subtitle, profile) {
         <button class="icon-btn" id="btn-notifications" title="Thông báo">
           <span>🔔</span>
         </button>
-        <div class="side-user" id="btn-profile">
+        <div class="side-user" id="side-user" style="cursor:pointer;">
           <div class="avatar">👨‍💼</div>
           <div>
             <div class="name" id="user-name">${profile && profile.full_name ? profile.full_name : 'Admin'}</div>
@@ -182,6 +171,14 @@ function renderTopbar(title, subtitle, profile) {
 
   const btnProfile = document.getElementById('btn-profile');
   const settingsMenu = document.getElementById('settings-menu');
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const scrim = document.getElementById('scrim');
+
+  menuToggle?.addEventListener('click', () => {
+    sidebar?.classList.toggle('open');
+    scrim?.classList.toggle('show');
+  });
 
   const toggleSettings = (e) => {
     e.stopPropagation();

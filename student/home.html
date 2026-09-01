@@ -9,108 +9,127 @@
 <link rel="stylesheet" href="../assets/css/design-system.css">
 <style>
 .welcome-section{
-  background:linear-gradient(135deg, #4f6df5, #22c9a8);
-  color:#fff;
-  padding:60px 40px;
-  border-radius:20px;
-  text-align:center;
-  margin-bottom:40px;
+  background:linear-gradient(135deg, #fff8f7 0%, #fff3f2 42%, #ffffff 100%);
+  color:var(--ink-900);
+  padding:32px 32px 28px;
+  border-radius:26px;
+  margin-bottom:28px;
   position:relative;
   overflow:hidden;
+  border:1px solid #f3dadc;
+  box-shadow:0 18px 42px rgba(217,71,80,0.08);
 }
 .welcome-section::before{
-  content:'🎓';
+  content:'📚';
   position:absolute;
-  font-size:200px;
-  opacity:0.1;
-  top:-50px;
-  right:-30px;
+  font-size:170px;
+  opacity:0.08;
+  top:-26px;
+  right:18px;
 }
 .welcome-title{
-  font-size:48px;
+  font-size:clamp(30px, 3vw, 42px);
   font-weight:800;
-  margin-bottom:16px;
+  margin:0 0 8px;
   position:relative;
   z-index:1;
+  letter-spacing:-0.04em;
 }
 .welcome-subtitle{
-  font-size:20px;
-  opacity:0.95;
+  font-size:17px;
+  opacity:0.82;
   position:relative;
   z-index:1;
+  color:var(--ink-600);
 }
 
 .stats-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
-  gap:24px;
-  margin-bottom:40px;
+  grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+  gap:22px;
+  margin-bottom:32px;
 }
 
 .stat-card{
-  background:var(--card);
+  background:linear-gradient(180deg, #fff 0%, #fffaf9 100%);
   border:1px solid var(--line);
-  border-radius:16px;
-  padding:28px;
-  text-align:center;
-  transition:all 0.3s;
+  border-radius:22px;
+  padding:24px 22px;
+  text-align:left;
+  transition:all 0.3s ease;
   position:relative;
   overflow:hidden;
+  box-shadow:0 10px 24px rgba(23,27,45,0.04);
 }
 
 .stat-card:hover{
-  transform:translateY(-8px);
-  box-shadow:0 12px 32px rgba(79,109,245,0.15);
+  transform:translateY(-6px);
+  box-shadow:0 18px 36px rgba(23,27,45,0.08);
 }
 
 .stat-icon{
-  font-size:48px;
+  width:54px;
+  height:54px;
+  border-radius:14px;
   margin-bottom:16px;
-  display:block;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  background:linear-gradient(135deg, rgba(217,71,80,0.12), rgba(242,166,75,0.16));
 }
 
 .stat-value{
-  font-size:36px;
+  font-size:32px;
   font-weight:800;
   color:var(--ink-900);
   margin-bottom:8px;
+  font-family:'Sora',sans-serif;
 }
 
 .stat-label{
-  font-size:14px;
+  font-size:13px;
   color:var(--ink-600);
-  font-weight:600;
+  font-weight:700;
+  letter-spacing:0.04em;
   text-transform:uppercase;
-  letter-spacing:0.5px;
 }
 
 .quick-links{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
-  gap:20px;
+  grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+  gap:18px;
 }
 
 .link-card{
   background:var(--card);
   border:1px solid var(--line);
-  border-radius:16px;
-  padding:32px;
+  border-radius:20px;
+  padding:22px 20px;
   text-decoration:none;
-  transition:all 0.3s;
+  transition:all 0.3s ease;
   display:flex;
   align-items:center;
-  gap:20px;
+  gap:18px;
+  box-shadow:0 8px 20px rgba(23,27,45,0.04);
 }
 
 .link-card:hover{
   transform:translateY(-4px);
-  box-shadow:0 8px 24px rgba(79,109,245,0.12);
-  border-color:#4f6df5;
+  box-shadow:0 18px 36px rgba(23,27,45,0.08);
+  border-color:rgba(217,71,80,0.35);
 }
 
 .link-icon{
-  font-size:48px;
+  width:54px;
+  height:54px;
+  border-radius:14px;
   flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg, rgba(217,71,80,0.10), rgba(45,183,160,0.12));
+  font-size:28px;
 }
 
 .link-content{
@@ -118,14 +137,14 @@
 }
 
 .link-title{
-  font-size:20px;
+  font-size:18px;
   font-weight:700;
   color:var(--ink-900);
   margin-bottom:4px;
 }
 
 .link-desc{
-  font-size:14px;
+  font-size:13px;
   color:var(--ink-600);
 }
 
@@ -145,7 +164,7 @@ body.dark-mode .link-card{
 
       <div class="welcome-section">
         <h1 class="welcome-title">Chào mừng, <span id="student-name">Học sinh</span>!</h1>
-        <p class="welcome-subtitle">Lớp 12A2 · Năm học 2024-2027</p>
+        <p class="welcome-subtitle">THPT Bình Phú · Năm học 2024-2027</p>
       </div>
 
       <div class="stats-grid">

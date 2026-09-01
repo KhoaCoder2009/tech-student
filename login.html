@@ -9,45 +9,45 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/css/design-system.css">
 <style>
-body{background:var(--bg);}
+body{background:linear-gradient(135deg,#fffaf9 0%, #f8f7f7 42%, #fff2f0 100%);}
 .wrap{display:flex;min-height:100vh;}
-.left{flex:1.05;position:relative;overflow:hidden;background:radial-gradient(120% 130% at 15% 10%, #24305a 0%, var(--navy-950) 55%, #0e1428 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:44px 48px;}
-.left::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 82% 78%, rgba(34,201,168,.18), transparent 42%),radial-gradient(circle at 90% 15%, rgba(79,109,245,.22), transparent 40%);pointer-events:none;}
-.hero{position:relative;z-index:1;max-width:440px;}
-.hero .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mint-500);font-weight:700;margin-bottom:14px;}
+.left{flex:1.1;position:relative;overflow:hidden;background:radial-gradient(120% 130% at 15% 10%, #2f1e25 0%, #1f243d 40%, #171b2d 100%);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:44px 48px;}
+.left::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 82% 80%, rgba(217,71,80,.22), transparent 38%),radial-gradient(circle at 90% 16%, rgba(242,166,75,.20), transparent 32%),radial-gradient(circle at 28% 18%, rgba(255,255,255,.12), transparent 20%);pointer-events:none;}
+.hero{position:relative;z-index:1;max-width:460px;}
+.hero .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#f7b5a8;font-weight:700;margin-bottom:14px;}
 .hero h1{font-size:33px;line-height:1.22;margin:0 0 14px;font-weight:700;}
-.hero p{font-size:14px;line-height:1.6;color:#adb3cc;margin:0;}
-.feature-card{position:relative;z-index:1;margin-top:32px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:16px;padding:18px 20px;max-width:400px;}
+.hero p{font-size:14px;line-height:1.6;color:#d7dbe8;margin:0;}
+.feature-card{position:relative;z-index:1;margin-top:32px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(6px);border-radius:18px;padding:18px 20px;max-width:420px;box-shadow:0 12px 28px rgba(23,27,45,0.12);}
 .feature-row{display:flex;align-items:center;gap:11px;padding:8px 0;}
-.feature-row .chip{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;flex-shrink:0;}
-.feature-row .tx{font-size:12.5px;color:#c4c9de;}
-.left-foot{position:relative;z-index:1;font-size:11.5px;color:#6b7495;}
+.feature-row .chip{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0;box-shadow:0 10px 20px rgba(0,0,0,0.12);}
+.feature-row .tx{font-size:12.5px;color:#e6eaf4;}
+.left-foot{position:relative;z-index:1;font-size:11.5px;color:#b9c0d4;}
 .right{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 24px;}
-.form-card{width:100%;max-width:378px;}
+.form-card{width:100%;max-width:390px;background:rgba(255,255,255,0.7);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.8);border-radius:26px;padding:28px 24px;box-shadow:0 28px 70px rgba(23,27,45,0.08);}
 .form-head{margin-bottom:26px;}
-.form-head h2{font-size:22px;margin:0 0 6px;}
+.form-head h2{font-size:26px;margin:0 0 6px;letter-spacing:-0.04em;}
 .form-head p{font-size:13px;color:var(--ink-600);margin:0;}
-.conn-badge{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;font-weight:700;color:#0f9d70;background:var(--mint-100);padding:4px 10px;border-radius:20px;}
+.conn-badge{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:11px;font-weight:700;color:#0f8f76;background:var(--mint-100);padding:5px 10px;border-radius:999px;}
 .input-wrap{position:relative;}
-.input-wrap input{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;font-size:13.5px;background:#fff;transition:border-color .15s, box-shadow .15s;}
-.input-wrap input:focus{outline:none;border-color:var(--mint-500);box-shadow:0 0 0 3px var(--mint-100);}
+.input-wrap input{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:12px;font-size:13.5px;background:#fff;transition:border-color .15s, box-shadow .15s;box-shadow:inset 0 1px 2px rgba(23,27,45,0.04);}
+.input-wrap input:focus{outline:none;border-color:var(--g1);box-shadow:0 0 0 3px rgba(217,71,80,0.08);}
 .input-wrap.err input{border-color:var(--coral-500);}
 .input-wrap .toggle-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:14px;color:var(--ink-400);}
 .err-msg{font-size:11.5px;color:var(--coral-500);margin-top:5px;display:none;}
 .input-wrap.err + .err-msg{display:block;}
 .row-between{display:flex;align-items:center;justify-content:space-between;margin:2px 0 20px;}
 .remember{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-600);}
-.remember input{accent-color:var(--mint-500);}
+.remember input{accent-color:var(--g1);}
 .link{font-size:12.5px;color:var(--navy-950);font-weight:600;text-decoration:none;border-bottom:1px solid transparent;background:none;border-top:none;border-left:none;border-right:none;padding:0;cursor:pointer;}
 .link:hover{border-bottom-color:var(--navy-950);}
-.btn-submit{width:100%;padding:12.5px;border:none;border-radius:11px;background:var(--navy-950);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;transition:background .15s;}
-.btn-submit:hover{background:var(--navy-800);}
+.btn-submit{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .15s ease, box-shadow .15s ease;box-shadow:0 10px 22px rgba(217,71,80,0.2);}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(217,71,80,0.26);}
 .btn-submit:disabled{opacity:.7;cursor:default;}
 .spinner{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .7s linear infinite;display:none;}
 .btn-submit.loading .spinner{display:inline-block;}
 .btn-submit.loading .btxt{opacity:.85;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.note{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:11.5px;color:var(--ink-600);display:flex;gap:8px;align-items:flex-start;}
+.note{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:11.5px;color:var(--ink-600);display:flex;gap:8px;align-items:flex-start;box-shadow:0 8px 18px rgba(23,27,45,0.02);}
 .shake{animation:shake .35s;}
 @keyframes shake{10%,90%{transform:translateX(-1px);}20%,80%{transform:translateX(2px);}30%,50%,70%{transform:translateX(-4px);}40%,60%{transform:translateX(4px);}}
 .success-view{display:none;text-align:center;padding:20px 4px 4px;}
@@ -57,7 +57,7 @@ body{background:var(--bg);}
 .success-view p{font-size:13px;color:var(--ink-600);margin:0 0 22px;}
 .role-preview{border:1px solid var(--line);border-radius:14px;padding:14px 16px;text-align:left;background:#fff;margin-bottom:18px;}
 .role-preview .rp-top{display:flex;align-items:center;gap:10px;margin-bottom:2px;}
-.role-preview .av{width:36px;height:36px;border-radius:50%;background:var(--navy-950);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+.role-preview .av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
 .role-preview .nm{font-size:13.5px;font-weight:700;}
 .role-preview .rl{font-size:11.5px;color:var(--ink-600);}
 .pending-note{background:var(--amber-100);color:#b5730a;border-radius:11px;padding:12px 14px;font-size:12.5px;margin-bottom:12px;}
@@ -69,13 +69,13 @@ body{background:var(--bg);}
 <div class="wrap">
   <aside class="left">
     <div class="brand" style="display:flex;align-items:center;gap:11px;">
-      <div class="brand-mark" style="width:38px;height:38px;font-size:16px;">TS</div>
-      <div><div style="font-weight:700;font-size:17px;">Tech-Student</div><div style="font-size:11.5px;color:#8a93b8;">Smart Classroom Management</div></div>
+      <div class="brand-mark" style="width:38px;height:38px;font-size:16px;">BP</div>
+      <div><div style="font-weight:700;font-size:17px;">THPT Bình Phú</div><div style="font-size:11.5px;color:#c9d3ed;">Bình Dương</div></div>
     </div>
     <div class="hero">
-      <div class="eyebrow">Lớp 12A2 · Năm học hiện tại</div>
-      <h1>Quản lý lớp học gọn hơn, nhanh hơn Excel.</h1>
-      <p>Đăng nhập bằng tài khoản được nhà trường cấp để xem thời khoá biểu, nề nếp, thông báo và thông tin lớp — mọi lúc, mọi nơi.</p>
+      <div class="eyebrow">THPT Bình Phú · Năm học hiện tại</div>
+      <h1>Quản lý học tập và nề nếp hiệu quả hơn.</h1>
+      <p>Đăng nhập để theo dõi thông tin lớp học, học sinh, thông báo và kết quả rèn luyện trong môi trường học tập hiện đại của trường.</p>
       <div class="feature-card">
         <div class="feature-row"><div class="chip" style="background:var(--g1)">👥</div><div class="tx">Quản lý học sinh, tổ, chức vụ theo thời gian thực</div></div>
         <div class="feature-row"><div class="chip" style="background:var(--g2)">🔐</div><div class="tx">Phân quyền chặt chẽ theo vai trò và phạm vi tổ</div></div>
@@ -90,19 +90,19 @@ body{background:var(--bg);}
       <div id="login-block">
         <div class="form-head">
           <h2>Đăng nhập</h2>
-          <p>Nhập thông tin tài khoản được quản trị viên cấp.</p>
-          <div class="conn-badge" id="conn-badge">● Đã kết nối Supabase</div>
+          <p>Chào mừng đến trang quản lý học tập của lớp 12A2.</p>
+          <div class="conn-badge" id="conn-badge">Hệ Thống Bảo Mật Và An Toàn - Trần Khoa</div>
         </div>
 
         <form id="login-form" novalidate>
           <div class="field" style="margin-bottom:16px;">
-            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Tài khoản</label>
+            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Tài khoản : student(stt)@12a2.edu.vn</label>
             <div class="input-wrap" id="wrap-user"><input type="text" id="f-user" placeholder="Tài khoản" autocomplete="username"></div>
             <div class="err-msg" id="err-user">Vui lòng nhập tài khoản hợp lệ.</div>
           </div>
 
           <div class="field" style="margin-bottom:18px;">
-            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Mật khẩu</label>
+            <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;">Mật khẩu : 12a2@2025</label>
             <div class="input-wrap" id="wrap-password"><input type="password" id="f-password" placeholder="Mật khẩu" autocomplete="current-password"></div>
             <div class="err-msg" id="err-password">Vui lòng nhập mật khẩu.</div>
           </div>
@@ -110,7 +110,7 @@ body{background:var(--bg);}
           <button type="submit" class="btn-submit" id="btn-submit"><span class="spinner"></span><span class="btxt">Đăng nhập</span></button>
         </form>
 
-        <div class="note"><span>ℹ️</span><span>Nhập tài khoản và mật khẩu được tạo trong Supabase Auth. Hệ thống sẽ xác thực qua Auth rồi kiểm tra hồ sơ người dùng trong bảng profiles.</span></div>
+        <div class="note"><span>ℹ️</span><span>Vui lòng nhập tài khoản và mật khẩu mà quản trị viên đã cấp </span></div>
       </div>
 
       <div class="success-view" id="success-block">
@@ -136,7 +136,7 @@ body{background:var(--bg);}
       <div id="reset-success" style="display:none;text-align:center;padding:6px 0 10px;">
         <div style="width:44px;height:44px;border-radius:50%;background:var(--mint-100);color:#0f8f76;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px;">✓</div>
         <div style="text-align:center;font-size:13px;font-weight:600;margin-bottom:4px;">Đã gửi liên kết đặt lại mật khẩu</div>
-        <div style="text-align:center;font-size:12px;color:var(--ink-600);">Vui lòng kiểm tra hộp thư của bạn để tiếp tục.</div>
+        <div style="text-align:center;font-size:12px;color:var(--ink-600);">Vui lòng không spam hay DDos website</div>
       </div>
     </div>
     <div class="modal-foot" id="forgot-foot">

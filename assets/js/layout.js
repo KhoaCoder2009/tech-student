@@ -47,7 +47,7 @@ function sidebarHtml(activePage, navItems = ADMIN_NAV_ITEMS){
     <aside class="sidebar" id="sidebar">
       <div class="brand">
         <div class="brand-logo">
-          <span class="brand-text">TECH STUDENT</span>
+          <span class="brand-text">12A2</span>
         </div>
       </div>
       <nav class="nav-group">
@@ -60,12 +60,6 @@ function sidebarHtml(activePage, navItems = ADMIN_NAV_ITEMS){
             <div class="name" id="side-name">Đang tải...</div>
             <div class="role" id="side-role"></div>
           </div>
-        </div>
-        <div class="side-actions">
-          <button class="side-action-btn" id="side-theme-toggle" title="Đổi giao diện">
-            <span id="side-theme-icon">🌙</span>
-          </button>
-          <button class="side-action-btn" id="side-settings" title="Cài đặt">⚙️</button>
         </div>
       </div>
     </aside>`;
@@ -83,22 +77,20 @@ function topbarHtml(title, sub){
         <div class="sub" id="page-sub">${sub}</div>
       </div>
       <div class="topbar-right">
-        <button class="icon-btn" id="btn-notifications" title="Thông báo">
-          <span>🔔</span>
-          <span class="dot-badge" id="notif-badge" style="display:none;"></span>
-        </button>
-        <div class="side-user" id="btn-profile">
-          <div class="avatar">👨‍💼</div>
-          <div>
-            <div class="name" id="user-name">Admin</div>
-            <div class="role">Quản trị viên</div>
-          </div>
+        <div class="quick-action-group">
+          <button class="icon-btn" id="btn-notifications" title="Thông báo">
+            <span>🔔</span>
+            <span class="dot-badge" id="notif-badge" style="display:none;"></span>
+          </button>
+          <button class="icon-btn" id="btn-profile" title="Hồ sơ">👤</button>
+          <button class="icon-btn" id="btn-theme-toggle" title="Chế độ tối">🌙</button>
+          <button class="icon-btn" id="btn-settings" title="Cài đặt">⚙️</button>
         </div>
       </div>
-      <div class="dropdown-menu" id="settings-menu" style="display:none;position:absolute;top:100%;right:20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-md);box-shadow:var(--shadow-md);padding:8px;min-width:200px;z-index:50;">
-        <a href="profile.html" class="dropdown-item" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">👤 Hồ sơ cá nhân</a>
-        <a href="change-password.html" class="dropdown-item" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🔒 Đổi mật khẩu</a>
-        <a href="#" class="dropdown-item" id="logout-link" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🚪 Đăng xuất</a>
+      <div class="dropdown-menu" id="settings-menu" style="display:none;position:absolute;top:100%;right:20px;background:linear-gradient(180deg,#fff7f7 0%, #ffffff 100%);border:1px solid rgba(217,71,80,0.12);border-radius:var(--radius-md);box-shadow:0 18px 40px rgba(23,27,45,0.12);padding:8px;min-width:220px;z-index:50;">
+        <a href="profile.html" class="dropdown-item" style="display:block;padding:10px 12px;color:var(--ink-900);text-decoration:none;border-radius:8px;transition:all 0.2s;background:rgba(217,71,80,0.04);margin-bottom:6px;">👤 Hồ sơ cá nhân</a>
+        <a href="change-password.html" class="dropdown-item" style="display:block;padding:10px 12px;color:var(--ink-900);text-decoration:none;border-radius:8px;transition:all 0.2s;background:rgba(76,110,245,0.05);margin-bottom:6px;">🔒 Đổi mật khẩu</a>
+        <a href="#" class="dropdown-item" id="logout-link" style="display:block;padding:10px 12px;color:var(--ink-900);text-decoration:none;border-radius:8px;transition:all 0.2s;background:rgba(45,183,160,0.06);">🚪 Đăng xuất</a>
       </div>
     </header>`;
 }
@@ -157,6 +149,7 @@ export async function initLayout({ page, title, sub, allowedRoles = ['admin'], n
 
   const btnSettings = document.getElementById('btn-settings');
   const btnProfile = document.getElementById('btn-profile');
+  const btnThemeToggle = document.getElementById('btn-theme-toggle');
   const settingsMenu = document.getElementById('settings-menu');
 
   const toggleSettings = (e) => {
@@ -164,7 +157,14 @@ export async function initLayout({ page, title, sub, allowedRoles = ['admin'], n
     const isVisible = settingsMenu.style.display === 'block';
     settingsMenu.style.display = isVisible ? 'none' : 'block';
   };
-  btnProfile?.addEventListener('click', toggleSettings);
+  btnProfile?.addEventListener('click', () => { window.location.href = 'profile.html'; });
+  btnSettings?.addEventListener('click', toggleSettings);
+  btnThemeToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDarkMode();
+    const isDark = document.body.classList.contains('dark-mode');
+    btnThemeToggle.innerHTML = isDark ? '☀️' : '🌙';
+  });
   document.addEventListener('click', () => { settingsMenu.style.display = 'none'; });
 
   document.getElementById('logout-link')?.addEventListener('click', async (e) => {
@@ -235,12 +235,12 @@ function showSettingsMenu() {
   const menu = document.createElement('div');
   menu.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;';
   menu.innerHTML = `
-    <div style="background:white;border-radius:14px;padding:20px;min-width:280px;box-shadow:0 24px 60px rgba(0,0,0,0.3);">
+    <div style="background:linear-gradient(180deg,#fffaf9 0%, #ffffff 100%);border-radius:14px;padding:20px;min-width:280px;box-shadow:0 24px 60px rgba(23,27,45,0.22);border:1px solid rgba(217,71,80,0.08);">
       <div style="font-weight:700;font-size:16px;margin-bottom:16px;color:var(--ink-900);">⚙️ Cài đặt</div>
-      <button id="menu-profile" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:white;text-align:left;font-size:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px;">👤 Hồ sơ cá nhân</button>
-      <button id="menu-dark-mode" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:white;text-align:left;font-size:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px;">🌙 Chế độ tối</button>
-      <button id="menu-change-password" style="width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;background:white;text-align:left;font-size:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px;">🔑 Đổi mật khẩu</button>
-      <button id="menu-logout" style="width:100%;padding:12px;border:1px solid var(--coral-500);border-radius:8px;background:var(--coral-100);color:var(--coral-500);text-align:left;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;">🚪 Đăng xuất</button>
+      <button id="menu-profile" style="width:100%;padding:12px;border:1px solid rgba(217,71,80,0.12);border-radius:8px;background:rgba(217,71,80,0.05);text-align:left;font-size:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--ink-900);">👤 Hồ sơ cá nhân</button>
+      <button id="menu-dark-mode" style="width:100%;padding:12px;border:1px solid rgba(61,90,255,0.15);border-radius:8px;background:rgba(61,90,255,0.06);text-align:left;font-size:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--ink-900);">🌙 Chế độ tối</button>
+      <button id="menu-change-password" style="width:100%;padding:12px;border:1px solid rgba(45,183,160,0.12);border-radius:8px;background:rgba(45,183,160,0.05);text-align:left;font-size:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--ink-900);">🔑 Đổi mật khẩu</button>
+      <button id="menu-logout" style="width:100%;padding:12px;border:1px solid rgba(217,71,80,0.2);border-radius:8px;background:rgba(217,71,80,0.08);color:#c93b45;text-align:left;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;">🚪 Đăng xuất</button>
     </div>
   `;
   document.body.appendChild(menu);

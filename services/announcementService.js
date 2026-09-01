@@ -30,6 +30,8 @@ export async function listAnnouncements(classId, options = {}) {
   // Get author positions separately (student only)
   const dataWithPositions = await Promise.all((data || []).map(async (a) => {
     let position_label = 'Thành viên';
+    let position_icon = '👤';
+    let position_color = 'rgba(79, 109, 245, 0.12)';
     
     // If author is student, get their position
     if (a.author?.role === 'student') {
@@ -42,17 +44,25 @@ export async function listAnnouncements(classId, options = {}) {
       if (positions && positions.length > 0) {
         position_label = positions[0]?.positions?.label || 'Thành viên';
       }
+      position_icon = '🎓';
+      position_color = 'rgba(45, 183, 160, 0.12)';
     } else if (a.author?.role === 'teacher') {
       position_label = 'GVCN';
+      position_icon = '👨‍🏫';
+      position_color = 'rgba(242, 166, 75, 0.18)';
     } else if (a.author?.role === 'admin') {
       position_label = 'Admin';
+      position_icon = '👨‍💼';
+      position_color = 'rgba(217, 71, 80, 0.14)';
     }
     
     return {
       ...a,
       author_name: a.author?.full_name || 'Không rõ',
       author_role: a.author?.role || 'student',
-      position_label
+      position_label,
+      position_icon,
+      position_color
     };
   }));
   
