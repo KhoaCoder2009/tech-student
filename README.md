@@ -1,187 +1,181 @@
-# Tech-Student
+# 🎓 Tech-Student
 
-Hệ thống quản lý lớp học 12A2 - THPT XYZ
+Hệ thống quản lý học sinh và điểm nề nếp cho lớp học.
 
-## 📂 Cấu trúc dự án
+## 📁 Cấu trúc project
 
 ```
 tech-student/
-├── admin/                      # Trang quản trị
-│   ├── dashboard.html          # Tổng quan
-│   ├── students.html           # Quản lý học sinh
-│   ├── students-detail.html    # Chi tiết học sinh
-│   ├── groups.html             # Quản lý tổ
-│   ├── positions.html          # Chức vụ
-│   ├── seating.html            # Sơ đồ chỗ ngồi
-│   ├── discipline.html         # Nề nếp
-│   └── accounts.html           # Tài khoản
+├── admin/              # Trang quản trị (Admin Dashboard)
+│   ├── dashboard.html  # Trang chủ admin
+│   ├── students.html   # Quản lý học sinh
+│   ├── groups.html     # Quản lý tổ học tập
+│   ├── positions.html  # Quản lý chức vụ
+│   ├── discipline.html # Ghi nhận vi phạm
+│   ├── announcements.html # Thông báo lớp học
+│   └── accounts.html   # Quản lý tài khoản
+│
+├── student/            # Trang dành cho học sinh
+│   ├── home.html       # Trang chủ học sinh
+│   ├── friends.html    # Danh sách bạn bè
+│   ├── mygroup.html    # Tổ của tôi
+│   ├── discipline.html # Điểm nề nếp cá nhân
+│   ├── announcements.html # Xem thông báo
+│   └── profile.html    # Hồ sơ cá nhân
+│
 ├── assets/
 │   ├── css/
-│   │   └── design-system.css   # Design system
-│   ├── js/
-│   │   ├── layout.js           # Navigation + Auth
-│   │   ├── supabaseClient.js   # Supabase config
-│   │   └── ui.js               # Toast, Modal
-│   └── img/
-│       └── logo.svg
-├── services/                   # API Services
+│   │   └── design-system.css  # Design system toàn project
+│   └── js/
+│       ├── supabaseClient.js  # Supabase client config
+│       ├── adminLayout.js     # Layout cho admin
+│       ├── studentLayout.js   # Layout cho student
+│       └── ui.js             # UI components (toast, modal, etc)
+│
+├── services/           # API service layer
 │   ├── authService.js
 │   ├── studentService.js
 │   ├── groupService.js
 │   ├── positionService.js
 │   ├── disciplineService.js
-│   ├── seatingService.js
-│   └── accountService.js
-├── supabase/
-│   ├── schema.sql              # Database schema
-│   ├── migrations/
-│   │   ├── 001_seating_positions.sql
-│   │   ├── 002_ensure_class_and_groups.sql
-│   │   ├── 004_attendance_discipline_grades.sql
-│   │   ├── 005_announcements.sql
-│   │   └── 013_sync_and_cleanup.sql
-│   └── functions/
-│       └── create-account/
-├── login.html
-├── unauthorized.html
-├── SETUP.sql                   # Script setup database (chạy 1 lần)
-└── README.md
+│   └── announcementService.js
+│
+├── database/          # SQL migration files
+│   ├── MASTER_DATABASE_SETUP.sql
+│   ├── FIX_ADD_DATE_OF_BIRTH.sql
+│   ├── ADD_NOTIFICATION_READ_STATUS.sql
+│   └── ...
+│
+├── supabase/         # Supabase config
+│   ├── migrations/   # Database migrations
+│   ├── functions/    # Edge functions
+│   └── schema.sql    # Database schema
+│
+├── docs/             # Documentation
+│   ├── README.md
+│   ├── AVATAR_FEATURE_GUIDE.md
+│   ├── CLEAN_URL_GUIDE.md
+│   └── ...
+│
+├── login.html        # Trang đăng nhập
+├── index.html        # Landing page
+├── unauthorized.html # 403 page
+├── vercel.json       # Vercel deployment config
+├── _redirects        # Netlify redirects
+└── .htaccess         # Apache clean URLs
+
 ```
 
-## 🚀 Cài đặt nhanh
+## 🚀 Tech Stack
 
-### 1. Cấu hình Supabase
+- **Frontend**: Vanilla HTML/CSS/JavaScript
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **Deployment**: Vercel / Netlify / Apache
+- **Design**: Custom design system với glassmorphism
 
-```bash
-# Tạo project tại supabase.com
-# Trong SQL Editor, chạy theo thứ tự:
+## ⚙️ Setup
 
-1. supabase/schema.sql
-2. supabase/migrations/001_seating_positions.sql
-3. supabase/migrations/002_ensure_class_and_groups.sql
-4. supabase/migrations/004_attendance_discipline_grades.sql
-5. supabase/migrations/005_announcements.sql
-6. supabase/migrations/013_sync_and_cleanup.sql
-7. SETUP.sql  ← Quan trọng! Chạy sau cùng
-```
+1. **Clone repository**
+   ```bash
+   git clone <repo-url>
+   cd tech-student
+   ```
 
-### 2. Cấu hình Frontend
+2. **Setup Supabase**
+   - Tạo project mới tại [supabase.com](https://supabase.com)
+   - Chạy các file SQL trong folder `database/` theo thứ tự:
+     1. `MASTER_DATABASE_SETUP.sql`
+     2. `FIX_ADD_DATE_OF_BIRTH.sql`
+     3. `ADD_NOTIFICATION_READ_STATUS.sql`
+     4. `SETUP_AVATAR_STORAGE.sql`
 
-Mở `assets/js/supabaseClient.js` và cập nhật:
+3. **Configure Supabase client**
+   - Copy Supabase URL và anon key
+   - Update trong `assets/js/supabaseClient.js`:
+   ```javascript
+   const SUPABASE_URL = 'your-project-url'
+   const SUPABASE_ANON_KEY = 'your-anon-key'
+   ```
 
-```javascript
-export const SUPABASE_URL = 'https://kkyiczvvagjkkcsyzanh.supabase.co';
-export const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
-```
+4. **Deploy**
+   - Vercel: `vercel deploy`
+   - Netlify: Drag & drop folder
+   - Apache: Upload + enable mod_rewrite
 
-### 3. Chạy Local Server
+## 📖 Features
 
-```bash
-cd tech-student
-python -m http.server 5500
-```
+### Admin
+- ✅ Dashboard với thống kê tổng quan
+- ✅ Quản lý danh sách học sinh (CRUD)
+- ✅ Quản lý tổ học tập (4 tổ)
+- ✅ Phân công chức vụ lớp
+- ✅ Ghi nhận vi phạm + trừ điểm nề nếp
+- ✅ Đăng thông báo lớp học
+- ✅ Quản lý tài khoản user
 
-Mở: `http://localhost:5500/login.html`
+### Student
+- ✅ Trang chủ với thống kê cá nhân
+- ✅ Xem danh sách bạn bè (avatar theo giới tính)
+- ✅ Xem thành viên tổ + chức vụ
+- ✅ Tra cứu điểm nề nếp cá nhân
+- ✅ Đọc thông báo (notification badge)
+- ✅ Cập nhật hồ sơ + avatar
 
-## 👥 Tài khoản
+## 🎨 Design System
 
-**Admin:**
-- Email: `admin@techstudent.local`
-- Password: `Admin@123`
+- **Colors**:
+  - Primary: `#4f6df5` (Blue)
+  - Success: `#22c9a8` (Mint)
+  - Warning: `#f5a524` (Amber)
+  - Danger: `#ef4444` (Red)
 
-**Học sinh (40 học sinh):**
-- Email: `01@techstudent.local` → `40@techstudent.local`
-- Password: `Student@123`
+- **Typography**: 
+  - Headings: Sora (700-800)
+  - Body: Inter (400-600)
 
-## 🎯 Phân tổ (theo sơ đồ lớp học chính xác)
+- **Sidebar**: 
+  - Fixed 56px width
+  - Icon only with tooltip on hover
+  - Active state = gradient fill
 
-**Layout sơ đồ:**
-- **5 hàng** từ xa bảng → gần bảng (hàng 5 → hàng 1)
-- **4 tổ** theo cột (Tổ 1 trái nhất → Tổ 4 phải nhất)
-- **40 học sinh** đúng vị trí như sơ đồ thực tế
+## 📝 Database Schema
 
-**Tổ 1 (10 HS - cột trái):** 04, 05, 08, 19, 20, 21, 23, 30, 35, 36  
-**Tổ 2 (10 HS - cột 2):** 13, 17, 22, 24, 27, 29, 31, 37, 39, 40  
-**Tổ 3 (10 HS - cột 3):** 01, 03, 07, 10, 11, 12, 16, 26, 34, 38  
-**Tổ 4 (10 HS - cột phải):** 02, 06, 09, 14, 15, 18, 25, 28, 32, 33
+Xem chi tiết trong `database/MASTER_DATABASE_SETUP.sql`
 
-## ✅ Tính năng
+Các bảng chính:
+- `profiles` - Thông tin user
+- `students` - Học sinh lớp 12A2
+- `groups` - 4 tổ học tập
+- `positions` - Chức vụ lớp
+- `student_positions` - Phân công chức vụ
+- `discipline_logs` - Lịch sử vi phạm
+- `announcements` - Thông báo
+- `announcement_reads` - Trạng thái đã đọc
 
-### Quản lý lớp học
-- ✅ Học sinh: CRUD, tìm kiếm, filter theo tổ
-- ✅ Tổ: Quản lý 4 tổ với màu sắc riêng
-- ✅ Chức vụ: Gán chức vụ, tooltip hiển thị tên học sinh
-- ✅ Sơ đồ chỗ ngồi: Drag & drop, phân theo tổ
+## 🔐 Security
 
-### Nề nếp
-- ✅ Cộng/trừ điểm học sinh
-- ✅ Lịch sử ghi nhận
-- ✅ Bảng điểm tất cả học sinh (như Excel)
-- ✅ Top học sinh xuất sắc
-- ✅ Danh sách cần chú ý
+- Row Level Security (RLS) enabled trên tất cả tables
+- Students chỉ xem được data của chính mình
+- Admins có full access
+- Auth dùng Supabase Auth
 
-### Quản lý hệ thống
-- ✅ Tài khoản: Quản lý tài khoản admin và học sinh
+## 📱 Responsive
 
-## 🔒 Phân quyền
+- Desktop: Full layout với sidebar
+- Mobile: Collapsible sidebar với hamburger menu
+- Tablet: Adaptive grid layout
 
-- **Admin**: Toàn quyền
-- **GVCN**: Quản lý lớp chủ nhiệm
-- **Tổ trưởng**: Xem học sinh cùng tổ
-- **Học sinh**: Xem dữ liệu bản thân
+## 🐛 Troubleshooting
 
-## 🔧 Troubleshooting
+Xem các file trong `docs/` folder:
+- `FIX_RLS_README.md` - Fix RLS recursion errors
+- `AVATAR_FEATURE_GUIDE.md` - Setup avatar upload
+- `CLEAN_URL_GUIDE.md` - Setup clean URLs
 
-### Lỗi: "Không tìm thấy học sinh"
+## 📄 License
 
-Chạy trong SQL Editor:
-```sql
--- Copy nội dung file QUICK_FIX.sql và chạy
-```
-
-### Lỗi: Tổ xuất hiện nhiều lần (duplicate groups)
-
-Chạy trong SQL Editor:
-```sql
--- Copy nội dung file FIX_DUPLICATE_GROUPS.sql và chạy
-```
-
-### Muốn reset toàn bộ database
-
-⚠️ **CẢNH BÁO:** Sẽ xóa TẤT CẢ dữ liệu!
-
-```sql
--- Copy nội dung file RESET_DATABASE.sql và chạy
--- Sau đó phải import lại 40 học sinh
-```
-
-### Lỗi khác
-
-Xem chi tiết trong: `TROUBLESHOOTING.md`
-
-## 📚 Tài liệu
-
-- `SYNC_GUIDE.md` - Hướng dẫn đồng bộ database ↔ frontend
-- `TROUBLESHOOTING.md` - Hướng dẫn fix các lỗi thường gặp
-- `QUICK_FIX.sql` - Script sửa lỗi nhanh
-
-## 🎨 Tech Stack
-
-- **Frontend**: Vanilla JavaScript (ES6 Modules)
-- **Database**: PostgreSQL (Supabase)
-- **Auth**: Supabase Auth (JWT)
-- **CSS**: Custom Design System
-- **Security**: Row Level Security (RLS)
-
-## 📝 Ghi chú
-
-- Database là Single Source of Truth
-- Tất cả query đều filter theo lớp 12A2
-- RLS đã được bật cho tất cả bảng
-- Không sử dụng framework để giữ code đơn giản
+MIT License - Free to use for educational purposes
 
 ---
 
-**Version**: 2.0  
-**Last Updated**: 2027  
-**Developer**: Tech-Student Team
+Made with ❤️ for Lớp 12A2

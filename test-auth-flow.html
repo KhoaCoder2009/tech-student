@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Auth Flow</title>
+<style>
+body{font-family:system-ui;padding:20px;max-width:600px;margin:0 auto;}
+.test{border:1px solid #ddd;padding:15px;margin:10px 0;border-radius:8px;}
+.pass{border-color:green;background:#f0fff0;}
+.fail{border-color:red;background:#fff0f0;}
+pre{background:#f5f5f5;padding:10px;border-radius:4px;overflow:auto;}
+button{padding:10px 20px;margin:5px;cursor:pointer;}
+</style>
+</head>
+<body>
+<h1>🔍 Test Auth Flow</h1>
+
+<div class="test" id="test-supabase">
+  <h3>1. Supabase Connection</h3>
+  <div id="result-supabase">Testing...</div>
+</div>
+
+<div class="test" id="test-auth-service">
+  <h3>2. Auth Service Import</h3>
+  <div id="result-auth-service">Testing...</div>
+</div>
+
+<div class="test" id="test-current-user">
+  <h3>3. Current User</h3>
+  <div id="result-current-user">Testing...</div>
+</div>
+
+<div class="test" id="test-login">
+  <h3>4. Manual Login Test</h3>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="testLogin()">Test Login</button>
+  <div id="result-login"></div>
+</div>
+
+<script type="module">
+import { supabase } from '/assets/js/supabaseClient.js';
+import { getCurrentUser, signIn, signOut } from '/services/authService.js';
+
+window.supabase = supabase;
+window.getCurrentUser = getCurrentUser;
+window.signIn = signIn;
+window.signOut = signOut;
+
+// Test 1: Supabase
+try {
+  if (supabase) {
+    document.getElementById('result-supabase').innerHTML = '✅ Supabase client loaded';
+    document.getElementById('test-supabase').classList.add('pass');
+  }
+} catch (error) {
+  document.getElementById('result-supabase').innerHTML = `❌ ${error.message}`;
+  document.getElementById('test-supabase').classList.add('fail');
+}
+
+// Test 2: Auth Service
+try {
+  if (getCurrentUser && signIn) {
+    document.getElementById('result-auth-service').innerHTML = '✅ Auth service loaded';
+    document.getElementById('test-auth-service').classList.add('pass');
+  }
+} catch (error) {
+  document.getElementById('result-auth-service').innerHTML = `❌ ${error.message}`;
+  document.getElementById('test-auth-service').classList.add('fail');
+}
+
+// Test 3: Current User
+try {
+  const user = await getCurrentUser();
+  if (user) {
+    document.getElementById('result-current-user').innerHTML = `
+      ✅ Logged in as: <strong>${user.full_name || user.email}</strong><br>
+      Role: <strong>${user.role}</strong><br>
+      <pre>${JSON.stringify(user, null, 2)}</pre>
+      <button onclick="window.signOut().then(() => location.reload())">Logout</button>
+    `;
+    document.getElementById('test-current-user').classList.add('pass');
+  } else {
+    document.getElementById('result-current-user').innerHTML = 'ℹ️ No user logged in';
+  }
+} catch (error) {
+  document.getElementById('result-current-user').innerHTML = `❌ ${error.message}`;
+  document.getElementById('test-current-user').classList.add('fail');
+}
+
+// Test 4: Manual Login
+window.testLogin = async function() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const resultDiv = document.getElementById('result-login');
+  
+  resultDiv.innerHTML = '⏳ Logging in...';
+  
+  try {
+    const result = await signIn(username, password);
+    document.getElementById('test-login').classList.add('pass');
+    resultDiv.innerHTML = `
+      ✅ Login successful!<br>
+      <pre>${JSON.stringify(result, null, 2)}</pre>
+      <br>
+      <strong>Redirect target:</strong> ${
+        result.user.role === 'admin' ? '/admin/dashboard.html' :
+        result.user.role === 'teacher' ? '/teacher/dashboard.html' :
+        '/student/home.html'
+      }
+      <br><br>
+      <button onclick="location.reload()">Reload Page</button>
+      <button onclick="location.href='${
+        result.user.role === 'admin' ? '/admin/dashboard.html' :
+        result.user.role === 'teacher' ? '/teacher/dashboard.html' :
+        '/student/home.html'
+      }'">Go to Dashboard</button>
+    `;
+  } catch (error) {
+    document.getElementById('test-login').classList.add('fail');
+    resultDiv.innerHTML = `❌ Login failed: ${error.message}<br><pre>${error.stack}</pre>`;
+  }
+};
+</script>
+</body>
+</html>

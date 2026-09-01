@@ -1,4 +1,5 @@
 import { supabase } from '../assets/js/supabaseClient.js';
+import { getCurrentUser } from './authService.js';
 
 function normalizeSchemaError(error, featureName) {
   const message = String(error?.message || '');
@@ -9,26 +10,53 @@ function normalizeSchemaError(error, featureName) {
 }
 
 /**
- * Get all announcements for a class (grouped by position)
+ * Get all announcements for a class
  */
 export async function listAnnouncements(classId, options = {}) {
-  const { position = null } = options;
-  
   let query = supabase
-    .from('announcements_with_author')
-    .select('*')
+    .from('announcements')
+    .select(`
+      *,
+      author:profiles!created_by(full_name, role)
+    `)
     .eq('class_id', classId)
     .order('is_pinned', { ascending: false })
     .order('created_at', { ascending: false });
 
-  if (position) {
-    query = query.eq('created_by_position', position);
-  }
-
   const { data, error } = await query;
 
   if (error) normalizeSchemaError(error, 'Thông báo');
-  return data || [];
+  
+  // Get author positions separately (student only)
+  const dataWithPositions = await Promise.all((data || []).map(async (a) => {
+    let position_label = 'Thành viên';
+    
+    // If author is student, get their position
+    if (a.author?.role === 'student') {
+      const { data: positions } = await supabase
+        .from('student_positions')
+        .select('positions(label)')
+        .eq('student_id', a.created_by)
+        .limit(1);
+      
+      if (positions && positions.length > 0) {
+        position_label = positions[0]?.positions?.label || 'Thành viên';
+      }
+    } else if (a.author?.role === 'teacher') {
+      position_label = 'GVCN';
+    } else if (a.author?.role === 'admin') {
+      position_label = 'Admin';
+    }
+    
+    return {
+      ...a,
+      author_name: a.author?.full_name || 'Không rõ',
+      author_role: a.author?.role || 'student',
+      position_label
+    };
+  }));
+  
+  return dataWithPositions;
 }
 
 /**
@@ -36,38 +64,52 @@ export async function listAnnouncements(classId, options = {}) {
  */
 export async function getAnnouncement(id) {
   const { data, error } = await supabase
-    .from('announcements_with_author')
-    .select('*')
+    .from('announcements')
+    .select(`
+      *,
+      author:profiles!created_by(full_name),
+      author_position:student_positions(positions(label))
+    `)
     .eq('id', id)
     .single();
 
   if (error) throw error;
-  return data;
+  
+  return {
+    ...data,
+    author_name: data.author?.full_name || 'Không rõ',
+    position_label: data.author_position?.[0]?.positions?.label || 'Thành viên'
+  };
 }
 
 /**
  * Check if user can post announcements
+ * Only GVCN, Lớp trưởng, Bí thư, Phó học tập, Phó lao động can post
  */
 export async function canPostAnnouncement(classId) {
+  const savedUser = await getCurrentUser();
+  if (savedUser?.role === 'admin' || savedUser?.role === 'teacher') return true;
+
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
 
-  const { data, error } = await supabase
-    .rpc('can_post_announcement', {
-      p_user_id: user.id,
-      p_class_id: classId
-    });
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
 
-  if (error) {
-    const message = String(error?.message || '');
-    if (message.includes('does not exist') || message.includes('function') || message.includes('relation')) {
-      throw new Error('Thông báo: chưa chạy SQL chức năng quyền đăng thông báo trong Supabase.');
-    }
-    console.error('Error checking permissions:', error);
-    return false;
-  }
-  
-  return data === true;
+  if (profile?.role === 'admin' || profile?.role === 'teacher') return true;
+
+  const { data: positions } = await supabase
+    .from('student_positions')
+    .select('positions(label)')
+    .eq('student_id', user.id);
+
+  if (!positions || positions.length === 0) return false;
+
+  const allowedPositions = ['Lớp trưởng', 'Bí thư', 'Phó học tập', 'Phó lao động'];
+  return positions.some(p => allowedPositions.includes(p.positions?.label));
 }
 
 /**
@@ -152,7 +194,7 @@ export async function togglePinAnnouncement(id, isPinned) {
 export async function getAnnouncementsByPosition(classId) {
   const announcements = await listAnnouncements(classId);
   
-  const positions = {
+  const grouped = {
     'GVCN': [],
     'Lớp trưởng': [],
     'Bí thư': [],
@@ -163,12 +205,12 @@ export async function getAnnouncementsByPosition(classId) {
   
   announcements.forEach(a => {
     const pos = a.position_label || 'Khác';
-    if (positions[pos]) {
-      positions[pos].push(a);
+    if (grouped[pos]) {
+      grouped[pos].push(a);
     } else {
-      positions['Khác'].push(a);
+      grouped['Khác'].push(a);
     }
   });
   
-  return positions;
+  return grouped;
 }

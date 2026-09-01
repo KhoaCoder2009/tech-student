@@ -11,7 +11,6 @@ export const ADMIN_NAV_ITEMS = [
   { group: 'Lớp học', page: 'students',    href: 'students.html',    icon: '👥', label: 'Học sinh' },
   { group: 'Lớp học', page: 'groups',      href: 'groups.html',      icon: '🗂️', label: 'Tổ' },
   { group: 'Lớp học', page: 'positions',   href: 'positions.html',   icon: '🎖️', label: 'Chức vụ' },
-  { group: 'Lớp học', page: 'seating',     href: 'seating.html',     icon: '🪑', label: 'Sơ đồ lớp' },
   { group: 'Quản lý', page: 'set-discipline-score', href: 'set-discipline-score.html', icon: '⭐', label: 'Điểm nề nếp' },
   { group: 'Quản lý', page: 'discipline',  href: 'discipline.html',  icon: '📝', label: 'Lịch sử nề nếp' },
   { group: 'Quản lý', page: 'announcements', href: 'announcements.html', icon: '📢', label: 'Thông báo' },
@@ -43,25 +42,17 @@ export const STUDENT_NAV_ITEMS = [
 const BOTTOM_NAV_PAGES = ['dashboard', 'students', 'groups', 'discipline'];
 
 function sidebarHtml(activePage, navItems = ADMIN_NAV_ITEMS){
-  let html = `
+  return `
     <div class="sidebar-scrim" id="scrim"></div>
     <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <span class="brand-text">TECH STUDENT</span>
+        </div>
+      </div>
       <nav class="nav-group">
-        ${navLink(navItems[0], activePage)}
-      </nav>`;
-
-  let currentGroup = null;
-  navItems.slice(1).forEach(item => {
-    if(item.group !== currentGroup){
-      if(currentGroup !== null) html += `</div>`;
-      html += `<div class="nav-group"><div class="nav-label">${item.group}</div>`;
-      currentGroup = item.group;
-    }
-    html += navLink(item, activePage);
-  });
-  html += `</div>`;
-
-  html += `
+        ${navItems.map(item => navLink(item, activePage)).join('')}
+      </nav>
       <div class="side-foot">
         <div class="side-user" id="side-user" style="cursor:pointer;" title="Đăng xuất">
           <div class="avatar" id="side-avatar">·</div>
@@ -70,30 +61,46 @@ function sidebarHtml(activePage, navItems = ADMIN_NAV_ITEMS){
             <div class="role" id="side-role"></div>
           </div>
         </div>
+        <div class="side-actions">
+          <button class="side-action-btn" id="side-theme-toggle" title="Đổi giao diện">
+            <span id="side-theme-icon">🌙</span>
+          </button>
+          <button class="side-action-btn" id="side-settings" title="Cài đặt">⚙️</button>
+        </div>
       </div>
     </aside>`;
-  return html;
 }
 function navLink(item, activePage){
-  return `<a class="nav-item ${item.page===activePage?'active':''}" href="${item.href}" data-page="${item.page}"><span class="ic">${item.icon}</span><span>${item.label}</span></a>`;
+  return `<a class="nav-item ${item.page===activePage?'active':''}" href="${item.href}" data-page="${item.page}" data-tooltip="${item.label}"><span class="ic">${item.icon}</span><span class="label">${item.label}</span></a>`;
 }
 
 function topbarHtml(title, sub){
   return `
-    <div class="topbar">
+    <header class="topbar">
       <button class="hamburger" id="hamburger">☰</button>
-      <div>
+      <div class="topbar-left">
         <h1 id="page-title">${title}</h1>
         <div class="sub" id="page-sub">${sub}</div>
       </div>
       <div class="topbar-right">
         <button class="icon-btn" id="btn-notifications" title="Thông báo">
-          🔔
+          <span>🔔</span>
           <span class="dot-badge" id="notif-badge" style="display:none;"></span>
         </button>
-        <button class="icon-btn" id="btn-settings" title="Cài đặt">⚙️</button>
+        <div class="side-user" id="btn-profile">
+          <div class="avatar">👨‍💼</div>
+          <div>
+            <div class="name" id="user-name">Admin</div>
+            <div class="role">Quản trị viên</div>
+          </div>
+        </div>
       </div>
-    </div>`;
+      <div class="dropdown-menu" id="settings-menu" style="display:none;position:absolute;top:100%;right:20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-md);box-shadow:var(--shadow-md);padding:8px;min-width:200px;z-index:50;">
+        <a href="profile.html" class="dropdown-item" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">👤 Hồ sơ cá nhân</a>
+        <a href="change-password.html" class="dropdown-item" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🔒 Đổi mật khẩu</a>
+        <a href="#" class="dropdown-item" id="logout-link" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🚪 Đăng xuất</a>
+      </div>
+    </header>`;
 }
 
 function bottomNavHtml(activePage){
@@ -125,13 +132,52 @@ export async function initLayout({ page, title, sub, allowedRoles = ['admin'], n
   document.getElementById('hamburger').addEventListener('click', () => { sidebar.classList.add('open'); scrim.classList.add('show'); });
   scrim.addEventListener('click', () => { sidebar.classList.remove('open'); scrim.classList.remove('show'); });
 
+  // Sidebar theme toggle and settings
+  const sideThemeToggle = document.getElementById('side-theme-toggle');
+  const sideThemeIcon = document.getElementById('side-theme-icon');
+  const sideSettings = document.getElementById('side-settings');
+  
+  function updateThemeIcon() {
+    const isDark = document.body.classList.contains('dark-mode');
+    if (sideThemeIcon) sideThemeIcon.textContent = isDark ? '☀️' : '🌙';
+  }
+  
+  sideThemeToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDarkMode();
+    updateThemeIcon();
+  });
+  
+  sideSettings?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showSettingsMenu();
+  });
+  
+  updateThemeIcon(); // Set initial icon
+
+  const btnSettings = document.getElementById('btn-settings');
+  const btnProfile = document.getElementById('btn-profile');
+  const settingsMenu = document.getElementById('settings-menu');
+
+  const toggleSettings = (e) => {
+    e.stopPropagation();
+    const isVisible = settingsMenu.style.display === 'block';
+    settingsMenu.style.display = isVisible ? 'none' : 'block';
+  };
+  btnProfile?.addEventListener('click', toggleSettings);
+  document.addEventListener('click', () => { settingsMenu.style.display = 'none'; });
+
+  document.getElementById('logout-link')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const ok = await confirmModal({ title: 'Đăng xuất khỏi Tech-Student?', desc: 'Bạn sẽ cần đăng nhập lại để tiếp tục sử dụng.', confirmText: 'Đăng xuất', icon: '🚪' });
+    if(!ok) return;
+    await signOut();
+    window.location.href = '../login.html';
+  });
+
   // Topbar buttons
   document.getElementById('btn-notifications')?.addEventListener('click', () => {
     window.location.href = 'announcements.html';
-  });
-
-  document.getElementById('btn-settings')?.addEventListener('click', () => {
-    showSettingsMenu();
   });
 
   // ---- AUTH GUARD ----

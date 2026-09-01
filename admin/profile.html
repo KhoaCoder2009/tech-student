@@ -172,21 +172,40 @@ async function loadProfile() {
     if (profile.role === 'student') {
       const { data: student, error: studentError } = await supabase
         .from('students')
-        .select(`
-          student_code,
-          class:classes(name),
-          group:groups(name),
-          position:student_positions(position:positions(label))
-        `)
+        .select('student_code, class_id, group_id')
         .eq('id', authUser.id)
-        .single();
+        .maybeSingle();
 
       if (!studentError && student) {
+        const { data: classRow } = await supabase
+          .from('classes')
+          .select('name')
+          .eq('id', student.class_id)
+          .maybeSingle();
+
+        const { data: groupRow } = await supabase
+          .from('groups')
+          .select('name')
+          .eq('id', student.group_id)
+          .maybeSingle();
+
+        const { data: studentPositions } = await supabase
+          .from('student_positions')
+          .select('position_id')
+          .eq('student_id', authUser.id)
+          .limit(10);
+
+        const positionIds = [...new Set((studentPositions || []).map(item => item.position_id).filter(Boolean))];
+        const { data: positions } = await supabase
+          .from('positions')
+          .select('id, label')
+          .in('id', positionIds.length ? positionIds : ['00000000-0000-0000-0000-000000000000']);
+
         $('#student-info').style.display = 'block';
         $('#student-code').textContent = student.student_code || '—';
-        $('#student-class').textContent = student.class?.name || '—';
-        $('#student-group').textContent = student.group?.name || '—';
-        $('#student-position').textContent = student.position?.position?.label || 'Thành viên';
+        $('#student-class').textContent = classRow?.name || '—';
+        $('#student-group').textContent = groupRow?.name || '—';
+        $('#student-position').textContent = positions?.[0]?.label || 'Thành viên';
       }
     }
 

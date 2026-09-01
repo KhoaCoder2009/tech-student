@@ -147,7 +147,7 @@ body{background:var(--bg);}
 </div>
 
 <script type="module">
-import { signIn, getCurrentUser } from './services/authService.js';
+import { signIn, getCurrentUser } from '/services/authService.js';
 
 const $=(s,r=document)=>r.querySelector(s);
 
@@ -169,15 +169,29 @@ function setLoading(on){ btnSubmit.classList.toggle('loading', on); btnSubmit.di
 function showSuccess(user){
   $('#login-block').style.display = 'none';
   $('#success-block').classList.add('show');
-  $('#success-sub').textContent = `Xin chào ${user.full_name.split(' ').slice(-1)[0]} 👋 — vai trò: ${user.roleLabel}.`;
-  $('#role-preview').innerHTML = `<div class="rp-top"><div class="av">${(user.full_name||'?').trim().slice(-1).toUpperCase()}</div><div><div class="nm">${user.full_name}</div><div class="rl">${user.roleLabel}</div></div></div>`;
+  
+  const firstName = user.full_name ? user.full_name.split(' ').slice(-1)[0] : 'bạn';
+  const displayName = user.full_name || user.email || 'Người dùng';
+  
+  $('#success-sub').textContent = `Xin chào ${firstName} 👋 — vai trò: ${user.roleLabel || 'Tài khoản'}.`;
+  $('#role-preview').innerHTML = `<div class="rp-top"><div class="av">${displayName.trim().charAt(0).toUpperCase()}</div><div><div class="nm">${displayName}</div><div class="rl">${user.roleLabel || 'Tài khoản'}</div></div></div>`;
 
   const target = {
-    admin: 'admin/dashboard.html',
-    teacher: 'teacher/dashboard.html',
-    student: 'student/dashboard.html'
+    admin: '/admin/dashboard.html',
+    teacher: '/teacher/dashboard.html',
+    student: '/student/home.html'
   }[user.role];
+  
   $('#pending-note').style.display = target ? 'none' : 'block';
+  
+  if (target) {
+    // Auto redirect after 1.5 seconds
+    $('#btn-continue').textContent = 'Đang chuyển trang...';
+    setTimeout(() => {
+      window.location.href = target;
+    }, 1500);
+  }
+  
   $('#btn-continue').onclick = () => { if(target) window.location.href = target; };
 }
 
@@ -215,13 +229,20 @@ $('#login-form').addEventListener('submit', async e => {
     const result = await signIn(normalized, password);
     const user = result.user || { full_name: normalized, role: 'student', roleLabel: 'Học sinh' };
     showSuccess(user);
-    $('#success-sub').textContent = `Đăng nhập thành công với tài khoản ${result.email || normalized}.`;
-    $('#role-preview').innerHTML = `<div class="rp-top"><div class="av">${(user.full_name || normalized).trim().charAt(0).toUpperCase()}</div><div><div class="nm">${user.full_name || result.email || normalized}</div><div class="rl">${user.roleLabel || 'Tài khoản'}</div></div></div>`;
   }catch(err){
-    const message = err.message || 'Đăng nhập thất bại.';
-    if(message.toLowerCase().includes('mật khẩu') || message.toLowerCase().includes('password')){
+    console.error('Login error:', err);
+    const message = err.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
+    
+    // Check for common error types
+    if(message.includes('Invalid login credentials') || message.includes('invalid credentials')){
+      wrapPassword.classList.add('err');
+      $('#err-password').textContent = 'Sai tài khoản hoặc mật khẩu.';
+    } else if(message.toLowerCase().includes('mật khẩu') || message.toLowerCase().includes('password')){
       wrapPassword.classList.add('err');
       $('#err-password').textContent = message;
+    } else if(message.includes('Email not confirmed')){
+      wrapUser.classList.add('err');
+      $('#err-user').textContent = 'Tài khoản chưa được xác nhận email.';
     } else {
       wrapUser.classList.add('err');
       $('#err-user').textContent = message;
@@ -234,7 +255,20 @@ $('#login-form').addEventListener('submit', async e => {
 
 (async () => {
   const user = await getCurrentUser();
-  if(user) showSuccess(user);
+  if(user) {
+    // User already logged in, redirect immediately
+    const target = {
+      admin: '/admin/dashboard.html',
+      teacher: '/teacher/dashboard.html',
+      student: '/student/home.html'
+    }[user.role];
+    
+    if (target) {
+      window.location.href = target;
+    } else {
+      showSuccess(user);
+    }
+  }
 })();
 </script>
 </body>

@@ -1,58 +1,38 @@
 /* ============================================================
    STUDENT LAYOUT — Layout cho học sinh
    ============================================================ */
+import { supabase } from './supabaseClient.js';
 import { getCurrentUser, signOut } from '../../services/authService.js';
 import { confirmModal } from './ui.js';
 
 export const STUDENT_NAV_ITEMS = [
-  { group: null, page: 'dashboard', href: 'dashboard.html', icon: '🏠', label: 'Tổng quan' },
-  { group: 'Học tập', page: 'schedule', href: 'schedule.html', icon: '🗓️', label: 'Thời khóa biểu' },
-  { group: 'Lớp & Tổ', page: 'classmates', href: 'classmates.html', icon: '👥', label: 'Bạn cùng lớp' },
-  { group: 'Lớp & Tổ', page: 'mygroup', href: 'mygroup.html', icon: '🗂️', label: 'Tổ của tôi' },
-  { group: 'Nề nếp', page: 'discipline', href: 'discipline.html', icon: '⭐', label: 'Điểm nề nếp' },
-  { group: 'Khác', page: 'announcements', href: '../admin/announcements.html', icon: '📢', label: 'Thông báo' },
+  { page: 'home', href: '/student/home.html', icon: '🏠', label: 'Trang chủ' },
+  { page: 'friends', href: '/student/friends.html', icon: '👥', label: 'Bạn bè' },
+  { page: 'mygroup', href: '/student/mygroup.html', icon: '🗂️', label: 'Tổ của tôi' },
+  { page: 'discipline', href: '/student/discipline.html', icon: '⭐', label: 'Điểm nề nếp' },
+  { page: 'announcements', href: '/student/announcements.html', icon: '📢', label: 'Thông báo' },
 ];
 
 function sidebarHtml(activePage, navItems = STUDENT_NAV_ITEMS) {
-  let html = `
+  return `
     <div class="sidebar-scrim" id="scrim"></div>
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <div class="brand-mark" style="background:linear-gradient(135deg,#4f6df5,#22c9a8);">
-          <span style="font-size:20px;font-weight:800;color:#fff;">TS</span>
+        <div class="brand-mark">
+          <img src="../assets/images/logo.png" alt="Tech-Student" onerror="this.parentElement.innerHTML='<span style=&quot;font-size:20px;font-weight:800;color:#4f6df5;&quot;>TS</span>'">
         </div>
       </div>
       <nav class="nav-group">
-        ${navLink(navItems[0], activePage)}
+        ${navItems.map(item => navLink(item, activePage)).join('')}
       </nav>
-  `;
-
-  const grouped = {};
-  navItems.slice(1).forEach(item => {
-    if (!item.group) return;
-    if (!grouped[item.group]) grouped[item.group] = [];
-    grouped[item.group].push(item);
-  });
-
-  for (const [groupName, items] of Object.entries(grouped)) {
-    html += `
-      <nav class="nav-group">
-        <div class="nav-label">${groupName}</div>
-        ${items.map(item => navLink(item, activePage)).join('')}
-      </nav>
-    `;
-  }
-
-  html += `
     </aside>
   `;
-  return html;
 }
 
 function navLink(item, activePage) {
   const isActive = item.page === activePage;
   return `
-    <a href="${item.href}" class="nav-item${isActive ? ' active' : ''}">
+    <a href="${item.href}" class="nav-item${isActive ? ' active' : ''}" data-tooltip="${item.label}">
       <span class="ic">${item.icon}</span>
       <span class="label">${item.label}</span>
     </a>
@@ -62,29 +42,28 @@ function navLink(item, activePage) {
 function topbarHtml(title, subtitle) {
   return `
     <header class="topbar">
-      <div class="topbar-left">
-        <button class="menu-toggle" id="menu-toggle">☰</button>
-        <div class="breadcrumb">
-          <span class="bc-title">${title}</span>
-          ${subtitle ? `<span class="bc-sub">${subtitle}</span>` : ''}
-        </div>
-      </div>
+      <button class="hamburger" id="menu-toggle" style="display:none;">☰</button>
+      <h1>${title}</h1>
+      ${subtitle ? `<div class="sub">${subtitle}</div>` : ''}
       <div class="topbar-right">
-        <button class="top-btn" id="btn-notif" title="Thông báo">
-          <span class="icon">🔔</span>
-          <span class="badge">5</span>
-        </button>
-        <button class="top-btn" id="btn-settings" title="Cài đặt">⚙️</button>
-        <button class="top-btn" id="btn-profile">
-          <span class="avatar">👤</span>
-          <span class="uname" id="user-name">Học sinh</span>
+        <div class="side-user" id="btn-profile">
+          <div class="avatar">👤</div>
+          <div>
+            <div class="name" id="user-name">Học sinh</div>
+            <div class="role">Học sinh</div>
+          </div>
+        </div>
+        <button class="icon-btn" id="btn-settings" title="Cài đặt">⚙️</button>
+        <button class="icon-btn" id="btn-notif" title="Thông báo">
+          <span>🔔</span>
+          <div class="dot-badge"></div>
         </button>
       </div>
-      <div class="dropdown-menu" id="settings-menu">
-        <a href="../admin/profile.html" class="dropdown-item">👤 Hồ sơ cá nhân</a>
-        <a href="#" class="dropdown-item" id="toggle-dark-mode">🌙 Chế độ tối</a>
-        <a href="../admin/change-password.html" class="dropdown-item">🔒 Đổi mật khẩu</a>
-        <a href="#" class="dropdown-item" id="btn-logout">🚪 Đăng xuất</a>
+      <div class="dropdown-menu" id="settings-menu" style="display:none;position:absolute;top:100%;right:20px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-md);box-shadow:var(--shadow-md);padding:8px;min-width:200px;z-index:50;">
+        <a href="/student/profile.html" class="dropdown-item" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">👤 Hồ sơ cá nhân</a>
+        <a href="#" class="dropdown-item" id="toggle-dark-mode" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🌙 Chế độ tối</a>
+        <a href="/student/change-password.html" class="dropdown-item" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🔒 Đổi mật khẩu</a>
+        <a href="#" class="dropdown-item" id="btn-logout" style="display:block;padding:8px 12px;color:var(--ink-900);text-decoration:none;border-radius:6px;transition:all 0.2s;">🚪 Đăng xuất</a>
       </div>
     </header>
   `;
@@ -99,12 +78,18 @@ export async function initStudentLayout(opts = {}) {
     return null;
   }
 
+  // Role guard: only students can access student pages
+  if (user.role !== 'student') {
+    window.location.href = '../unauthorized.html';
+    return null;
+  }
+
   document.getElementById('sidebar-slot').innerHTML = sidebarHtml(page);
   document.getElementById('topbar-slot').innerHTML = topbarHtml(title, sub);
 
   const userName = document.getElementById('user-name');
-  if (userName && user.profile?.full_name) {
-    userName.textContent = user.profile.full_name;
+  if (userName && user.full_name) {
+    userName.textContent = user.full_name;
   }
 
   // Menu toggle
@@ -122,12 +107,32 @@ export async function initStudentLayout(opts = {}) {
 
   // Settings dropdown
   const btnSettings = document.getElementById('btn-settings');
+  const btnProfile = document.getElementById('btn-profile');
   const settingsMenu = document.getElementById('settings-menu');
-  btnSettings?.addEventListener('click', (e) => {
+  
+  const toggleSettings = (e) => {
     e.stopPropagation();
-    settingsMenu.classList.toggle('show');
+    const isVisible = settingsMenu.style.display === 'block';
+    settingsMenu.style.display = isVisible ? 'none' : 'block';
+  };
+  
+  btnSettings?.addEventListener('click', toggleSettings);
+  btnProfile?.addEventListener('click', toggleSettings);
+  
+  document.addEventListener('click', () => {
+    settingsMenu.style.display = 'none';
   });
-  document.addEventListener('click', () => settingsMenu.classList.remove('show'));
+
+  // Hover effects for dropdown items
+  const dropdownItems = document.querySelectorAll('.dropdown-item');
+  dropdownItems.forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      item.style.background = 'var(--bg)';
+    });
+    item.addEventListener('mouseleave', () => {
+      item.style.background = 'transparent';
+    });
+  });
 
   // Dark mode toggle
   const btnDarkMode = document.getElementById('toggle-dark-mode');
@@ -143,8 +148,11 @@ export async function initStudentLayout(opts = {}) {
   // Notification button
   const btnNotif = document.getElementById('btn-notif');
   btnNotif?.addEventListener('click', () => {
-    window.location.href = '../admin/announcements.html';
+    window.location.href = '/student/announcements.html';
   });
+
+  // Load unread count
+  loadUnreadCount();
 
   // Logout
   const btnLogout = document.getElementById('btn-logout');
@@ -158,4 +166,53 @@ export async function initStudentLayout(opts = {}) {
   });
 
   return user;
+}
+
+async function loadUnreadCount() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Get student's class
+    const { data: student } = await supabase
+      .from('students')
+      .select('class_id')
+      .eq('id', user.id)
+      .single();
+
+    if (!student?.class_id) return;
+
+    // Count unread announcements
+    const { data: announcements } = await supabase
+      .from('announcements')
+      .select('id')
+      .eq('class_id', student.class_id);
+
+    if (!announcements) return;
+
+    const announcementIds = announcements.map(a => a.id);
+
+    // Get read status
+    const { data: reads } = await supabase
+      .from('announcement_reads')
+      .select('announcement_id')
+      .eq('user_id', user.id)
+      .in('announcement_id', announcementIds);
+
+    const readIds = new Set(reads?.map(r => r.announcement_id) || []);
+    const unreadCount = announcements.filter(a => !readIds.has(a.id)).length;
+
+    // Update badge
+    const badge = document.querySelector('.dot-badge');
+    if (badge) {
+      if (unreadCount > 0) {
+        badge.style.display = 'block';
+        badge.style.background = '#ef4444';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  } catch (error) {
+    console.error('Load unread count error:', error);
+  }
 }

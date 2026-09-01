@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Trang chủ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+<style>
+.welcome-section{
+  background:linear-gradient(135deg, #4f6df5, #22c9a8);
+  color:#fff;
+  padding:60px 40px;
+  border-radius:20px;
+  text-align:center;
+  margin-bottom:40px;
+  position:relative;
+  overflow:hidden;
+}
+.welcome-section::before{
+  content:'🎓';
+  position:absolute;
+  font-size:200px;
+  opacity:0.1;
+  top:-50px;
+  right:-30px;
+}
+.welcome-title{
+  font-size:48px;
+  font-weight:800;
+  margin-bottom:16px;
+  position:relative;
+  z-index:1;
+}
+.welcome-subtitle{
+  font-size:20px;
+  opacity:0.95;
+  position:relative;
+  z-index:1;
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:24px;
+  margin-bottom:40px;
+}
+
+.stat-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:28px;
+  text-align:center;
+  transition:all 0.3s;
+  position:relative;
+  overflow:hidden;
+}
+
+.stat-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 12px 32px rgba(79,109,245,0.15);
+}
+
+.stat-icon{
+  font-size:48px;
+  margin-bottom:16px;
+  display:block;
+}
+
+.stat-value{
+  font-size:36px;
+  font-weight:800;
+  color:var(--ink-900);
+  margin-bottom:8px;
+}
+
+.stat-label{
+  font-size:14px;
+  color:var(--ink-600);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+
+.quick-links{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+  gap:20px;
+}
+
+.link-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:32px;
+  text-decoration:none;
+  transition:all 0.3s;
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+
+.link-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 24px rgba(79,109,245,0.12);
+  border-color:#4f6df5;
+}
+
+.link-icon{
+  font-size:48px;
+  flex-shrink:0;
+}
+
+.link-content{
+  flex:1;
+}
+
+.link-title{
+  font-size:20px;
+  font-weight:700;
+  color:var(--ink-900);
+  margin-bottom:4px;
+}
+
+.link-desc{
+  font-size:14px;
+  color:var(--ink-600);
+}
+
+body.dark-mode .stat-card,
+body.dark-mode .link-card{
+  background:var(--navy-900);
+  border-color:var(--line);
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content">
+
+      <div class="welcome-section">
+        <h1 class="welcome-title">Chào mừng, <span id="student-name">Học sinh</span>!</h1>
+        <p class="welcome-subtitle">Lớp 12A2 · Năm học 2024-2027</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-icon">⭐</span>
+          <div class="stat-value" id="stat-discipline">--</div>
+          <div class="stat-label">Điểm nề nếp</div>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">🗂️</span>
+          <div class="stat-value" id="stat-group">--</div>
+          <div class="stat-label">Tổ của bạn</div>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-icon">👥</span>
+          <div class="stat-value">40</div>
+          <div class="stat-label">Học sinh</div>
+        </div>
+      </div>
+
+      <h2 style="font-size:24px;font-weight:700;margin-bottom:20px;color:var(--ink-900);">Truy cập nhanh</h2>
+      
+      <div class="quick-links">
+        <a href="/student/friends.html" class="link-card">
+          <div class="link-icon">👥</div>
+          <div class="link-content">
+            <div class="link-title">Bạn bè</div>
+            <div class="link-desc">Danh sách bạn cùng lớp</div>
+          </div>
+        </a>
+
+        <a href="/student/mygroup.html" class="link-card">
+          <div class="link-icon">🗂️</div>
+          <div class="link-content">
+            <div class="link-title">Tổ của tôi</div>
+            <div class="link-desc">Thành viên tổ & chức vụ</div>
+          </div>
+        </a>
+
+        <a href="/student/discipline.html" class="link-card">
+          <div class="link-icon">⭐</div>
+          <div class="link-content">
+            <div class="link-title">Điểm nề nếp</div>
+            <div class="link-desc">Lịch sử vi phạm</div>
+          </div>
+        </a>
+
+        <a href="/student/announcements.html" class="link-card">
+          <div class="link-icon">📢</div>
+          <div class="link-content">
+            <div class="link-title">Thông báo</div>
+            <div class="link-desc">Tin tức lớp học</div>
+          </div>
+        </a>
+
+        <a href="/student/profile.html" class="link-card">
+          <div class="link-icon">👤</div>
+          <div class="link-content">
+            <div class="link-title">Hồ sơ</div>
+            <div class="link-desc">Thông tin cá nhân</div>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initStudentLayout } from '../assets/js/studentLayout.js';
+import { supabase } from '../assets/js/supabaseClient.js';
+import { getCurrentStudent } from '../services/studentService.js';
+
+async function loadStats() {
+  try {
+    const student = await getCurrentStudent();
+    
+    if (!student) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const { data: group } = await supabase
+      .from('groups')
+      .select('name')
+      .eq('id', student.group_id)
+      .maybeSingle();
+
+    document.getElementById('student-name').textContent = profile?.full_name || 'Học sinh';
+    document.getElementById('stat-discipline').textContent = student.score || 100;
+    document.getElementById('stat-group').textContent = group?.name || '--';
+  } catch (error) {
+    console.error('Load stats error:', error);
+  }
+}
+
+(async () => {
+  await initStudentLayout({ 
+    page: 'home', 
+    title: 'Trang chủ', 
+    sub: 'Dashboard học sinh'
+  });
+  await loadStats();
+})();
+</script>
+</body>
+</html>

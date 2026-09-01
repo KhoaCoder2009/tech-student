@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Thông báo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+<style>
+.announcements-header{
+  background:linear-gradient(135deg,#4f6df5 0%,#22c9a8 100%);
+  padding:32px;
+  border-radius:var(--radius-lg);
+  color:#fff;
+  margin-bottom:32px;
+}
+.announcements-title{font-size:28px;font-weight:800;margin-bottom:8px;}
+.announcements-subtitle{font-size:15px;opacity:0.95;}
+
+.announcement-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:24px;
+  margin-bottom:20px;
+  transition:all 0.3s ease;
+  cursor:pointer;
+}
+.announcement-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(79,109,245,0.15);
+  border-color:#4f6df5;
+}
+.announcement-card.pinned{
+  border-left:4px solid #f59e0b;
+  background:linear-gradient(135deg,var(--card) 0%,#fffbeb 100%);
+}
+
+.announcement-meta{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+}
+.author-badge{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 12px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+.badge-admin{background:#ede9fe;color:#8b5cf6;}
+.badge-teacher{background:#e3f9f4;color:#22c9a8;}
+.badge-student{background:#f3f4f6;color:#6b7280;}
+
+.pin-icon{
+  font-size:18px;
+  margin-left:auto;
+}
+.announcement-time{
+  font-size:13px;
+  color:var(--ink-500);
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.announcement-time::before{content:'🕐';}
+
+.announcement-title{
+  font-size:20px;
+  font-weight:700;
+  color:var(--ink-900);
+  margin-bottom:12px;
+  line-height:1.4;
+}
+.announcement-content{
+  font-size:15px;
+  color:var(--ink-600);
+  line-height:1.8;
+  white-space:pre-wrap;
+}
+
+.empty-state{
+  text-align:center;
+  padding:80px 20px;
+  color:var(--ink-500);
+}
+.empty-icon{font-size:64px;margin-bottom:16px;opacity:0.5;}
+.empty-text{font-size:16px;color:var(--ink-600);}
+
+.loading-placeholder{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:24px;
+  margin-bottom:20px;
+}
+.skeleton{
+  background:linear-gradient(90deg,var(--line) 0%,#f5f7fb 50%,var(--line) 100%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+  border-radius:8px;
+  height:20px;
+  margin-bottom:12px;
+}
+@keyframes shimmer{
+  0%{background-position:200% 0;}
+  100%{background-position:-200% 0;}
+}
+
+/* Dark mode */
+body.dark-mode .announcement-card{
+  background:var(--navy-900);
+  border-color:var(--line);
+}
+body.dark-mode .announcement-card:hover{
+  background:var(--navy-800);
+  border-color:#4f6df5;
+}
+body.dark-mode .announcement-card.pinned{
+  background:linear-gradient(135deg,var(--navy-900) 0%,#2d2410 100%);
+}
+
+/* Responsive */
+@media(max-width:768px){
+  .announcements-header{padding:24px;margin-bottom:24px;}
+  .announcements-title{font-size:22px;}
+  .announcement-card{padding:20px;}
+  .announcement-title{font-size:18px;}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+
+      <div class="announcements-header">
+        <h1 class="announcements-title">📢 Thông báo lớp học</h1>
+        <p class="announcements-subtitle">Cập nhật tin tức và thông báo quan trọng từ GVCN và Ban cán sự lớp</p>
+      </div>
+
+      <div id="announcements-list">
+        <div class="loading-placeholder">
+          <div class="skeleton" style="width:30%;"></div>
+          <div class="skeleton" style="width:100%;"></div>
+          <div class="skeleton" style="width:80%;"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initStudentLayout } from '../assets/js/studentLayout.js';
+import { supabase } from '../assets/js/supabaseClient.js';
+
+const $ = s => document.querySelector(s);
+
+async function loadAnnouncements() {
+  const announcementsList = $('#announcements-list');
+  
+  try {
+    // Get class ID
+    const { data: classData, error: classError } = await supabase
+      .from('classes')
+      .select('id')
+      .eq('name', '12A2')
+      .single();
+
+    if (classError) throw new Error('Không tìm thấy lớp học');
+
+    // Get announcements
+    const { data: announcements, error: annError } = await supabase
+      .from('announcements')
+      .select('id, title, content, created_at, created_by, is_pinned')
+      .eq('class_id', classData.id)
+      .order('is_pinned', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(50);
+    
+    if (annError) throw new Error('Lỗi tải thông báo');
+
+    if (!announcements || announcements.length === 0) {
+      announcementsList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div class="empty-text">Chưa có thông báo nào</div>
+        </div>
+      `;
+      return;
+    }
+
+    // Get author information
+    const authorIds = [...new Set(announcements.map(a => a.created_by))];
+    const { data: authors } = await supabase
+      .from('profiles')
+      .select('id, full_name, role')
+      .in('id', authorIds);
+    
+    const authorMap = {};
+    authors?.forEach(a => {
+      authorMap[a.id] = a;
+    });
+
+    // Render announcements
+    announcementsList.innerHTML = announcements.map(ann => {
+      const author = authorMap[ann.created_by];
+      const timeAgo = getTimeAgo(new Date(ann.created_at));
+      
+      let badgeClass = 'badge-student';
+      let badgeText = '👤 Học sinh';
+      let badgeIcon = '👤';
+      
+      if (author) {
+        if (author.role === 'admin') {
+          badgeClass = 'badge-admin';
+          badgeText = 'Admin';
+          badgeIcon = '👨‍💼';
+        } else if (author.role === 'teacher') {
+          badgeClass = 'badge-teacher';
+          badgeText = 'GVCN';
+          badgeIcon = '👨‍🏫';
+        } else {
+          badgeText = author.full_name || 'Học sinh';
+        }
+      }
+      
+      return `
+        <div class="announcement-card ${ann.is_pinned ? 'pinned' : ''}" data-id="${ann.id}">
+          <div class="announcement-meta">
+            <div class="author-badge ${badgeClass}">
+              <span>${badgeIcon}</span>
+              <span>${badgeText}</span>
+            </div>
+            <div class="announcement-time">${timeAgo}</div>
+            ${ann.is_pinned ? '<div class="pin-icon">📌</div>' : ''}
+          </div>
+          <h3 class="announcement-title">${escapeHtml(ann.title)}</h3>
+          <div class="announcement-content">${escapeHtml(ann.content)}</div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error('Load announcements error:', error);
+    announcementsList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-text">Lỗi tải thông báo: ${error.message}</div>
+      </div>
+    `;
+  }
+}
+
+function getTimeAgo(date) {
+  if (!date || isNaN(date.getTime())) return 'Không rõ';
+  
+  const seconds = Math.floor((new Date() - date) / 1000);
+  
+  if (seconds < 60) return 'Vừa xong';
+  if (seconds < 3600) return Math.floor(seconds / 60) + ' phút trước';
+  if (seconds < 86400) return Math.floor(seconds / 3600) + ' giờ trước';
+  if (seconds < 604800) return Math.floor(seconds / 86400) + ' ngày trước';
+  
+  return date.toLocaleDateString('vi-VN', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric' 
+  });
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+(async () => {
+  const user = await initStudentLayout({ 
+    page: 'announcements', 
+    title: 'Thông báo', 
+    sub: 'Tin tức lớp học'
+  });
+  
+  if (!user) return;
+  
+  await loadAnnouncements();
+})();
+</script>
+</body>
+</html>

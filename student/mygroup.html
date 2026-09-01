@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Tổ của tôi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+<style>
+.group-header{
+  background:linear-gradient(135deg,#4f6df5 0%,#22c9a8 100%);
+  padding:40px;
+  border-radius:var(--radius-lg);
+  color:#fff;
+  margin-bottom:32px;
+  position:relative;
+  overflow:hidden;
+}
+.group-header::before{
+  content:'🗂️';
+  position:absolute;
+  font-size:200px;
+  opacity:0.1;
+  top:-50px;
+  right:-30px;
+}
+.group-title{font-size:32px;font-weight:800;margin-bottom:8px;position:relative;z-index:1;}
+.group-subtitle{font-size:16px;opacity:0.95;position:relative;z-index:1;}
+
+.group-stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:20px;
+  margin-bottom:32px;
+}
+
+.stat-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:24px;
+  text-align:center;
+  transition:all 0.3s ease;
+}
+.stat-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(79,109,245,0.12);
+}
+.stat-icon{
+  font-size:40px;
+  margin-bottom:12px;
+}
+.stat-value{
+  font-size:32px;
+  font-weight:900;
+  color:var(--ink-900);
+  margin-bottom:4px;
+}
+.stat-label{
+  font-size:13px;
+  color:var(--ink-600);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+
+.members-section{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:28px;
+}
+
+.section-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:24px;
+  padding-bottom:16px;
+  border-bottom:2px solid var(--line);
+}
+.section-title{
+  font-size:20px;
+  font-weight:700;
+  color:var(--ink-900);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.members-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:20px;
+}
+
+.member-card{
+  background:var(--bg);
+  border:2px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:20px;
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.member-card.is-me{
+  border-color:#4f6df5;
+  background:linear-gradient(135deg,var(--card) 0%,#f0f5ff 100%);
+}
+.member-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(79,109,245,0.15);
+}
+
+.me-badge{
+  position:absolute;
+  top:12px;
+  right:12px;
+  background:#4f6df5;
+  color:#fff;
+  padding:4px 10px;
+  border-radius:6px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+}
+
+.member-avatar{
+  width:60px;
+  height:60px;
+  margin:0 auto 16px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#4f6df5,#22c9a8);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  box-shadow:0 6px 20px rgba(79,109,245,0.25);
+}
+
+.member-name{
+  font-size:16px;
+  font-weight:700;
+  color:var(--ink-900);
+  text-align:center;
+  margin-bottom:4px;
+}
+.member-code{
+  font-size:12px;
+  color:var(--ink-500);
+  text-align:center;
+  margin-bottom:12px;
+}
+
+.member-badges{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:12px;
+}
+.badge{
+  padding:6px 12px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:600;
+  text-align:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+.badge-position{
+  background:#fef3c7;
+  color:#f59e0b;
+}
+.badge-score{
+  background:#ecfdf5;
+  color:#22c9a8;
+}
+.badge-score.low{
+  background:#fef2f2;
+  color:#ef4444;
+}
+
+.empty-state{
+  text-align:center;
+  padding:60px 20px;
+  color:var(--ink-500);
+}
+.empty-icon{font-size:64px;margin-bottom:16px;opacity:0.5;}
+.empty-text{font-size:16px;color:var(--ink-600);}
+
+/* Dark mode */
+body.dark-mode .stat-card,
+body.dark-mode .members-section{
+  background:var(--navy-900);
+  border-color:var(--line);
+}
+body.dark-mode .member-card{
+  background:var(--navy-800);
+  border-color:var(--line);
+}
+body.dark-mode .member-card.is-me{
+  background:linear-gradient(135deg,var(--navy-900) 0%,#1e3a8a 100%);
+  border-color:#4f6df5;
+}
+body.dark-mode .member-card:hover{
+  background:var(--navy-900);
+}
+
+/* Responsive */
+@media(max-width:768px){
+  .group-header{padding:28px 24px;}
+  .group-title{font-size:24px;}
+  .group-stats{grid-template-columns:1fr 1fr;}
+  .members-grid{grid-template-columns:1fr;}
+  .members-section{padding:20px;}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+
+      <div class="group-header" id="group-header">
+        <h1 class="group-title" id="group-name">Đang tải...</h1>
+        <p class="group-subtitle">Danh sách thành viên và chức vụ trong tổ</p>
+      </div>
+
+      <div class="group-stats">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-value" id="member-count">--</div>
+          <div class="stat-label">Thành viên</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-value" id="avg-score">--</div>
+          <div class="stat-label">Điểm TB</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">👑</div>
+          <div class="stat-value" id="leader-count">--</div>
+          <div class="stat-label">Cán bộ</div>
+        </div>
+      </div>
+
+      <div class="members-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>👨‍🎓</span>
+            <span>Danh sách thành viên</span>
+          </h2>
+        </div>
+
+        <div class="members-grid" id="members-grid">
+          <div class="empty-state">
+            <div class="empty-icon">🗂️</div>
+            <div class="empty-text">Đang tải danh sách thành viên...</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initStudentLayout } from '../assets/js/studentLayout.js';
+import { supabase } from '../assets/js/supabaseClient.js';
+import { getCurrentStudent } from '../services/studentService.js';
+
+const $ = s => document.querySelector(s);
+
+async function loadGroupData() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Get current student's group using service
+    const currentStudent = await getCurrentStudent();
+    
+    if (!currentStudent) {
+      throw new Error('Không tìm thấy thông tin học sinh');
+    }
+
+    if (!currentStudent.group_id) {
+      $('#members-grid').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div class="empty-text">Bạn chưa được phân vào tổ nào</div>
+        </div>
+      `;
+      return;
+    }
+
+    // Get group info
+    const { data: group, error: groupError } = await supabase
+      .from('groups')
+      .select('id, name, color')
+      .eq('id', currentStudent.group_id)
+      .single();
+
+    if (groupError || !group) {
+      throw new Error('Không tìm thấy thông tin tổ');
+    }
+
+    // Update header with group color
+    $('#group-name').textContent = group.name;
+    const groupHeader = $('#group-header');
+    groupHeader.style.background = `linear-gradient(135deg, ${group.color} 0%, #22c9a8 100%)`;
+
+    // Get all members in group
+    const { data: members, error: membersError } = await supabase
+      .from('students')
+      .select('id, student_code, discipline_score')
+      .eq('group_id', group.id)
+      .order('student_code');
+
+    if (membersError) throw membersError;
+
+    // Get profiles
+    const memberIds = members.map(m => m.id);
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', memberIds);
+
+    const profileMap = {};
+    profiles?.forEach(p => {
+      profileMap[p.id] = p.full_name;
+    });
+
+    const { data: positions } = await supabase
+      .from('student_positions')
+      .select('student_id, position_id')
+      .in('student_id', memberIds)
+      .eq('group_id', group.id);
+
+    const { data: positionCatalog } = await supabase
+      .from('positions')
+      .select('id, label')
+      .in('id', [...new Set((positions || []).map(p => p.position_id).filter(Boolean))]);
+
+    const positionLabelMap = Object.fromEntries((positionCatalog || []).map(pos => [pos.id, pos.label]));
+    const positionMap = {};
+    (positions || []).forEach(p => {
+      positionMap[p.student_id] = positionLabelMap[p.position_id] || null;
+    });
+
+    // Build members list
+    const membersList = members.map(member => ({
+      ...member,
+      full_name: profileMap[member.id] || 'Không rõ',
+      position: positionMap[member.id],
+      isMe: member.id === user.id
+    }));
+
+    // Calculate stats
+    const memberCount = membersList.length;
+    const avgScore = (membersList.reduce((sum, m) => sum + (m.discipline_score || 0), 0) / memberCount).toFixed(1);
+    const leaderCount = membersList.filter(m => m.position && m.position !== 'Thành viên').length;
+
+    $('#member-count').textContent = memberCount;
+    $('#avg-score').textContent = avgScore;
+    $('#leader-count').textContent = leaderCount;
+
+    // Render members
+    renderMembers(membersList, group.color);
+
+  } catch (error) {
+    console.error('Load group data error:', error);
+    $('#members-grid').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-text">Lỗi tải dữ liệu: ${error.message}</div>
+      </div>
+    `;
+  }
+}
+
+function renderMembers(members, groupColor) {
+  const membersGrid = $('#members-grid');
+
+  if (members.length === 0) {
+    membersGrid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <div class="empty-text">Tổ chưa có thành viên</div>
+      </div>
+    `;
+    return;
+  }
+
+  // Sort: leaders first, then by student code
+  const sorted = members.sort((a, b) => {
+    if (a.position && !b.position) return -1;
+    if (!a.position && b.position) return 1;
+    return a.student_code.localeCompare(b.student_code);
+  });
+
+  membersGrid.innerHTML = sorted.map(member => {
+    const scoreClass = member.discipline_score < 80 ? 'low' : '';
+    
+    return `
+      <div class="member-card ${member.isMe ? 'is-me' : ''}">
+        ${member.isMe ? '<div class="me-badge">Bạn</div>' : ''}
+        <div class="member-avatar" style="background:linear-gradient(135deg,${groupColor},#22c9a8);">
+          ${member.isMe ? '👤' : '👨‍🎓'}
+        </div>
+        <div class="member-name">${escapeHtml(member.full_name)}</div>
+        <div class="member-code">Mã HS: ${member.student_code}</div>
+        <div class="member-badges">
+          ${member.position ? `
+            <div class="badge badge-position">
+              ⭐ ${member.position}
+            </div>
+          ` : ''}
+          <div class="badge badge-score ${scoreClass}">
+            ${member.discipline_score || 100} điểm nề nếp
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+(async () => {
+  const user = await initStudentLayout({ 
+    page: 'mygroup', 
+    title: 'Tổ của tôi', 
+    sub: 'Thông tin tổ và thành viên'
+  });
+  
+  if (!user) return;
+  
+  await loadGroupData();
+})();
+</script>
+</body>
+</html>

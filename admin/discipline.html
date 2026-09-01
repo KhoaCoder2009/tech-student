@@ -157,11 +157,18 @@ function groupOf(id) {
 
 async function loadData() {
   try {
+    const safeListCategories = typeof disciplineService.listCategories === 'function'
+      ? disciplineService.listCategories()
+      : Promise.resolve([]);
+    const safeListLogs = typeof disciplineService.listDisciplineLogs === 'function'
+      ? disciplineService.listDisciplineLogs({})
+      : Promise.resolve([]);
+
     [STUDENTS, GROUPS, CATEGORIES, LOGS] = await Promise.all([
       studentService.listStudents({}),
       groupService.listGroups(),
-      disciplineService.listCategories(),
-      disciplineService.listDisciplineLogs({}),
+      safeListCategories,
+      safeListLogs,
     ]);
 
     $('#f-student').innerHTML = STUDENTS.map(s => `<option value="${s.id}">${s.name} (${s.code})</option>`).join('');

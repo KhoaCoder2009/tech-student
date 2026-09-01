@@ -8,7 +8,6 @@ export const GVCN_NAV_ITEMS = [
   { group: null, page: 'dashboard', href: 'dashboard.html', icon: '🏠', label: 'Tổng quan' },
   { group: 'Lớp chủ nhiệm', page: 'students', href: '../admin/students.html', icon: '👥', label: 'Học sinh' },
   { group: 'Lớp chủ nhiệm', page: 'groups', href: '../admin/groups.html', icon: '🗂️', label: 'Tổ' },
-  { group: 'Lớp chủ nhiệm', page: 'seating', href: '../admin/seating.html', icon: '🪑', label: 'Sơ đồ lớp' },
   { group: 'Nề nếp', page: 'set-discipline-score', href: '../admin/set-discipline-score.html', icon: '⭐', label: 'Điểm nề nếp' },
   { group: 'Nề nếp', page: 'discipline', href: '../admin/discipline.html', icon: '📝', label: 'Lịch sử' },
   { group: 'Giao tiếp', page: 'announcements', href: '../admin/announcements.html', icon: '📢', label: 'Thông báo' },
@@ -19,8 +18,8 @@ function sidebarHtml(activePage, navItems = GVCN_NAV_ITEMS) {
     <div class="sidebar-scrim" id="scrim"></div>
     <aside class="sidebar" id="sidebar">
       <div class="brand">
-        <div class="brand-mark" style="background:linear-gradient(135deg,#4f6df5,#22c9a8);">
-          <span style="font-size:20px;font-weight:800;color:#fff;">TS</span>
+        <div class="brand-logo">
+          <span class="brand-text">TECH STUDENT</span>
         </div>
       </div>
       <nav class="nav-group">
@@ -100,12 +99,18 @@ export async function initTeacherLayout(opts = {}) {
     return null;
   }
 
+  // Role guard: only teachers and admins can access
+  if (user.role !== 'teacher' && user.role !== 'admin') {
+    window.location.href = '../unauthorized.html';
+    return null;
+  }
+
   document.getElementById('sidebar-slot').innerHTML = sidebarHtml(page);
   document.getElementById('topbar-slot').innerHTML = topbarHtml(title, sub);
 
   const userName = document.getElementById('user-name');
-  if (userName && user.profile?.full_name) {
-    userName.textContent = user.profile.full_name;
+  if (userName && user.full_name) {
+    userName.textContent = user.full_name;
   }
 
   // Menu toggle

@@ -3,58 +3,279 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tech-Student · Tổng quan</title>
+<title>Tech-Student · Admin Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/design-system.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:24px;
+  margin-bottom:32px;
+}
+
+.stat-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:24px;
+  transition:all 0.3s;
+}
+.stat-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(79,109,245,0.12);
+}
+
+.stat-icon{
+  width:56px;
+  height:56px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  margin-bottom:16px;
+}
+
+.stat-label{
+  font-size:13px;
+  color:var(--ink-500);
+  margin-bottom:8px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+
+.stat-value{
+  font-size:32px;
+  font-weight:800;
+  color:var(--ink-900);
+  margin-bottom:8px;
+}
+
+.stat-change{
+  font-size:13px;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.stat-change.positive{color:#10b981;}
+.stat-change.negative{color:#ef4444;}
+
+.quick-actions{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:16px;
+  margin-bottom:32px;
+}
+
+.action-card{
+  background:linear-gradient(135deg,#4f6df5,#6b7bf8);
+  border-radius:var(--radius-lg);
+  padding:20px;
+  color:#fff;
+  text-decoration:none;
+  transition:all 0.3s;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.action-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(79,109,245,0.3);
+}
+
+.action-card.green{background:linear-gradient(135deg,#10b981,#34d399);}
+.action-card.orange{background:linear-gradient(135deg,#f59e0b,#fbbf24);}
+.action-card.purple{background:linear-gradient(135deg,#8b5cf6,#a78bfa);}
+.action-card.pink{background:linear-gradient(135deg,#ec4899,#f472b6);}
+
+.action-icon{
+  font-size:32px;
+  opacity:0.9;
+}
+
+.action-text{
+  flex:1;
+}
+
+.action-title{
+  font-size:16px;
+  font-weight:700;
+  margin-bottom:4px;
+}
+
+.action-desc{
+  font-size:12px;
+  opacity:0.9;
+}
+
+.section-title{
+  font-size:20px;
+  font-weight:700;
+  color:var(--ink-900);
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.recent-list{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+}
+
+.recent-item{
+  padding:16px 20px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  gap:16px;
+  transition:background 0.2s;
+}
+.recent-item:last-child{border-bottom:none;}
+.recent-item:hover{background:var(--sky-50);}
+
+.recent-icon{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  flex-shrink:0;
+}
+
+.recent-content{
+  flex:1;
+  min-width:0;
+}
+
+.recent-title{
+  font-size:14px;
+  font-weight:600;
+  color:var(--ink-900);
+  margin-bottom:2px;
+}
+
+.recent-desc{
+  font-size:13px;
+  color:var(--ink-500);
+}
+
+.recent-time{
+  font-size:12px;
+  color:var(--ink-400);
+  flex-shrink:0;
+}
+
+.empty-state{
+  text-align:center;
+  padding:40px 20px;
+  color:var(--ink-500);
+}
+
+@media(max-width:768px){
+  .dashboard-grid{grid-template-columns:1fr;}
+  .quick-actions{grid-template-columns:1fr;}
+}
+</style>
 </head>
 <body>
 <div class="shell">
   <div id="sidebar-slot"></div>
   <main class="main">
     <div id="topbar-slot"></div>
-    <div class="content" id="content">
+    <div class="content">
 
-      <div class="stat-grid">
+      <!-- Stats -->
+      <div class="dashboard-grid">
         <div class="stat-card">
-          <div class="lbl">👥 Sĩ số lớp</div>
-          <div class="val" id="stat-total">—</div>
-          <div class="delta up" id="stat-groups-note">&nbsp;</div>
+          <div class="stat-icon" style="background:#dbeafe;color:#3b82f6;">👥</div>
+          <div class="stat-label">Tổng học sinh</div>
+          <div class="stat-value" id="stat-students">--</div>
+          <div class="stat-change positive">
+            <span>↑</span>
+            <span>Lớp 12A2</span>
+          </div>
         </div>
+
         <div class="stat-card">
-          <div class="lbl">⭐ Điểm nề nếp TB</div>
-          <div class="val" id="stat-avg">—</div>
-          <div class="delta up">Toàn lớp</div>
+          <div class="stat-icon" style="background:#dcfce7;color:#10b981;">🗂️</div>
+          <div class="stat-label">Tổ học tập</div>
+          <div class="stat-value" id="stat-groups">--</div>
+          <div class="stat-change">
+            <span>4 tổ hoạt động</span>
+          </div>
         </div>
+
         <div class="stat-card">
-          <div class="lbl">📅 Chuyên cần</div>
-          <div class="val" id="stat-att">—</div>
-          <div class="delta up">Trung bình toàn lớp</div>
+          <div class="stat-icon" style="background:#fef3c7;color:#f59e0b;">⭐</div>
+          <div class="stat-label">Chức vụ</div>
+          <div class="stat-value" id="stat-positions">--</div>
+          <div class="stat-change">
+            <span>Đã phân công</span>
+          </div>
         </div>
+
         <div class="stat-card">
-          <div class="lbl">⚠️ Học sinh cần chú ý</div>
-          <div class="val" id="stat-vio">—</div>
-          <div class="delta down">Điểm nề nếp dưới 80</div>
+          <div class="stat-icon" style="background:#fee2e2;color:#ef4444;">📋</div>
+          <div class="stat-label">Vi phạm tuần này</div>
+          <div class="stat-value" id="stat-violations">--</div>
+          <div class="stat-change negative" id="violation-change">
+            <span>↓</span>
+            <span>So với tuần trước</span>
+          </div>
         </div>
       </div>
 
-      <div class="grid-2">
-        <div class="panel">
-          <h3>So sánh điểm nề nếp giữa các tổ</h3>
-          <div class="panel-sub">Dữ liệu hiện tại</div>
-          <canvas id="groupChart" height="150"></canvas>
-        </div>
-        <div class="panel">
-          <h3>Cần chú ý</h3>
-          <div class="panel-sub">Học sinh có điểm nề nếp thấp nhất</div>
-          <div class="attn-list" id="attn-list"></div>
-        </div>
+      <!-- Quick Actions -->
+      <h2 class="section-title">⚡ Thao tác nhanh</h2>
+      <div class="quick-actions">
+        <a href="/admin/students.html" class="action-card">
+          <div class="action-icon">👥</div>
+          <div class="action-text">
+            <div class="action-title">Quản lý học sinh</div>
+            <div class="action-desc">Xem & chỉnh sửa</div>
+          </div>
+        </a>
+
+        <a href="/admin/discipline.html" class="action-card green">
+          <div class="action-icon">📋</div>
+          <div class="action-text">
+            <div class="action-title">Ghi điểm nề nếp</div>
+            <div class="action-desc">Thêm vi phạm mới</div>
+          </div>
+        </a>
+
+        <a href="/admin/announcements.html" class="action-card orange">
+          <div class="action-icon">📢</div>
+          <div class="action-text">
+            <div class="action-title">Thông báo</div>
+            <div class="action-desc">Đăng tin mới</div>
+          </div>
+        </a>
+
+        <a href="/admin/groups.html" class="action-card purple">
+          <div class="action-icon">🗂️</div>
+          <div class="action-text">
+            <div class="action-title">Tổ học tập</div>
+            <div class="action-desc">Sắp xếp tổ</div>
+          </div>
+        </a>
       </div>
 
-      <div class="panel">
-        <h3>Chi tiết theo tổ</h3>
-        <div id="group-rows"></div>
+      <!-- Recent Activities -->
+      <h2 class="section-title">🕐 Hoạt động gần đây</h2>
+      <div class="recent-list" id="recent-list">
+        <div class="empty-state">
+          Đang tải...
+        </div>
       </div>
 
     </div>
@@ -62,80 +283,184 @@
 </div>
 
 <script type="module">
-import { initLayout } from '../assets/js/layout.js';
-import { errorBanner } from '../assets/js/ui.js';
-import * as studentService from '../services/studentService.js';
-import * as groupService from '../services/groupService.js';
+import { initAdminLayout } from '../assets/js/adminLayout.js';
+import { supabase } from '../assets/js/supabaseClient.js';
 
-let chartInst = null;
+const $ = s => document.querySelector(s);
 
-async function loadAndRender(){
-  const content = document.getElementById('content');
-  try{
-    const [students, groups] = await Promise.all([
-      studentService.listStudents({}),
-      groupService.listGroups(),
+async function loadStats() {
+  const setStat = (id, value) => {
+    const node = document.getElementById(id);
+    if (node) node.textContent = value ?? 0;
+  };
+
+  try {
+    setStat('stat-students', 0);
+    setStat('stat-groups', 0);
+    setStat('stat-positions', 0);
+    setStat('stat-violations', 0);
+
+    const { data: schoolYear } = await supabase
+      .from('school_years')
+      .select('id')
+      .eq('is_current', true)
+      .maybeSingle();
+
+    const { data: classes, error: classError } = schoolYear
+      ? await supabase
+          .from('classes')
+          .select('id')
+          .eq('school_year_id', schoolYear.id)
+          .limit(1)
+      : { data: [], error: null };
+
+    const classId = classes?.[0]?.id;
+
+    const studentPromise = classId
+      ? supabase.from('students').select('*', { count: 'exact', head: true }).eq('class_id', classId)
+      : supabase.from('students').select('*', { count: 'exact', head: true });
+
+    const groupPromise = classId
+      ? supabase.from('groups').select('*', { count: 'exact', head: true }).eq('class_id', classId)
+      : supabase.from('groups').select('*', { count: 'exact', head: true });
+
+    const positionPromise = supabase
+      .from('student_positions')
+      .select('*', { count: 'exact', head: true });
+
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const violationPromise = supabase
+      .from('discipline_logs')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', weekAgo.toISOString());
+
+    const [studentRes, groupRes, positionRes, violationRes] = await Promise.all([
+      studentPromise,
+      groupPromise,
+      positionPromise,
+      violationPromise
     ]);
-    renderStats(students, groups);
-  }catch(err){
-    errorBanner(content, 'Không tải được dữ liệu tổng quan: ' + err.message, loadAndRender);
+
+    const studentCount = studentRes?.count ?? 0;
+    const groupCount = groupRes?.count ?? 0;
+    const positionCount = positionRes?.count ?? 0;
+    const violationCount = violationRes?.count ?? 0;
+
+    setStat('stat-students', studentCount);
+    setStat('stat-groups', groupCount);
+    setStat('stat-positions', positionCount);
+    setStat('stat-violations', violationCount);
+
+    if (classError) {
+      console.warn('Load stats with class filtering error:', classError);
+    }
+  } catch (error) {
+    console.error('Load stats error:', error);
   }
 }
 
-function renderStats(students, groups){
-  const total = students.length;
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-groups-note').textContent = `${groups.length} tổ`;
+async function loadRecentActivities() {
+  try {
+    // Get recent discipline logs
+    const { data: logs } = await supabase
+      .from('discipline_logs')
+      .select(`
+        id,
+        type,
+        points_deducted,
+        description,
+        created_at,
+        student_id,
+        created_by
+      `)
+      .order('created_at', { ascending: false })
+      .limit(10);
 
-  const avg = total ? (students.reduce((a,s)=>a+s.score,0)/total).toFixed(1) : '0.0';
-  document.getElementById('stat-avg').textContent = avg;
+    if (!logs || logs.length === 0) {
+      $('#recent-list').innerHTML = '<div class="empty-state">Chưa có hoạt động nào</div>';
+      return;
+    }
 
-  const att = total ? Math.round(students.reduce((a,s)=>a+s.attendance,0)/total) : 0;
-  document.getElementById('stat-att').textContent = att + '%';
+    // Get student and admin names
+    const studentIds = [...new Set(logs.map(l => l.student_id))];
+    const adminIds = [...new Set(logs.map(l => l.created_by))];
 
-  const attention = students.filter(s => s.score < 80);
-  document.getElementById('stat-vio').textContent = attention.length;
+    const { data: students } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', studentIds);
 
-  const rows = document.getElementById('group-rows'); rows.innerHTML = '';
-  const chartLabels = [], chartData = [];
-  groups.forEach(g => {
-    const mem = students.filter(s => s.group_id === g.id);
-    const gAvg = mem.length ? (mem.reduce((a,s)=>a+s.score,0)/mem.length).toFixed(1) : '0.0';
-    chartLabels.push(g.name); chartData.push(gAvg);
-    rows.insertAdjacentHTML('beforeend', `
-      <div class="group-row">
-        <div class="g-chip" style="background:${g.color}">${g.name.slice(-1)}</div>
-        <div class="g-info"><div class="n">${g.name}</div><div class="s">${mem.length} học sinh</div></div>
-        <div class="g-score">${gAvg}</div>
-      </div>`);
-  });
+    const { data: admins } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', adminIds);
 
-  const attn = document.getElementById('attn-list'); attn.innerHTML = '';
-  if(!attention.length){
-    attn.innerHTML = `<div class="empty" style="padding:24px 0;"><div class="ic">🎉</div><div class="t">Không có học sinh cần chú ý</div></div>`;
-  }else{
-    [...attention].sort((a,b)=>a.score-b.score).slice(0,5).forEach(s => {
-      const g = groups.find(x=>x.id===s.group_id);
-      attn.insertAdjacentHTML('beforeend', `
-        <div class="attn-item">
-          <div class="ni">${(s.name||'?').trim().slice(-1).toUpperCase()}</div>
-          <div class="txt"><div class="n">${s.name}</div><div class="r">${g?g.name:''} · Điểm nề nếp ${s.score}</div></div>
-        </div>`);
+    const nameMap = {};
+    [...(students || []), ...(admins || [])].forEach(p => {
+      nameMap[p.id] = p.full_name;
     });
-  }
 
-  if(chartInst) chartInst.destroy();
-  chartInst = new Chart(document.getElementById('groupChart'), {
-    type: 'bar',
-    data: { labels: chartLabels, datasets: [{ data: chartData, backgroundColor: ['#4f6df5','#22c9a8','#f5a524','#c05fd6'], borderRadius: 8, maxBarThickness: 44 }] },
-    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false, min: 70, max: 100, grid: { color: '#eef0f6' } }, x: { grid: { display: false } } } }
-  });
+    const html = logs.map(log => {
+      const studentName = nameMap[log.student_id] || 'Không rõ';
+      const adminName = nameMap[log.created_by] || 'Admin';
+      const timeAgo = getTimeAgo(log.created_at);
+      
+      return `
+        <div class="recent-item">
+          <div class="recent-icon" style="background:#fee2e2;color:#ef4444;">
+            📋
+          </div>
+          <div class="recent-content">
+            <div class="recent-title">
+              ${escapeHtml(studentName)} bị trừ ${log.points_deducted} điểm
+            </div>
+            <div class="recent-desc">
+              ${escapeHtml(log.description)} • Bởi ${escapeHtml(adminName)}
+            </div>
+          </div>
+          <div class="recent-time">${timeAgo}</div>
+        </div>
+      `;
+    }).join('');
+
+    $('#recent-list').innerHTML = html;
+
+  } catch (error) {
+    console.error('Load recent activities error:', error);
+    $('#recent-list').innerHTML = '<div class="empty-state">Lỗi tải dữ liệu</div>';
+  }
+}
+
+function getTimeAgo(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+
+  if (seconds < 60) return 'Vừa xong';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} phút trước`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} giờ trước`;
+  return `${Math.floor(seconds / 86400)} ngày trước`;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 (async () => {
-  const user = await initLayout({ page: 'dashboard', title: 'Tổng quan', sub: 'Lớp 12A2 · Năm học hiện tại', allowedRoles: ['admin'] });
-  if(!user) return;
-  loadAndRender();
+  const user = await initAdminLayout({
+    page: 'dashboard',
+    title: 'Dashboard',
+    subtitle: 'Tổng quan hệ thống quản lý lớp học'
+  });
+
+  if (!user) return;
+
+  await loadStats();
+  await loadRecentActivities();
 })();
 </script>
 </body>

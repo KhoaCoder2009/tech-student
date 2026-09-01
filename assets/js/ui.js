@@ -18,10 +18,30 @@ function ensureToastWrap(){
 export function toast(msg, type=''){
   const wrap = ensureToastWrap();
   const el = document.createElement('div');
-  el.className = 'toast' + (type ? ' ' + type : '');
-  el.innerHTML = `<span>${type === 'err' ? '⚠️' : '✅'}</span><span>${msg}</span>`;
+  
+  // Icon based on type
+  const icons = {
+    success: '✅',
+    err: '❌',
+    error: '❌',
+    warn: '⚠️',
+    warning: '⚠️',
+    info: 'ℹ️'
+  };
+  const icon = icons[type] || '✅';
+  
+  el.className = 'toast' + (type ? ' toast-' + type : ' toast-success');
+  el.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${msg}</span>`;
+  
   wrap.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
+  
+  // Auto-dismiss with progress bar
+  el.style.setProperty('--toast-duration', '3.2s');
+  
+  setTimeout(() => {
+    el.classList.add('toast-exit');
+    setTimeout(() => el.remove(), 300);
+  }, 3200);
 }
 
 function ensureConfirmModal(){

@@ -1,12 +1,128 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tech-Student · Hồ sơ</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/design-system.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Hồ sơ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+<style>
+.profile-container{max-width:760px;margin:40px auto;}
+.profile-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:32px;
+  box-shadow:var(--shadow-md);
+  animation:fadeInUp 0.5s ease;
+}
+.profile-header{
+  text-align:center;
+  padding-bottom:24px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:24px;
+}
+.profile-avatar{
+  width:90px;
+  height:90px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:linear-gradient(135deg, var(--g1), var(--g2));
+  color:#fff;
+  font-weight:700;
+  font-size:32px;
+  margin:0 auto 16px;
+  box-shadow:0 8px 24px rgba(79,109,245,0.3);
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+  transition:all 0.3s;
+}
+.profile-avatar:hover{
+  transform:scale(1.05);
+  box-shadow:0 12px 32px rgba(79,109,245,0.4);
+}
+.profile-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.avatar-upload-overlay{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  background:rgba(0,0,0,0.7);
+  color:#fff;
+  font-size:11px;
+  font-weight:600;
+  padding:6px;
+  text-align:center;
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.profile-avatar:hover .avatar-upload-overlay{
+  opacity:1;
+}
+#avatar-input{
+  display:none;
+}
+.profile-name{margin:0;font-size:24px;font-weight:800;color:var(--ink-900);}
+.profile-role{
+  display:inline-block;
+  margin-top:10px;
+  padding:6px 16px;
+  border-radius:999px;
+  background:var(--mint-100);
+  color:var(--navy-900);
+  font-size:13px;
+  font-weight:600;
+}
+.info-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:16px;
+}
+.info-item{
+  padding:16px;
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:var(--radius-md);
+  transition:all 0.3s ease;
+}
+.info-item:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(79,109,245,0.1);
+}
+.info-label{font-size:12px;color:var(--ink-600);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+.info-value{font-weight:700;margin-top:8px;font-size:16px;color:var(--ink-900);}
+
+body.dark-mode .profile-card{
+  background:var(--navy-900);
+  border-color:var(--line);
+}
+body.dark-mode .info-item{
+  background:var(--navy-800);
+  border-color:var(--line);
+}
+
+.loading-skeleton{
+  background:linear-gradient(90deg, var(--line) 0%, rgba(245,247,251,0.8) 50%, var(--line) 100%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+  border-radius:4px;
+  height:20px;
+}
+
+@media(max-width:768px){
+  .info-grid{grid-template-columns:1fr;}
+  .profile-container{margin:20px auto;}
+  .profile-card{padding:24px;}
+}
+</style>
 </head>
 <body>
 <div class="shell">
@@ -14,19 +130,43 @@
   <main class="main">
     <div id="topbar-slot"></div>
     <div class="content" id="content">
-      <div class="profile-container" style="max-width:760px; margin:0 auto;">
-        <div class="profile-card" style="background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); padding:32px; box-shadow:var(--shadow-sm);">
-          <div class="profile-header" style="text-align:center; padding-bottom:24px; border-bottom:1px solid var(--line); margin-bottom:24px;">
-            <div class="profile-avatar" style="width:90px; height:90px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:linear-gradient(135deg, var(--g1), var(--g2)); color:#fff; font-weight:700; font-size:32px; margin:0 auto 16px;">A</div>
-            <h2 style="margin:0; font-size:24px;">Nguyễn Văn A</h2>
-            <span class="profile-role" style="display:inline-block; margin-top:10px; padding:6px 16px; border-radius:999px; background:var(--mint-100); color:var(--navy-900); font-size:13px; font-weight:600;">Học sinh · 12A2</span>
+      <div class="profile-container">
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar" id="profile-avatar" title="Click để đổi ảnh đại diện">
+              ?
+              <div class="avatar-upload-overlay">📷 Đổi ảnh</div>
+            </div>
+            <input type="file" id="avatar-input" accept="image/*">
+            <h2 class="profile-name" id="profile-name">Đang tải...</h2>
+            <span class="profile-role" id="profile-role">Học sinh · 12A2</span>
           </div>
 
-          <div class="info-grid" style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px;">
-            <div class="info-item" style="padding:14px; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-md);"><div class="info-label" style="font-size:12px; color:var(--ink-600);">Mã học sinh</div><div class="info-value" style="font-weight:700; margin-top:6px;">12A2001</div></div>
-            <div class="info-item" style="padding:14px; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-md);"><div class="info-label" style="font-size:12px; color:var(--ink-600);">Lớp</div><div class="info-value" style="font-weight:700; margin-top:6px;">12A2</div></div>
-            <div class="info-item" style="padding:14px; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-md);"><div class="info-label" style="font-size:12px; color:var(--ink-600);">Tổ</div><div class="info-value" style="font-weight:700; margin-top:6px;">Tổ 1</div></div>
-            <div class="info-item" style="padding:14px; background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-md);"><div class="info-label" style="font-size:12px; color:var(--ink-600);">Chức vụ</div><div class="info-value" style="font-weight:700; margin-top:6px;">Tổ viên</div></div>
+          <div class="info-grid" id="info-grid">
+            <div class="info-item">
+              <div class="info-label">Mã học sinh</div>
+              <div class="info-value"><div class="loading-skeleton"></div></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Lớp</div>
+              <div class="info-value"><div class="loading-skeleton"></div></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Tổ</div>
+              <div class="info-value"><div class="loading-skeleton"></div></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Chức vụ</div>
+              <div class="info-value"><div class="loading-skeleton"></div></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Điểm nề nếp</div>
+              <div class="info-value"><div class="loading-skeleton"></div></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Email</div>
+              <div class="info-value"><div class="loading-skeleton"></div></div>
+            </div>
           </div>
         </div>
       </div>
@@ -35,10 +175,196 @@
 </div>
 
 <script type="module">
-import { initLayout, STUDENT_NAV_ITEMS } from '../assets/js/layout.js';
+import { initStudentLayout } from '../assets/js/studentLayout.js';
+import { supabase } from '../assets/js/supabaseClient.js';
+import { toast } from '../assets/js/ui.js';
+import { getCurrentStudent } from '../services/studentService.js';
+
+const $ = s => document.querySelector(s);
+
+let currentUserId = null;
+
+async function uploadAvatar(file) {
+  if (!file || !currentUserId) return;
+
+  // Validate file
+  if (!file.type.startsWith('image/')) {
+    alert('Vui lòng chọn file ảnh!');
+    return;
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    alert('File ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB.');
+    return;
+  }
+
+  try {
+    // Show loading
+    const avatar = $('#profile-avatar');
+    const originalContent = avatar.innerHTML;
+    avatar.innerHTML = '<div style="font-size:14px;">📤<br>Đang tải...</div>';
+
+    // Create unique filename
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${currentUserId}-${Date.now()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('student-avatars')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      // If bucket doesn't exist, show helpful error
+      if (uploadError.message.includes('not found')) {
+        toast('Lỗi: Bucket "student-avatars" chưa được tạo trong Supabase Storage.\n\nVui lòng:\n1. Vào Supabase Dashboard\n2. Storage → Create bucket "student-avatars"\n3. Set bucket là Public\n4. Thử lại', 'err');
+        avatar.innerHTML = originalContent;
+        return;
+      }
+      throw uploadError;
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('student-avatars')
+      .getPublicUrl(filePath);
+
+    // Update profile in database
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ avatar_url: publicUrl })
+      .eq('id', currentUserId);
+
+    if (updateError) throw updateError;
+
+    // Update UI
+    avatar.innerHTML = `<img src="${publicUrl}" alt="Avatar"><div class="avatar-upload-overlay">📷 Đổi ảnh</div>`;
+    // Avatar updated successfully
+
+  } catch (error) {
+    console.error('Upload avatar error:', error);
+    toast(`Lỗi upload ảnh: ${error.message}`, 'err');
+    // Restore avatar
+    await loadProfile();
+  }
+}
+
+async function loadProfile() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    currentUserId = user.id;
+    
+    // Get student profile with all related data using service
+    const student = await getCurrentStudent();
+    
+    if (!student) throw new Error('Không tìm thấy hồ sơ học sinh');
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, email, avatar_url')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const { data: group } = await supabase
+      .from('groups')
+      .select('name')
+      .eq('id', student.group_id)
+      .maybeSingle();
+
+    const { data: studentPositions } = await supabase
+      .from('student_positions')
+      .select('position_id')
+      .eq('student_id', user.id)
+      .limit(10);
+
+    const positionIds = [...new Set((studentPositions || []).map(item => item.position_id).filter(Boolean))];
+    const { data: positions } = await supabase
+      .from('positions')
+      .select('id, label')
+      .in('id', positionIds.length ? positionIds : ['00000000-0000-0000-0000-000000000000']);
+
+    const position = positions?.[0]?.label || 'Thành viên';
+
+    const fullName = profile?.full_name || 'Học sinh';
+    const initials = fullName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    const avatarUrl = profile?.avatar_url;
+    
+    // Update header with avatar or initials
+    const avatarEl = $('#profile-avatar');
+    if (avatarUrl) {
+      avatarEl.innerHTML = `<img src="${avatarUrl}" alt="${fullName}"><div class="avatar-upload-overlay">📷 Đổi ảnh</div>`;
+    } else {
+      avatarEl.innerHTML = `${initials}<div class="avatar-upload-overlay">📷 Đổi ảnh</div>`;
+    }
+    
+    $('#profile-name').textContent = fullName;
+
+    $('#info-grid').innerHTML = `
+      <div class="info-item">
+        <div class="info-label">Mã học sinh</div>
+        <div class="info-value">${student.code}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Lớp</div>
+        <div class="info-value">12A2</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Tổ</div>
+        <div class="info-value">${group?.name || 'Chưa phân tổ'}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Chức vụ</div>
+        <div class="info-value">${position}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Điểm nề nếp</div>
+        <div class="info-value">${student.score || 100} điểm</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Email</div>
+        <div class="info-value">${profile?.email || 'Chưa cập nhật'}</div>
+      </div>
+    `;
+
+  } catch (error) {
+    console.error('Load profile error:', error);
+    $('#info-grid').innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-500);">
+        <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+        <div>Lỗi tải thông tin: ${error.message}</div>
+      </div>
+    `;
+  }
+}
 
 (async () => {
-  await initLayout({ page: 'profile', title: 'Hồ sơ cá nhân', sub: 'Thông tin học sinh', allowedRoles: ['student'], navItems: STUDENT_NAV_ITEMS });
+  const user = await initStudentLayout({ 
+    page: 'profile', 
+    title: 'Hồ sơ cá nhân', 
+    sub: 'Thông tin học sinh'
+  });
+  
+  if (!user) return;
+  
+  await loadProfile();
+
+  // Setup avatar upload
+  const avatarEl = $('#profile-avatar');
+  const avatarInput = $('#avatar-input');
+
+  avatarEl.addEventListener('click', () => {
+    avatarInput.click();
+  });
+
+  avatarInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      uploadAvatar(file);
+    }
+  });
 })();
 </script>
 </body>

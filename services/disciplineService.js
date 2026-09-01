@@ -1,4 +1,4 @@
-/* services/disciplineService.js — Quản lý nề nếp (cộng/trừ điểm) */
+/* services/disciplineService.js — Quản lý nề nếp (lịch sử vi phạm và điểm) */
 import { supabase } from '../assets/js/supabaseClient.js';
 
 function normalizeDisciplineSchemaError(error) {
@@ -10,156 +10,179 @@ function normalizeDisciplineSchemaError(error) {
 }
 
 /**
- * Lấy danh mục cộng/trừ điểm
+ * Danh mục mặc định để UI cũ của trang lịch sử nề nếp không crash.
+ * Nếu hệ thống có bảng category riêng, có thể thay bằng query dữ liệu thật.
  */
-export async function listCategories() {
-  const { data, error } = await supabase
-    .from('discipline_categories')
-    .select('*')
-    .order('type')
-    .order('label');
-
-  if (error) normalizeDisciplineSchemaError(error);
-  return data;
+export function listCategories() {
+  return [
+    { id: 'reward-study', label: 'Học tập tốt', type: 'add', default_points: 2 },
+    { id: 'reward-behavior', label: 'Tuyên dương', type: 'add', default_points: 2 },
+    { id: 'reward-discipline', label: 'Thực hiện nội quy', type: 'add', default_points: 1 },
+    { id: 'violation-late', label: 'Đi muộn', type: 'subtract', default_points: 2 },
+    { id: 'violation-uniform', label: 'Chưa đúng đồng phục', type: 'subtract', default_points: 2 },
+    { id: 'violation-rules', label: 'Vi phạm nội quy', type: 'subtract', default_points: 3 },
+  ];
 }
 
 /**
- * Lấy lịch sử nề nếp
+ * Lấy lịch sử vi phạm nề nếp
  */
-export async function listDisciplineLogs({ studentId, dateFrom, dateTo, status = 'approved' } = {}) {
+export async function listDisciplineLogs({ studentId, dateFrom, dateTo } = {}) {
   let query = supabase
     .from('discipline_logs')
     .select(`
-      id, type, points, reason, date, status, notes, created_at,
+      id,
+      type,
+      points,
+      reason,
+      date,
+      created_at,
       student:students(id, student_code, profiles(full_name)),
-      category:discipline_categories(label),
-      recorded_by_profile:profiles!recorded_by(full_name)
+      recorded_by_profile:profiles!recorded_by(full_name),
+      category:discipline_categories(label)
     `)
-    .order('date', { ascending: false });
+    .order('created_at', { ascending: false });
 
   if (studentId) query = query.eq('student_id', studentId);
-  if (dateFrom) query = query.gte('date', dateFrom);
-  if (dateTo) query = query.lte('date', dateTo);
-  if (status) query = query.eq('status', status);
+  if (dateFrom) query = query.gte('created_at', dateFrom);
+  if (dateTo) query = query.lte('created_at', dateTo);
 
   const { data, error } = await query;
   if (error) normalizeDisciplineSchemaError(error);
 
-  return data.map(row => ({
-    id: row.id,
-    type: row.type,
-    points: row.points,
-    reason: row.reason,
-    date: row.date,
-    status: row.status,
-    notes: row.notes,
-    studentId: row.student?.id,
-    studentCode: row.student?.student_code,
-    studentName: row.student?.profiles?.full_name || '(chưa rõ)',
-    categoryLabel: row.category?.label || 'Khác',
-    recordedBy: row.recorded_by_profile?.full_name || 'Hệ thống',
-    createdAt: row.created_at,
-  }));
+  return data.map(row => {
+    const points = Math.abs(Number(row.points_deducted || 0));
+    const isSubtract = Number(row.points_deducted || 0) < 0 || /muộn|vi phạm|không|chưa|đúng|trừ/i.test(String(row.violation_type || ''));
+
+    return {
+      id: row.id,
+      violationType: row.violation_type,
+      pointsDeducted: row.points_deducted,
+      description: row.description,
+      studentId: row.student?.id,
+      studentCode: row.student?.student_code,
+      studentName: row.student?.profiles?.full_name || '(chưa rõ)',
+      recordedBy: row.recorded_by_profile?.full_name || 'Hệ thống',
+      createdAt: row.created_at,
+      date: row.created_at,
+      type: isSubtract ? 'subtract' : 'add',
+      points,
+      reason: row.description || row.violation_type,
+      categoryLabel: row.violation_type,
+    };
+  });
 }
 
 /**
  * Lấy thống kê nề nếp của một học sinh
  */
 export async function getStudentDisciplineStats(studentId) {
-  const { data, error } = await supabase
+  // Get current score from students table
+  const { data: student, error: studentError } = await supabase
+    .from('students')
+    .select('discipline_score')
+    .eq('id', studentId)
+    .single();
+
+  if (studentError) normalizeDisciplineSchemaError(studentError);
+
+  // Get all violations
+  const { data: logs, error: logsError } = await supabase
     .from('discipline_logs')
-    .select('type, points')
-    .eq('student_id', studentId)
-    .eq('status', 'approved');
+    .select('points_deducted')
+    .eq('student_id', studentId);
 
-  if (error) normalizeDisciplineSchemaError(error);
+  if (logsError) normalizeDisciplineSchemaError(logsError);
 
-  const totalAdd = data
-    .filter(r => r.type === 'add')
-    .reduce((sum, r) => sum + parseFloat(r.points), 0);
-
-  const totalSubtract = data
-    .filter(r => r.type === 'subtract')
-    .reduce((sum, r) => sum + parseFloat(r.points), 0);
-
-  const countAdd = data.filter(r => r.type === 'add').length;
-  const countSubtract = data.filter(r => r.type === 'subtract').length;
+  const totalDeducted = logs.reduce((sum, r) => sum + parseFloat(r.points_deducted), 0);
+  const violationCount = logs.length;
 
   return {
-    totalAdd: totalAdd.toFixed(1),
-    totalSubtract: totalSubtract.toFixed(1),
-    countAdd,
-    countSubtract,
-    currentScore: (100 + totalAdd - totalSubtract).toFixed(1),
+    currentScore: student?.discipline_score || 100,
+    totalDeducted: totalDeducted.toFixed(1),
+    violationCount,
+    averageDeduction: violationCount > 0 ? (totalDeducted / violationCount).toFixed(1) : '0',
   };
 }
 
 /**
- * Thêm log nề nếp (cộng/trừ điểm)
+ * Thêm log vi phạm nề nếp
+ * Hỗ trợ cả contract mới: { studentId, violationType, pointsDeducted, description, recordedBy }
+ * và contract cũ của trang admin: { studentId, categoryId, type, points, reason, date, recordedBy }
  */
-export async function createDisciplineLog({
-  studentId,
-  categoryId,
-  type,
-  points,
-  reason,
-  date,
-  recordedBy,
-  status = 'approved',
-  notes,
-}) {
+export async function createDisciplineLog(payload = {}) {
+  const {
+    studentId,
+    violationType,
+    pointsDeducted,
+    description,
+    recordedBy,
+    categoryId,
+    type,
+    points,
+    reason,
+    date,
+  } = payload;
+
+  const normalizedType = type === 'subtract' ? 'subtract' : 'add';
+  const normalizedPoints = Number(pointsDeducted ?? points ?? 0);
+  const finalPoints = normalizedType === 'subtract' ? -Math.abs(normalizedPoints) : Math.abs(normalizedPoints);
+  const finalViolationType = violationType || categoryId || (normalizedType === 'subtract' ? 'Trừ điểm' : 'Cộng điểm');
+  const finalDescription = description || reason || finalViolationType;
+
   const { data, error } = await supabase
     .from('discipline_logs')
     .insert({
       student_id: studentId,
-      category_id: categoryId,
-      type,
-      points,
-      reason,
-      date: date || new Date().toISOString().split('T')[0],
-      recorded_by: recordedBy,
-      status,
-      notes,
+      violation_type: finalViolationType,
+      points_deducted: finalPoints,
+      description: finalDescription,
+      created_by: recordedBy,
+      created_at: date ? new Date(date).toISOString() : undefined,
     })
     .select()
     .single();
 
   if (error) normalizeDisciplineSchemaError(error);
+
+  await updateStudentScore(studentId);
+
   return data;
 }
 
 /**
- * Cập nhật log nề nếp
+ * Xóa log vi phạm
  */
-export async function updateDisciplineLog(id, updates) {
-  const { data, error } = await supabase
-    .from('discipline_logs')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) normalizeDisciplineSchemaError(error);
-  return data;
-}
-
-/**
- * Xóa log nề nếp
- */
-export async function deleteDisciplineLog(id) {
+export async function deleteDisciplineLog(id, studentId) {
   const { error } = await supabase
     .from('discipline_logs')
     .delete()
     .eq('id', id);
 
   if (error) normalizeDisciplineSchemaError(error);
+
+  // Recalculate student's score
+  if (studentId) await updateStudentScore(studentId);
 }
 
 /**
- * Duyệt/từ chối log nề nếp
+ * Cập nhật điểm nề nếp của học sinh (tính lại từ logs)
  */
-export async function approveDisciplineLog(id, approvedBy, status = 'approved') {
-  return updateDisciplineLog(id, { status, approved_by: approvedBy });
+async function updateStudentScore(studentId) {
+  const { data: logs, error } = await supabase
+    .from('discipline_logs')
+    .select('points_deducted')
+    .eq('student_id', studentId);
+
+  if (error) return;
+
+  const totalDeducted = logs.reduce((sum, r) => sum + parseFloat(r.points_deducted || 0), 0);
+  const newScore = Math.max(0, 100 - totalDeducted);
+
+  await supabase
+    .from('students')
+    .update({ discipline_score: newScore })
+    .eq('id', studentId);
 }
 
 /**

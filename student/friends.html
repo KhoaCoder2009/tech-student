@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech-Student · Bạn bè</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/design-system.css">
+<style>
+.friends-header{
+  background:linear-gradient(135deg,#4f6df5 0%,#22c9a8 100%);
+  padding:32px;
+  border-radius:var(--radius-lg);
+  color:#fff;
+  margin-bottom:32px;
+}
+.friends-title{font-size:28px;font-weight:800;margin-bottom:8px;}
+.friends-subtitle{font-size:15px;opacity:0.95;}
+
+.filter-bar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:24px;
+  flex-wrap:wrap;
+}
+.search-box{
+  flex:1;
+  min-width:200px;
+  position:relative;
+}
+.search-input{
+  width:100%;
+  padding:12px 40px 12px 16px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-md);
+  font-size:14px;
+  background:var(--card);
+  transition:all 0.2s;
+}
+.search-input:focus{
+  outline:none;
+  border-color:#4f6df5;
+  box-shadow:0 0 0 3px rgba(79,109,245,0.1);
+}
+.search-icon{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:18px;
+  color:var(--ink-500);
+}
+
+.filter-group{
+  display:flex;
+  gap:8px;
+}
+.filter-btn{
+  padding:10px 16px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm);
+  background:var(--card);
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.filter-btn.active{
+  background:#4f6df5;
+  color:#fff;
+  border-color:#4f6df5;
+}
+
+.friends-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:20px;
+}
+
+.friend-card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:24px;
+  text-align:center;
+  transition:all 0.3s ease;
+  cursor:pointer;
+}
+.friend-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(79,109,245,0.12);
+  border-color:#4f6df5;
+}
+
+.friend-avatar{
+  width:80px;
+  height:80px;
+  margin:0 auto 16px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#4f6df5,#22c9a8);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  box-shadow:0 8px 24px rgba(79,109,245,0.2);
+}
+
+.friend-name{
+  font-size:17px;
+  font-weight:700;
+  color:var(--ink-900);
+  margin-bottom:4px;
+}
+.friend-code{
+  font-size:13px;
+  color:var(--ink-500);
+  margin-bottom:12px;
+}
+
+.friend-info{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+}
+.info-badge{
+  padding:4px 10px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.badge-group{background:#f0f9ff;color:#0284c7;}
+.badge-position{background:#fef3c7;color:#f59e0b;}
+
+.friend-score{
+  display:inline-block;
+  padding:8px 16px;
+  background:linear-gradient(135deg,#f59e0b,#f97316);
+  color:#fff;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:700;
+}
+
+.empty-state{
+  text-align:center;
+  padding:80px 20px;
+  color:var(--ink-500);
+}
+.empty-icon{font-size:64px;margin-bottom:16px;opacity:0.5;}
+.empty-text{font-size:16px;color:var(--ink-600);}
+
+/* Dark mode */
+body.dark-mode .friend-card{
+  background:var(--navy-900);
+  border-color:var(--line);
+}
+body.dark-mode .friend-card:hover{
+  background:var(--navy-800);
+  border-color:#4f6df5;
+}
+
+/* Responsive */
+@media(max-width:768px){
+  .friends-header{padding:24px;}
+  .friends-title{font-size:22px;}
+  .friends-grid{grid-template-columns:1fr;}
+  .filter-bar{flex-direction:column;align-items:stretch;}
+  .search-box{min-width:100%;}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div id="sidebar-slot"></div>
+  <main class="main">
+    <div id="topbar-slot"></div>
+    <div class="content" id="content">
+
+      <div class="friends-header">
+        <h1 class="friends-title">👥 Bạn bè lớp 12A2</h1>
+        <p class="friends-subtitle">Danh sách 40 bạn học cùng lớp</p>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-box">
+          <input type="text" class="search-input" placeholder="Tìm kiếm bạn bè..." id="search-input">
+          <span class="search-icon">🔍</span>
+        </div>
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all">Tất cả</button>
+          <button class="filter-btn" data-filter="group1">Tổ 1</button>
+          <button class="filter-btn" data-filter="group2">Tổ 2</button>
+          <button class="filter-btn" data-filter="group3">Tổ 3</button>
+          <button class="filter-btn" data-filter="group4">Tổ 4</button>
+        </div>
+      </div>
+
+      <div class="friends-grid" id="friends-grid">
+        <div class="empty-state">
+          <div class="empty-icon">👥</div>
+          <div class="empty-text">Đang tải danh sách bạn bè...</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { initStudentLayout } from '../assets/js/studentLayout.js';
+import { supabase } from '../assets/js/supabaseClient.js';
+import { getCurrentStudent } from '../services/studentService.js';
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+let allFriends = [];
+let currentFilter = 'all';
+let searchQuery = '';
+
+async function loadFriends() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Get current student's class using service
+    const currentStudent = await getCurrentStudent();
+    
+    if (!currentStudent) {
+      throw new Error('Không tìm thấy thông tin học sinh');
+    }
+
+    // Get all students in same class
+    const { data: students, error: studentsError } = await supabase
+      .from('students')
+      .select('id, student_code, discipline_score, group_id, gender')
+      .eq('class_id', currentStudent.class_id)
+      .order('student_code');
+
+    if (studentsError) throw studentsError;
+
+    // Get profiles
+    const studentIds = students.map(s => s.id);
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', studentIds);
+
+    const profileMap = {};
+    profiles?.forEach(p => {
+      profileMap[p.id] = p.full_name;
+    });
+
+    // Get groups
+    const groupIds = [...new Set(students.map(s => s.group_id).filter(Boolean))];
+    const { data: groups } = await supabase
+      .from('groups')
+      .select('id, name, color')
+      .in('id', groupIds);
+
+    const groupMap = {};
+    groups?.forEach(g => {
+      groupMap[g.id] = g;
+    });
+
+    const { data: positions } = await supabase
+      .from('student_positions')
+      .select('student_id, position_id')
+      .in('student_id', studentIds);
+
+    const { data: positionCatalog } = await supabase
+      .from('positions')
+      .select('id, label')
+      .in('id', [...new Set((positions || []).map(p => p.position_id).filter(Boolean))]);
+
+    const positionLabelMap = Object.fromEntries((positionCatalog || []).map(pos => [pos.id, pos.label]));
+    const positionMap = {};
+    (positions || []).forEach(p => {
+      positionMap[p.student_id] = positionLabelMap[p.position_id] || null;
+    });
+
+    // Build friends list
+    allFriends = students.map(student => ({
+      ...student,
+      full_name: profileMap[student.id] || 'Không rõ',
+      group: groupMap[student.group_id],
+      position: positionMap[student.id],
+      isCurrentUser: student.id === user.id
+    }));
+
+    renderFriends();
+
+  } catch (error) {
+    console.error('Load friends error:', error);
+    $('#friends-grid').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-text">Lỗi tải danh sách: ${error.message}</div>
+      </div>
+    `;
+  }
+}
+
+function renderFriends() {
+  let filtered = allFriends;
+
+  // Filter by group
+  if (currentFilter !== 'all') {
+    const groupNum = parseInt(currentFilter.replace('group', ''));
+    filtered = filtered.filter(f => f.group?.name === `Tổ ${groupNum}`);
+  }
+
+  // Filter by search
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    filtered = filtered.filter(f => 
+      f.full_name.toLowerCase().includes(query) ||
+      f.student_code.includes(query)
+    );
+  }
+
+  const friendsGrid = $('#friends-grid');
+
+  if (filtered.length === 0) {
+    friendsGrid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-text">Không tìm thấy bạn nào</div>
+      </div>
+    `;
+    return;
+  }
+
+  friendsGrid.innerHTML = filtered.map(friend => {
+    const groupColor = friend.group?.color || '#6b7280';
+    const groupName = friend.group?.name || 'Chưa có tổ';
+    
+    // Avatar theo giới tính
+    const genderEmoji = friend.gender === 'female' ? '👧' : '👦';
+    const genderColor = friend.gender === 'female' ? 
+      'linear-gradient(135deg,#ec4899,#f472b6)' : 
+      'linear-gradient(135deg,#3b82f6,#60a5fa)';
+    
+    return `
+      <div class="friend-card ${friend.isCurrentUser ? 'current-user' : ''}">
+        <div class="friend-avatar" style="background:${friend.isCurrentUser ? 'linear-gradient(135deg,#f59e0b,#fbbf24)' : genderColor};">
+          ${friend.isCurrentUser ? '👤' : genderEmoji}
+        </div>
+        <div class="friend-name">
+          ${escapeHtml(friend.full_name)}
+          ${friend.isCurrentUser ? ' (Bạn)' : ''}
+        </div>
+        <div class="friend-code">Mã HS: ${friend.student_code}</div>
+        <div class="friend-info">
+          <div class="info-badge badge-group" style="background:${groupColor}22;color:${groupColor};">
+            🗂️ ${groupName}
+          </div>
+          ${friend.position ? `
+            <div class="info-badge badge-position">
+              ⭐ ${friend.position}
+            </div>
+          ` : ''}
+        </div>
+        <div class="friend-score">
+          ${friend.discipline_score || 100} điểm
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Search input
+$('#search-input').addEventListener('input', (e) => {
+  searchQuery = e.target.value;
+  renderFriends();
+});
+
+// Filter buttons
+$$('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderFriends();
+  });
+});
+
+(async () => {
+  const user = await initStudentLayout({ 
+    page: 'friends', 
+    title: 'Bạn bè', 
+    sub: 'Danh sách bạn học lớp 12A2'
+  });
+  
+  if (!user) return;
+  
+  await loadFriends();
+})();
+</script>
+</body>
+</html>

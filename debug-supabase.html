@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Debug Supabase Connection</title>
+<style>
+body{font-family:system-ui;padding:20px;max-width:1000px;margin:0 auto;background:#f5f5f5;}
+h1{color:#333;}
+.section{background:white;padding:20px;margin:15px 0;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+button{padding:10px 20px;margin:5px;background:#4f6df5;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;}
+button:hover{background:#3d5bd4;}
+.success{color:#0d9f6e;background:#ecfdf5;padding:10px;border-radius:6px;margin:10px 0;}
+.error{color:#dc2626;background:#fef2f2;padding:10px;border-radius:6px;margin:10px 0;}
+.info{color:#0369a1;background:#f0f9ff;padding:10px;border-radius:6px;margin:10px 0;}
+pre{background:#f8f9fa;padding:15px;border-radius:6px;overflow-x:auto;font-size:12px;}
+table{width:100%;border-collapse:collapse;margin:10px 0;}
+th,td{text-align:left;padding:8px;border-bottom:1px solid #e5e7eb;}
+th{background:#f9fafb;font-weight:600;}
+.status{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;}
+.status.ok{background:#10b981;}
+.status.fail{background:#ef4444;}
+</style>
+</head>
+<body>
+
+<h1>🔍 Supabase Connection Debugger</h1>
+
+<div class="section">
+  <h2>1️⃣ Connection Info</h2>
+  <div id="connection-info">Loading...</div>
+</div>
+
+<div class="section">
+  <h2>2️⃣ Check Tables</h2>
+  <button onclick="checkTables()">Check All Tables</button>
+  <div id="tables-result"></div>
+</div>
+
+<div class="section">
+  <h2>3️⃣ Auth Users</h2>
+  <button onclick="checkAuthUsers()">Check Auth Users</button>
+  <div id="auth-result"></div>
+</div>
+
+<div class="section">
+  <h2>4️⃣ Profiles Table</h2>
+  <button onclick="checkProfiles()">Check Profiles</button>
+  <div id="profiles-result"></div>
+</div>
+
+<div class="section">
+  <h2>5️⃣ Students Table</h2>
+  <button onclick="checkStudents()">Check Students</button>
+  <div id="students-result"></div>
+</div>
+
+<div class="section">
+  <h2>6️⃣ Classes & Groups</h2>
+  <button onclick="checkClassesGroups()">Check Classes & Groups</button>
+  <div id="classes-result"></div>
+</div>
+
+<div class="section">
+  <h2>7️⃣ Test Login</h2>
+  <input type="text" id="test-user" placeholder="Username" style="padding:8px;width:200px;margin:5px;">
+  <input type="password" id="test-pass" placeholder="Password" style="padding:8px;width:200px;margin:5px;">
+  <button onclick="testLogin()">Test Login</button>
+  <div id="login-test-result"></div>
+</div>
+
+<script type="module">
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './assets/js/supabaseClient.js';
+import { signIn, toEmail } from './services/authService.js';
+
+// Display connection info
+document.getElementById('connection-info').innerHTML = `
+  <div class="info">
+    <strong>Supabase URL:</strong> ${SUPABASE_URL}<br>
+    <strong>Anon Key:</strong> ${SUPABASE_ANON_KEY.substring(0, 50)}...<br>
+    <strong>Client Ready:</strong> ${supabase ? '✅ Yes' : '❌ No'}
+  </div>
+`;
+
+window.checkTables = async function() {
+  const result = document.getElementById('tables-result');
+  result.innerHTML = '<div class="info">Checking tables...</div>';
+  
+  const tables = ['profiles', 'classes', 'groups', 'positions', 'students', 'student_positions', 'announcements', 'discipline_categories', 'discipline_logs'];
+  let html = '<table><thead><tr><th>Table</th><th>Status</th><th>Count</th></tr></thead><tbody>';
+  
+  for (const table of tables) {
+    try {
+      const { count, error } = await supabase
+        .from(table)
+        .select('*', { count: 'exact', head: true });
+      
+      if (error) {
+        html += `<tr><td>${table}</td><td><span class="status fail"></span>Error</td><td>${error.message}</td></tr>`;
+      } else {
+        html += `<tr><td>${table}</td><td><span class="status ok"></span>OK</td><td>${count ?? 0} rows</td></tr>`;
+      }
+    } catch (err) {
+      html += `<tr><td>${table}</td><td><span class="status fail"></span>Exception</td><td>${err.message}</td></tr>`;
+    }
+  }
+  
+  html += '</tbody></table>';
+  result.innerHTML = html;
+};
+
+window.checkAuthUsers = async function() {
+  const result = document.getElementById('auth-result');
+  result.innerHTML = '<div class="info">Checking auth users...</div>';
+  
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error) {
+      result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+    } else if (!user) {
+      result.innerHTML = '<div class="info">ℹ️ No user logged in. Login required to see data.</div>';
+    } else {
+      result.innerHTML = `
+        <div class="success">✅ Logged in as:</div>
+        <pre>${JSON.stringify(user, null, 2)}</pre>
+      `;
+    }
+  } catch (err) {
+    result.innerHTML = `<div class="error">❌ Exception: ${err.message}</div>`;
+  }
+};
+
+window.checkProfiles = async function() {
+  const result = document.getElementById('profiles-result');
+  result.innerHTML = '<div class="info">Loading profiles...</div>';
+  
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, role, is_active')
+      .order('full_name');
+    
+    if (error) {
+      result.innerHTML = `<div class="error">❌ Error: ${error.message}<br><br><strong>Possible reasons:</strong><br>1. Table doesn't exist<br>2. RLS blocking access<br>3. Not logged in</div>`;
+    } else if (!data || data.length === 0) {
+      result.innerHTML = '<div class="error">❌ No profiles found!</div>';
+    } else {
+      let html = `<div class="success">✅ Found ${data.length} profiles</div><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Active</th></tr></thead><tbody>`;
+      data.forEach(p => {
+        html += `<tr><td>${p.full_name}</td><td>${p.email}</td><td>${p.role}</td><td>${p.is_active ? '✅' : '❌'}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      result.innerHTML = html;
+    }
+  } catch (err) {
+    result.innerHTML = `<div class="error">❌ Exception: ${err.message}</div>`;
+  }
+};
+
+window.checkStudents = async function() {
+  const result = document.getElementById('students-result');
+  result.innerHTML = '<div class="info">Loading students...</div>';
+  
+  try {
+    const { data, error, count } = await supabase
+      .from('students')
+      .select('id, student_code, gender, class_id, group_id, discipline_score', { count: 'exact' })
+      .limit(10);
+    
+    if (error) {
+      result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+    } else if (!data || data.length === 0) {
+      result.innerHTML = '<div class="error">❌ No students found!</div>';
+    } else {
+      let html = `<div class="success">✅ Found ${count} students (showing first 10)</div><table><thead><tr><th>Code</th><th>Gender</th><th>Score</th></tr></thead><tbody>`;
+      data.forEach(s => {
+        html += `<tr><td>${s.student_code}</td><td>${s.gender}</td><td>${s.discipline_score}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      result.innerHTML = html;
+    }
+  } catch (err) {
+    result.innerHTML = `<div class="error">❌ Exception: ${err.message}</div>`;
+  }
+};
+
+window.checkClassesGroups = async function() {
+  const result = document.getElementById('classes-result');
+  result.innerHTML = '<div class="info">Loading classes & groups...</div>';
+  
+  try {
+    const [classesRes, groupsRes] = await Promise.all([
+      supabase.from('classes').select('*'),
+      supabase.from('groups').select('*')
+    ]);
+    
+    let html = '';
+    
+    if (classesRes.error) {
+      html += `<div class="error">❌ Classes error: ${classesRes.error.message}</div>`;
+    } else {
+      html += `<div class="success">✅ Found ${classesRes.data?.length || 0} classes</div>`;
+      if (classesRes.data && classesRes.data.length > 0) {
+        html += '<pre>' + JSON.stringify(classesRes.data, null, 2) + '</pre>';
+      }
+    }
+    
+    if (groupsRes.error) {
+      html += `<div class="error">❌ Groups error: ${groupsRes.error.message}</div>`;
+    } else {
+      html += `<div class="success">✅ Found ${groupsRes.data?.length || 0} groups</div>`;
+      if (groupsRes.data && groupsRes.data.length > 0) {
+        html += '<pre>' + JSON.stringify(groupsRes.data, null, 2) + '</pre>';
+      }
+    }
+    
+    result.innerHTML = html;
+  } catch (err) {
+    result.innerHTML = `<div class="error">❌ Exception: ${err.message}</div>`;
+  }
+};
+
+window.testLogin = async function() {
+  const result = document.getElementById('login-test-result');
+  const username = document.getElementById('test-user').value;
+  const password = document.getElementById('test-pass').value;
+  
+  if (!username || !password) {
+    result.innerHTML = '<div class="error">Please enter username and password</div>';
+    return;
+  }
+  
+  result.innerHTML = '<div class="info">Testing login...</div>';
+  
+  try {
+    const email = toEmail(username);
+    result.innerHTML += `<div class="info">Email: ${email}</div>`;
+    
+    const loginResult = await signIn(username, password);
+    result.innerHTML = `
+      <div class="success">✅ Login successful!</div>
+      <pre>${JSON.stringify(loginResult, null, 2)}</pre>
+      <button onclick="location.reload()">Reload to check logged in status</button>
+    `;
+  } catch (err) {
+    result.innerHTML = `<div class="error">❌ Login failed: ${err.message}</div>`;
+  }
+};
+
+// Auto-check on load
+window.addEventListener('load', () => {
+  checkTables();
+  checkAuthUsers();
+});
+</script>
+
+</body>
+</html>

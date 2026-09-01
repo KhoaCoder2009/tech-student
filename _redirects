@@ -7,9 +7,7 @@
 /admin/students-detail /admin/students-detail.html 200
 /admin/groups /admin/groups.html 200
 /admin/positions /admin/positions.html 200
-/admin/seating /admin/seating.html 200
 /admin/discipline /admin/discipline.html 200
-/admin/set-discipline-score /admin/set-discipline-score.html 200
 /admin/announcements /admin/announcements.html 200
 /admin/accounts /admin/accounts.html 200
 /admin/profile /admin/profile.html 200
@@ -18,12 +16,16 @@
 # Teacher (GVCN) routes
 /teacher/dashboard /teacher/dashboard.html 200
 
-# Student routes
+# Student routes (updated)
+/student /student/home.html 200
+/student/home /student/home.html 200
 /student/dashboard /student/dashboard.html 200
-/student/schedule /student/schedule.html 200
-/student/classmates /student/classmates.html 200
-/student/mygroup /student/mygroup.html 200
+/student/announcements /student/announcements.html 200
+/student/friends /student/friends.html 200
 /student/discipline /student/discipline.html 200
+/student/mygroup /student/mygroup.html 200
+/student/profile /student/profile.html 200
+/student/change-password /student/change-password.html 200
 
 # Login
 /login /login.html 200
