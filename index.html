@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CLASS MANAGEMENT</title>
+<link rel="icon" type="image/png" href="logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -269,6 +270,7 @@ dialog::backdrop{background:var(--backdrop)}
   <nav class="side-nav" aria-label="Điều hướng chính">
     <button class="side-link" id="side-log" type="button" aria-label="Sổ ghi nhận" title="Sổ ghi nhận" aria-current="page"><span class="side-icon" aria-hidden="true">▤</span><span>Sổ ghi nhận</span></button>
     <button class="side-link" id="side-mx" type="button" aria-label="Bảng tổng hợp" title="Bảng tổng hợp"><span class="side-icon" aria-hidden="true">▦</span><span>Bảng tổng hợp</span></button>
+    <a class="side-link" href="truc-nhat.html" aria-label="Phân công trực nhật" title="Phân công trực nhật"><span class="side-icon" aria-hidden="true">📋</span><span>Phân công trực nhật</span></a>
   </nav>
   <div class="side-actions" id="side-actions">
     <button class="btn" id="btn-settings" type="button" aria-label="Cài đặt" title="Cài đặt"><span class="side-icon" aria-hidden="true">⚙</span><span>Cài đặt</span></button>
@@ -862,11 +864,11 @@ function deleteEntry(id){
   var list=cur();if(!list)return;
   var i=list.findIndex(function(e){return e.id===id;});if(i<0)return;
   var e=list.splice(i,1)[0],wk=S.week;
-  markDirty(wk);renderLog();updateSummary();
+  markDirty(wk);renderLog();updateSummary();renderAnalytics();
   toast('Đã xóa dòng.',{label:'Hoàn tác',fn:function(){
     var l=S.cache[wk];if(!l)return;
     l.splice(Math.min(i,l.length),0,e);markDirty(wk);
-    if(S.week===wk&&S.tab==='log'){renderLog();updateSummary();}
+    if(S.week===wk&&S.tab==='log'){renderLog();updateSummary();renderAnalytics();}
   }});
 }
 function onFieldInput(ev){
@@ -888,7 +890,7 @@ function onFieldInput(ev){
   else if(f==='note')e.note=t.value;
   else if(f==='pts'){var n=parseFloat(t.value);e.pts=isFinite(n)?n:0;paintPts(t);}
   paintRecorder(tr,e);
-  markDirty(S.week);updateSummary();
+  markDirty(S.week);updateSummary();renderAnalytics();
 }
 function onFieldChange(ev){
   var t=ev.target;if(!t.dataset||t.dataset.f!=='hs')return;

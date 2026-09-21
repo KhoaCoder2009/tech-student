@@ -177,3 +177,15 @@ select id, 'Hồ Quỳnh Kim Thủy', 'academic_monitor'
 from auth.users
 where email = 'kimthuy@edu.vn'
 on conflict (id) do update set display_name = excluded.display_name, role = excluded.role;
+
+-- Duty schedules table (Bảng phân công trực nhật)
+create table if not exists public.duty_schedules (
+  week_start date primary key,
+  schedule jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.duty_schedules enable row level security;
+
+create policy "signed in users can manage duty schedules"
+  on public.duty_schedules for all to authenticated using (true) with check (true);

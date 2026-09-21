@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phân công trực nhật | CLASS MANAGEMENT</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8fafc; --paper:#ffffff; --head:#fff1f2; --field:#f8fafc; --hover:#fff7f7;
+  --ink:#991b1b; --text:#111827; --muted:#6b7280;
+  --line:#e5e7eb; --soft:#fee2e2;
+  --red:#dc2626; --green:#15803d; --focus:#dc2626;
+  --primary:#dc2626; --on-primary:#ffffff;
+  color-scheme:light;
+  box-sizing:border-box;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:16px;line-height:1.5;padding:2rem 1rem}
+.container{max-width:1200px;margin:0 auto}
+.header{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:2rem;padding-bottom:1rem;border-bottom:2px solid var(--line)}
+h1{margin:0;font-size:1.8rem;color:var(--text)}
+.actions{display:flex;gap:.5rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.3rem;min-height:2.5rem;padding:.45rem 1rem;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--text);font:600 .9rem 'Inter',sans-serif;text-decoration:none;cursor:pointer;transition:all .18s ease}
+.btn:hover{background:var(--hover);border-color:#fecaca;transform:translateY(-1px)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.btn.primary:hover{background:#b91c1c;border-color:#b91c1c}
+.week-info{padding:1rem;background:linear-gradient(120deg,#fff 0%,#fff7f7 100%);border:1px solid #fecaca;border-radius:12px;margin-bottom:1.5rem}
+.week-info h2{margin:0 0 .5rem;font-size:1.3rem;color:var(--red)}
+.week-info p{margin:0;color:var(--muted);font-size:.9rem}
+.schedule-wrap{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(17,24,39,.05)}
+.schedule{width:100%;border-collapse:collapse;min-width:900px}
+.schedule th,.schedule td{padding:.75rem .5rem;border:1px solid var(--line);text-align:center;vertical-align:middle}
+.schedule thead th{background:var(--head);color:var(--ink);font-weight:700;font-size:.85rem;position:sticky;top:0;z-index:10}
+.schedule tbody tr:hover td{background:var(--hover)}
+.schedule .day-col{min-width:140px;background:#fff}
+.schedule .period-label{font-weight:700;color:var(--red);font-size:.9rem;min-width:60px;background:var(--soft)}
+.schedule input,.schedule select{width:100%;min-width:120px;padding:.5rem .4rem;border:1px solid transparent;border-radius:7px;background:transparent;font:inherit;font-size:.9rem;text-align:center;transition:all .18s ease}
+.schedule input:hover,.schedule select:hover{border-color:#fecaca;background:var(--field)}
+.schedule input:focus,.schedule select:focus{background:var(--field);border-color:var(--red);outline:0;box-shadow:0 0 0 3px #fee2e2}
+.schedule .empty{color:var(--muted);font-style:italic}
+.status{margin:1rem 0;padding:1rem;border-radius:8px;font-size:.9rem}
+.status.success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
+.status.error{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+.legend{display:flex;flex-wrap:wrap;gap:1rem;margin-top:1rem;padding:1rem;background:var(--field);border-radius:8px;font-size:.85rem}
+.legend-item{display:flex;align-items:center;gap:.5rem}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <h1>📋 Phân công trực nhật</h1>
+    <div class="actions">
+      <button class="btn" id="export-excel" type="button">📥 Xuất Excel</button>
+      <button class="btn" id="save" type="button">💾 Lưu</button>
+      <a class="btn" href="index.html">← Về trang chính</a>
+    </div>
+  </header>
+
+  <div class="week-info">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:1rem">
+        <button class="btn" id="prev-week" type="button" title="Tuần trước">◀</button>
+        <div>
+          <h2 id="week-title" style="margin:0 0 .5rem">Tuần 1 · 5/9 – 11/9/2026</h2>
+          <p style="margin:0;color:var(--muted);font-size:.9rem">Lịch trực nhật từ Thứ 2 đến Thứ 6</p>
+        </div>
+        <button class="btn" id="next-week" type="button" title="Tuần sau">▶</button>
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:.3rem;font-size:.85rem;font-weight:600;color:var(--muted)">Buổi:</label>
+        <select id="session-filter" style="min-width:140px;padding:.6rem .8rem;border:1px solid var(--line);border-radius:10px;background:var(--field);font:inherit;font-size:.95rem;font-weight:700;color:var(--red);cursor:pointer">
+          <option value="morning">🌅 Sáng</option>
+          <option value="afternoon">🌆 Chiều</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="status" class="status" hidden></div>
+
+  <div class="schedule-wrap">
+    <table class="schedule">
+      <thead>
+        <tr>
+          <th>Tiết</th>
+          <th>Thứ 2</th>
+          <th>Thứ 3</th>
+          <th>Thứ 4</th>
+          <th>Thứ 5</th>
+          <th>Thứ 6</th>
+        </tr>
+      </thead>
+      <tbody id="schedule-body">
+        <!-- JavaScript sẽ render bảng -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <span>💡 Gợi ý: Nhập tên học sinh hoặc chọn từ danh sách</span>
+    </div>
+  </div>
+</div>
+
+<datalist id="student-list"></datalist>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="supabase-config.js"></script>
+<script>
+(function(){
+'use strict';
+
+const client = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri'];
+const DAY_NAMES = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
+
+// Cấu trúc dữ liệu: { week_start: 'YYYY-MM-DD', schedule: { morning: { mon: [...], ... }, afternoon: { mon: [...], ... } } }
+let scheduleData = {
+  week_start: getCurrentWeekStart(),
+  schedule: initEmptySchedule()
+};
+
+let studentList = [];
+let hasChanges = false;
+let currentSession = 'morning'; // Buổi hiện tại đang hiển thị
+
+function getCurrentWeekStart() {
+  const today = new Date();
+  const day = today.getDay();
+  const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Thứ 2
+  const monday = new Date(today.setDate(diff));
+  return monday.toISOString().split('T')[0];
+}
+
+function initEmptySchedule() {
+  const schedule = { morning: {}, afternoon: {} };
+  ['morning', 'afternoon'].forEach(session => {
+    DAYS.forEach(day => {
+      schedule[session][day] = ['', '', '', '', ''];
+    });
+  });
+  return schedule;
+}
+
+function formatWeekTitle(weekStart) {
+  const start = new Date(weekStart);
+  const end = new Date(weekStart);
+  end.setDate(end.getDate() + 6);
+  
+  const weekNum = Math.floor((start - new Date(2026, 8, 5)) / (7 * 24 * 60 * 60 * 1000)) + 1;
+  
+  return `Tuần ${weekNum} · ${start.getDate()}/${start.getMonth() + 1} – ${end.getDate()}/${end.getMonth() + 1}/${end.getFullYear()}`;
+}
+
+function renderSchedule() {
+  const tbody = document.getElementById('schedule-body');
+  tbody.innerHTML = '';
+  
+  // Render 5 tiết theo buổi hiện tại
+  for (let period = 0; period < 5; period++) {
+    const tr = document.createElement('tr');
+    
+    // Cột tiết
+    const periodCell = document.createElement('td');
+    periodCell.className = 'period-label';
+    periodCell.textContent = `Tiết ${period + 1}`;
+    tr.appendChild(periodCell);
+    
+    // Các cột thứ (chỉ có input tên)
+    DAYS.forEach(day => {
+      const td = document.createElement('td');
+      td.className = 'day-col';
+      
+      // Input tên học sinh
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Nhập tên...';
+      input.value = scheduleData.schedule[currentSession][day][period] || '';
+      input.dataset.day = day;
+      input.dataset.period = period;
+      input.setAttribute('list', 'student-list');
+      input.addEventListener('input', onInputChange);
+      
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+    
+    tbody.appendChild(tr);
+  }
+}
+
+function onInputChange(e) {
+  const { day, period } = e.target.dataset;
+  const periodIndex = parseInt(period);
+  scheduleData.schedule[currentSession][day][periodIndex] = e.target.value.trim();
+  hasChanges = true;
+}
+
+function switchSession(session) {
+  currentSession = session;
+  document.getElementById('session-filter').value = session;
+  renderSchedule();
+}
+
+function changeWeek(offset) {
+  // Save current data before switching
+  if (hasChanges) {
+    if (!confirm('Bạn có thay đổi chưa lưu. Có muốn chuyển tuần không?')) {
+      return;
+    }
+  }
+  
+  const currentDate = new Date(scheduleData.week_start);
+  currentDate.setDate(currentDate.getDate() + (offset * 7));
+  scheduleData.week_start = currentDate.toISOString().split('T')[0];
+  
+  hasChanges = false;
+  scheduleData.schedule = initEmptySchedule();
+  
+  document.getElementById('week-title').textContent = formatWeekTitle(scheduleData.week_start);
+  loadSchedule();
+}
+
+function exportToExcel() {
+  try {
+    // Tạo workbook mới
+    const wb = XLSX.utils.book_new();
+    
+    // Tạo data cho sheet Sáng
+    const morningData = [
+      ['Phân công trực nhật - BUỔI SÁNG'],
+      [formatWeekTitle(scheduleData.week_start)],
+      [],
+      ['Tiết', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6']
+    ];
+    
+    for (let i = 0; i < 5; i++) {
+      const row = [`Tiết ${i + 1}`];
+      DAYS.forEach(day => {
+        row.push(scheduleData.schedule.morning[day][i] || '');
+      });
+      morningData.push(row);
+    }
+    
+    // Tạo data cho sheet Chiều
+    const afternoonData = [
+      ['Phân công trực nhật - BUỔI CHIỀU'],
+      [formatWeekTitle(scheduleData.week_start)],
+      [],
+      ['Tiết', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6']
+    ];
+    
+    for (let i = 0; i < 5; i++) {
+      const row = [`Tiết ${i + 1}`];
+      DAYS.forEach(day => {
+        row.push(scheduleData.schedule.afternoon[day][i] || '');
+      });
+      afternoonData.push(row);
+    }
+    
+    // Tạo sheets
+    const wsMorning = XLSX.utils.aoa_to_sheet(morningData);
+    const wsAfternoon = XLSX.utils.aoa_to_sheet(afternoonData);
+    
+    // Set column widths
+    wsMorning['!cols'] = [{wch:10}, {wch:20}, {wch:20}, {wch:20}, {wch:20}, {wch:20}];
+    wsAfternoon['!cols'] = [{wch:10}, {wch:20}, {wch:20}, {wch:20}, {wch:20}, {wch:20}];
+    
+    // Add sheets to workbook
+    XLSX.utils.book_append_sheet(wb, wsMorning, 'Buổi Sáng');
+    XLSX.utils.book_append_sheet(wb, wsAfternoon, 'Buổi Chiều');
+    
+    // Generate filename
+    const weekStart = new Date(scheduleData.week_start);
+    const filename = `Truc-nhat-tuan-${weekStart.getDate()}-${weekStart.getMonth()+1}-${weekStart.getFullYear()}.xlsx`;
+    
+    // Download
+    XLSX.writeFile(wb, filename);
+    
+    showStatus('✅ Đã xuất file Excel thành công!', 'success');
+  } catch (err) {
+    console.error('Lỗi xuất Excel:', err);
+    showStatus('❌ Lỗi xuất Excel: ' + err.message, 'error');
+  }
+}
+
+async function loadStudents() {
+  try {
+    const result = await client.from('students').select('name').eq('class_id', 'main').order('sort_order');
+    if (result.error) throw result.error;
+    
+    studentList = result.data.map(s => s.name);
+    
+    // Render datalist
+    const datalist = document.getElementById('student-list');
+    datalist.innerHTML = '';
+    studentList.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      datalist.appendChild(option);
+    });
+  } catch (err) {
+    console.error('Lỗi tải danh sách học sinh:', err);
+  }
+}
+
+async function loadSchedule() {
+  try {
+    const result = await client
+      .from('duty_schedules')
+      .select('*')
+      .eq('week_start', scheduleData.week_start)
+      .maybeSingle();
+    
+    if (result.error && result.error.code !== 'PGRST116') throw result.error;
+    
+    if (result.data && result.data.schedule) {
+      const loadedSchedule = result.data.schedule;
+      
+      // Check if old format and migrate
+      if (loadedSchedule.mon && !loadedSchedule.morning && !loadedSchedule.afternoon) {
+        // Old format: { mon: [{session, student}, ...], ... }
+        scheduleData.schedule = { morning: {}, afternoon: {} };
+        DAYS.forEach(day => {
+          scheduleData.schedule.morning[day] = [];
+          scheduleData.schedule.afternoon[day] = [];
+          
+          if (Array.isArray(loadedSchedule[day])) {
+            loadedSchedule[day].forEach(item => {
+              if (item.session === 'morning' && scheduleData.schedule.morning[day].length < 5) {
+                scheduleData.schedule.morning[day].push(item.student || '');
+              } else if (item.session === 'afternoon' && scheduleData.schedule.afternoon[day].length < 5) {
+                scheduleData.schedule.afternoon[day].push(item.student || '');
+              }
+            });
+          }
+          
+          // Fill remaining slots
+          while (scheduleData.schedule.morning[day].length < 5) scheduleData.schedule.morning[day].push('');
+          while (scheduleData.schedule.afternoon[day].length < 5) scheduleData.schedule.afternoon[day].push('');
+        });
+      } else if (loadedSchedule.morning || loadedSchedule.afternoon) {
+        // New format
+        scheduleData.schedule = loadedSchedule;
+      }
+    }
+    
+    renderSchedule();
+    
+  } catch (err) {
+    console.error('Lỗi tải lịch trực:', err);
+    showStatus('Lỗi tải dữ liệu: ' + err.message, 'error');
+  }
+}
+
+async function saveSchedule() {
+  const btn = document.getElementById('save');
+  btn.disabled = true;
+  btn.textContent = '💾 Đang lưu...';
+  
+  try {
+    const result = await client
+      .from('duty_schedules')
+      .upsert({
+        week_start: scheduleData.week_start,
+        schedule: scheduleData.schedule,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'week_start' });
+    
+    if (result.error) throw result.error;
+    
+    hasChanges = false;
+    showStatus('✅ Đã lưu thành công!', 'success');
+  } catch (err) {
+    console.error('Lỗi lưu:', err);
+    showStatus('❌ Lỗi: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 Lưu';
+  }
+}
+
+function showStatus(message, type) {
+  const status = document.getElementById('status');
+  status.textContent = message;
+  status.className = 'status ' + type;
+  status.hidden = false;
+  setTimeout(() => {
+    status.hidden = true;
+  }, 3000);
+}
+
+// Check quyền
+client.auth.getSession().then(async (result) => {
+  if (!result.data.session) {
+    window.location.replace('login.html');
+    return;
+  }
+  
+  const profile = await client.from('profiles').select('role').eq('id', result.data.session.user.id).maybeSingle();
+  if (profile.error || !profile.data || !['teacher', 'class_monitor', 'academic_monitor', 'secretary'].includes(profile.data.role)) {
+    showStatus('Bạn không có quyền chỉnh sửa lịch trực nhật.', 'error');
+    document.querySelectorAll('input').forEach(input => input.disabled = true);
+    document.getElementById('save').disabled = true;
+    return;
+  }
+  
+  // Load data
+  await loadStudents();
+  await loadSchedule();
+  
+  document.getElementById('week-title').textContent = formatWeekTitle(scheduleData.week_start);
+});
+
+// Save button
+document.getElementById('save').addEventListener('click', saveSchedule);
+
+// Export Excel button
+document.getElementById('export-excel').addEventListener('click', exportToExcel);
+
+// Week navigation
+document.getElementById('prev-week').addEventListener('click', function() {
+  changeWeek(-1);
+});
+
+document.getElementById('next-week').addEventListener('click', function() {
+  changeWeek(1);
+});
+
+// Session filter
+document.getElementById('session-filter').addEventListener('change', function(e) {
+  switchSession(e.target.value);
+});
+
+// Cảnh báo khi thoát có thay đổi
+window.addEventListener('beforeunload', (e) => {
+  if (hasChanges) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+})();
+</script>
+</body>
+</html>
