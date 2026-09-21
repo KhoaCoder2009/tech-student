@@ -3,7 +3,7 @@
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null,
-  role text not null check (role in ('teacher', 'class_monitor', 'academic_monitor'))
+  role text not null check (role in ('teacher', 'class_monitor', 'academic_monitor', 'secretary', 'student'))
 );
 
 create table if not exists public.class_settings (
@@ -15,6 +15,8 @@ create table if not exists public.students (
   class_id text not null,
   name text not null,
   sort_order integer not null default 0,
+  base_points integer not null default 100,
+  current_points integer not null default 100,
   primary key (class_id, name)
 );
 
@@ -72,48 +74,89 @@ insert into public.class_settings (class_id, class_name)
 values ('main', '')
 on conflict (class_id) do nothing;
 
-insert into public.students (class_id, name, sort_order) values
-  ('main', 'Nguyễn Quốc An', 1),
-  ('main', 'Nguyễn Hoàng Bảo Anh', 2),
-  ('main', 'Huỳnh Minh Ánh', 3),
-  ('main', 'Nguyễn Bảo Châu', 4),
-  ('main', 'Nguyễn Ngọc Minh Châu', 5),
-  ('main', 'Nguyễn Thị Mỹ Duyên', 6),
-  ('main', 'Nguyễn Thị Anh Đào', 7),
-  ('main', 'Trần Tiến Đạt', 8),
-  ('main', 'Võ Thanh Giang', 9),
-  ('main', 'Nguyễn Hoàng Hải', 10),
-  ('main', 'Mai Gia Hân', 11),
-  ('main', 'Bùi Quốc Huy', 12),
-  ('main', 'Lê Xuân Nhật Huy', 13),
-  ('main', 'Lê Nguyễn Đăng Khoa', 14),
-  ('main', 'Trần Đăng Khoa', 15),
-  ('main', 'Nguyễn Thị Xuân Linh', 16),
-  ('main', 'Phạm Tấn Lực', 17),
-  ('main', 'Trần Thị Ngọc My', 18),
-  ('main', 'Nguyễn Trung Nghĩa', 19),
-  ('main', 'Mai Như Ngọc', 20),
-  ('main', 'Võ Hữu Ngọc', 21),
-  ('main', 'Nguyễn Thị Thu Nguyệt', 22),
-  ('main', 'Nguyễn Thanh Tuyết Nhi', 23),
-  ('main', 'Lâm Tâm Như', 24),
-  ('main', 'Dương Chấn Phong', 25),
-  ('main', 'Lâm Thiên Phúc', 26),
-  ('main', 'Từ Thị Mai Phương', 27),
-  ('main', 'Nguyễn Hoàng Sơn', 28),
-  ('main', 'Nguyễn Minh Tâm', 29),
-  ('main', 'Nguyễn Hoàng Thái', 30),
-  ('main', 'Trịnh Minh Thiên', 31),
-  ('main', 'Trần Thị Ngọc Thùy', 32),
-  ('main', 'Hồ Quỳnh Kim Thủy', 33),
-  ('main', 'Phạm Thị Ngọc Trâm', 34),
-  ('main', 'Quách Thị Thanh Tuyền', 35),
-  ('main', 'Trần Minh Tướng', 36),
-  ('main', 'Nguyễn Thị Vi', 37),
-  ('main', 'Đinh Thị Yến Vy', 38),
-  ('main', 'Mai Phương Vy', 39),
-  ('main', 'Trần Trúc Vy', 40)
+insert into public.students (class_id, name, sort_order, base_points, current_points) values
+  ('main', 'Nguyễn Quốc An', 1, 100, 100),
+  ('main', 'Nguyễn Hoàng Bảo Anh', 2, 100, 100),
+  ('main', 'Huỳnh Minh Ánh', 3, 100, 100),
+  ('main', 'Nguyễn Bảo Châu', 4, 100, 100),
+  ('main', 'Nguyễn Ngọc Minh Châu', 5, 100, 100),
+  ('main', 'Nguyễn Thị Mỹ Duyên', 6, 100, 100),
+  ('main', 'Nguyễn Thị Anh Đào', 7, 100, 100),
+  ('main', 'Trần Tiến Đạt', 8, 100, 100),
+  ('main', 'Võ Thanh Giang', 9, 100, 100),
+  ('main', 'Nguyễn Hoàng Hải', 10, 100, 100),
+  ('main', 'Mai Gia Hân', 11, 100, 100),
+  ('main', 'Bùi Quốc Huy', 12, 100, 100),
+  ('main', 'Lê Xuân Nhật Huy', 13, 100, 100),
+  ('main', 'Lê Nguyễn Đăng Khoa', 14, 100, 100),
+  ('main', 'Trần Đăng Khoa', 15, 100, 100),
+  ('main', 'Nguyễn Thị Xuân Linh', 16, 100, 100),
+  ('main', 'Phạm Tấn Lực', 17, 100, 100),
+  ('main', 'Trần Thị Ngọc My', 18, 100, 100),
+  ('main', 'Nguyễn Trung Nghĩa', 19, 100, 100),
+  ('main', 'Mai Như Ngọc', 20, 100, 100),
+  ('main', 'Võ Hữu Ngọc', 21, 100, 100),
+  ('main', 'Nguyễn Thị Thu Nguyệt', 22, 100, 100),
+  ('main', 'Nguyễn Thanh Tuyết Nhi', 23, 100, 100),
+  ('main', 'Lâm Tâm Như', 24, 100, 100),
+  ('main', 'Dương Chấn Phong', 25, 100, 100),
+  ('main', 'Lâm Thiên Phúc', 26, 100, 100),
+  ('main', 'Từ Thị Mai Phương', 27, 100, 100),
+  ('main', 'Nguyễn Hoàng Sơn', 28, 100, 100),
+  ('main', 'Nguyễn Minh Tâm', 29, 100, 100),
+  ('main', 'Nguyễn Hoàng Thái', 30, 100, 100),
+  ('main', 'Trịnh Minh Thiên', 31, 100, 100),
+  ('main', 'Trần Thị Ngọc Thùy', 32, 100, 100),
+  ('main', 'Hồ Quỳnh Kim Thủy', 33, 100, 100),
+  ('main', 'Phạm Thị Ngọc Trâm', 34, 100, 100),
+  ('main', 'Quách Thị Thanh Tuyền', 35, 100, 100),
+  ('main', 'Trần Minh Tướng', 36, 100, 100),
+  ('main', 'Nguyễn Thị Vi', 37, 100, 100),
+  ('main', 'Đinh Thị Yến Vy', 38, 100, 100),
+  ('main', 'Mai Phương Vy', 39, 100, 100),
+  ('main', 'Trần Trúc Vy', 40, 100, 100)
 on conflict (class_id, name) do update set sort_order = excluded.sort_order;
+
+-- Function tự động cập nhật điểm học sinh
+create or replace function update_student_points()
+returns trigger as $$
+declare
+  student_total integer;
+begin
+  -- Tính tổng điểm của học sinh
+  select coalesce(sum(points), 0) into student_total
+  from violation_records
+  where class_id = coalesce(NEW.class_id, OLD.class_id)
+    and student_name = coalesce(NEW.student_name, OLD.student_name);
+  
+  -- Cập nhật current_points = 100 + tổng điểm (tối thiểu 0)
+  update students
+  set current_points = greatest(0, 100 + student_total)
+  where class_id = coalesce(NEW.class_id, OLD.class_id)
+    and name = coalesce(NEW.student_name, OLD.student_name);
+  
+  return coalesce(NEW, OLD);
+end;
+$$ language plpgsql;
+
+-- Trigger khi thêm/sửa/xóa violation_records
+drop trigger if exists update_points_on_insert on violation_records;
+create trigger update_points_on_insert
+  after insert on violation_records
+  for each row
+  execute function update_student_points();
+
+drop trigger if exists update_points_on_update on violation_records;
+create trigger update_points_on_update
+  after update on violation_records
+  for each row
+  execute function update_student_points();
+
+drop trigger if exists update_points_on_delete on violation_records;
+create trigger update_points_on_delete
+  after delete on violation_records
+  for each row
+  execute function update_student_points();
 
 -- Tao 3 user trong Authentication truoc, sau do thay 3 email ben duoi
 -- bang email thuc te va chay khoi lenh nay de gan vai tro.

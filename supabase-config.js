@@ -1,0 +1,4 @@
+window.SUPABASE_CONFIG={
+  url:'https://zlabisrheehbpgfpqewv.supabase.co',
+  anonKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpsYWJpc3JoZWVoYnBnZnBxZXd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MDEyNDksImV4cCI6MjEwNTQ3NzI0OX0.06SuB-RhULcqNWE2hK-hRaIcL2VSUASoQoEjtLoUMLY'
+};

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Đăng nhập | CLASS MANAGEMENT</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg:#f8fafc;--paper:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--red:#dc2626;--red-dark:#b91c1c;--soft:#fff1f2}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:1rem;background:var(--bg);color:var(--text);font:16px/1.5 'Inter',system-ui,sans-serif}
+.auth-shell{width:min(440px,100%);padding:2rem;background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 50px rgba(17,24,39,.1)}
+.login-layout{display:grid;grid-template-columns:minmax(18rem,1fr) minmax(22rem,28rem);gap:4rem;align-items:center;width:min(980px,100%)}
+.login-visual{position:relative;min-height:26rem;padding:2rem;border-radius:24px;background:#fff1f2;border:1px solid #fecaca;overflow:hidden}.login-visual::after{content:"";position:absolute;width:18rem;height:18rem;right:-7rem;bottom:-8rem;border:1px solid #fca5a5;border-radius:50%;box-shadow:0 0 0 2rem rgba(220,38,38,.05),0 0 0 4rem rgba(220,38,38,.04)}.login-visual img{position:absolute;right:2rem;bottom:2rem;width:10rem;height:10rem;object-fit:contain}.visual-kicker{margin:0 0 .7rem;color:var(--red);font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.login-visual h2{max-width:24rem;margin:0;color:var(--text);font-size:2.2rem;line-height:1.1}.login-visual p{max-width:20rem;margin:.8rem 0 0;color:var(--muted)}
+.mark{display:block;width:12rem;height:7rem;margin-bottom:1rem;object-fit:contain;object-position:left center}
+.login-layout h1{font-family:'Inter',system-ui,sans-serif}
+@media(max-width:760px){.login-layout{grid-template-columns:1fr;gap:1rem}.login-visual{min-height:10rem;padding:1.25rem}.login-visual h2{font-size:1.5rem;max-width:17rem}.login-visual p{font-size:.85rem;max-width:18rem}.login-visual img{right:1rem;bottom:.75rem;width:6rem;height:6rem}.auth-shell{padding:1.5rem}}
+h1{margin:0;font:700 1.65rem/1.2 'Inter',system-ui,sans-serif}p{color:var(--muted);margin:.5rem 0 1.5rem}.field{display:block;margin:1rem 0}.field span{display:block;margin-bottom:.35rem;font-weight:600}.field input{width:100%;padding:.7rem .75rem;border:1px solid var(--line);border-radius:9px;background:#f8fafc;font:inherit}.field input:focus{outline:0;border-color:var(--red);box-shadow:0 0 0 3px #fee2e2}.btn{width:100%;min-height:2.8rem;border:1px solid var(--red);border-radius:9px;background:var(--red);color:#fff;font:600 1rem 'Inter',sans-serif;cursor:pointer}.btn:hover{background:var(--red-dark)}.btn:disabled{opacity:.6;cursor:wait}.error{min-height:1.5rem;margin:.75rem 0 0;color:var(--red);font-size:.875rem}.note{margin:1.25rem 0 0;padding-top:1rem;border-top:1px solid var(--line);font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="login-layout">
+  <section class="login-visual" aria-label="Không gian quản lý lớp học">
+    <p class="visual-kicker">Modern education platform</p>
+    <h2>Giữ nhịp lớp học rõ ràng mỗi ngày.</h2>
+    <p>Ghi nhận nề nếp, theo dõi tiến độ và kết nối hoạt động lớp trong một không gian tập trung.</p>
+    <img src="logo.png" alt="">
+  </section>
+  <main class="auth-shell">
+    <img class="mark" src="logo.png" alt="CLASS MANAGEMENT">
+    <h1>Đăng nhập</h1>
+    <form id="login-form">
+      <label class="field"><span>Tài khoản</span><input id="email" type="email" autocomplete="username" required></label>
+      <label class="field"><span>Mật khẩu</span><input id="password" type="password" autocomplete="current-password" required></label>
+      <button class="btn" id="submit" type="submit">Đăng nhập</button>
+      <p class="error" id="error" role="alert"></p>
+    </form>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+(function(){
+'use strict';
+var client=window.supabase.createClient(window.SUPABASE_CONFIG.url,window.SUPABASE_CONFIG.anonKey),form=document.querySelector('#login-form'),button=document.querySelector('#submit'),error=document.querySelector('#error');
+client.auth.getSession().then(function(result){if(result.data.session)window.location.replace('index.html');});
+form.addEventListener('submit',async function(event){
+  event.preventDefault();button.disabled=true;error.textContent='';
+  try{var result=await client.auth.signInWithPassword({email:document.querySelector('#email').value.trim(),password:document.querySelector('#password').value});if(result.error)throw result.error;window.location.replace('index.html');}
+  catch(err){error.textContent=err.message||'Đăng nhập không thành công.';button.disabled=false;}
+});
+})();
+</script>
+</body>
+</html>
