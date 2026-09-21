@@ -462,7 +462,7 @@ function dmy(s){var d=fromISO(s);return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.g
 function weekLabel(ws){return 'Tuần '+schoolWeekNumber(ws)+' · '+dm(ws)+' – '+dmy(addDays(ws,6));}
 function norm(s){return String(s||'').trim().replace(/\s+/g,' ');}
 function keyOf(s){return norm(s).toLowerCase();}
-function fmtPts(p){p=Number(p)||0;return p>0?'+'+p:(p<0?'−'+Math.abs(p):'0');}
+function fmtPts(p){p=Number(p)||0;return p<0?'−'+Math.abs(p):String(p);}
 function slug(s){
   var t=String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
   return t||'lop';

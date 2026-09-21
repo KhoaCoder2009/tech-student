@@ -92,7 +92,7 @@ function formatDate(dateStr) {
 }
 
 function formatPoints(p) {
-  return p > 0 ? '+' + p : (p < 0 ? '−' + Math.abs(p) : '0');
+  return p < 0 ? '−' + Math.abs(p) : String(p);
 }
 
 async function loadData() {
