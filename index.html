@@ -320,6 +320,13 @@ body.sidebar-collapsed .utility-icon{width:2.35rem;justify-content:center;gap:0}
 @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>
 <style>html,body,button,input,select,textarea,summary,table{font-family:'Inter',system-ui,sans-serif!important}</style>
+<style>
+@keyframes page-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes page-leave{from{opacity:1}to{opacity:0;transform:translateY(-3px)}}
+body{animation:page-enter .24s ease-out both}
+body.page-leaving{animation:page-leave .16s ease-in both;pointer-events:none}
+@media (prefers-reduced-motion:reduce){body{animation:none}body.page-leaving{animation:none}}
+</style>
 </head>
 <body>
 <div class="mobile-utility">
@@ -1484,6 +1491,15 @@ async function boot(){
 bindUI();
 boot();
 })();
+</script>
+<script>
+document.addEventListener('click',function(event){
+  var link=event.target.closest('a[href]');
+  if(!link||event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||link.target==='_blank'||link.hasAttribute('download'))return;
+  var url=new URL(link.href,location.href);
+  if(url.origin!==location.origin||url.href===location.href)return;
+  event.preventDefault();document.body.classList.add('page-leaving');setTimeout(function(){location.href=url.href;},160);
+});
 </script>
 </body>
 </html>
