@@ -170,6 +170,11 @@ create trigger update_points_on_delete
 
 -- Tao user trong Authentication truoc, sau do chay cac lenh ben duoi
 -- de gan vai tro cho profile.
+-- Chay migration nay ca khi bang profiles da ton tai tu truoc.
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check
+  check (role in ('teacher', 'class_monitor', 'academic_monitor', 'secretary', 'labor_monitor', 'student'));
+
 insert into public.profiles (id, display_name, role)
 select id, 'Trần Đăng Khoa', 'class_monitor'
 from auth.users
