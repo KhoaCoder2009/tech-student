@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phân công trực nhật | Quản lí nề nếp</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8fafc; --paper:#ffffff; --head:#fff1f2; --field:#f8fafc; --hover:#fff7f7;
+  --ink:#991b1b; --text:#111827; --muted:#6b7280;
+  --line:#e5e7eb; --soft:#fee2e2;
+  --red:#dc2626; --green:#15803d; --focus:#dc2626;
+  --primary:#dc2626; --on-primary:#ffffff; --sidebar-icon-gap:.55rem;
+  color-scheme:light dark;
+  box-sizing:border-box;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,'Segoe UI',sans-serif;font-size:15px;line-height:1.5}
+body.theme-dark{--bg:#0f1720;--paper:#182632;--head:#243946;--field:#111e29;--hover:#2a3d4b;--text:#edf3f5;--muted:#a9b8c1;--line:#344957;--ink:#ffc0b7;--soft:#4a2d35;--red:#f0786c;--green:#59c792;--focus:#f0786c;--primary:#e9685d}
+body.theme-dark .sidebar,body.theme-dark .header,body.theme-dark .week-info,body.theme-dark .schedule-wrap{background:var(--paper);border-color:var(--line)}
+body.theme-dark .week-info{background:linear-gradient(120deg,#182632 0%,#293941 100%);border-color:#6a4a50}
+body.theme-dark .utility-icon:hover .utility-symbol{background:#314653}
+body.theme-dark .utility-icon[aria-pressed="true"] .utility-symbol{border-color:#d5e0e5;box-shadow:0 0 0 1px #d5e0e5}
+body.theme-dark .mobile-utility{background:rgba(24,38,50,.94)}
+body.theme-dark .schedule .day-col{background:var(--paper)}
+body.theme-dark .status.error{background:#4a2d35;color:#ffc0b7;border-color:#8a5960}
+.page{min-height:100vh;margin-left:270px;padding:2rem 2rem 4rem}
+.container{max-width:1200px;margin:0 auto}
+.sidebar{position:fixed;inset:0 auto 0 0;z-index:20;display:flex;flex-direction:column;width:248px;padding:1.5rem 1rem;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:1px solid rgba(229,231,235,.9);box-shadow:8px 0 24px rgba(17,24,39,.06)}
+.brand{display:flex;align-items:center;gap:.7rem;padding:.25rem .35rem 1.25rem;border-bottom:1px solid var(--line);cursor:pointer}
+.brand-mark{display:block;width:2.6rem;height:2.6rem;object-fit:contain}
+.brand>div{display:block}
+.side-nav{display:grid;align-items:center;gap:var(--sidebar-icon-gap);width:100%;padding:0;border:0;background:transparent;box-shadow:none}
+.side-link{display:flex;align-items:center;justify-content:flex-start;gap:.65rem;width:100%;min-height:2.35rem;padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted);font:600 .9rem Arial,'Segoe UI',sans-serif;text-decoration:none;text-align:left;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
+.side-link:hover,.side-link[aria-current="page"]{background:var(--head);color:var(--red);transform:translateY(-1px)}
+.side-link>span:not(.side-icon){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side-icon{display:grid;place-items:center;width:2.35rem;height:2.35rem;flex:0 0 2.35rem;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:currentColor;font-size:1rem;line-height:1;box-shadow:0 1px 4px rgba(17,24,39,.04)}
+.side-icon svg{width:1.15rem;height:1.15rem;stroke-width:2}
+.side-link>span:not(.side-icon){display:inline}
+.side-actions{display:grid;gap:.5rem;margin-top:auto}
+.side-actions .btn{width:100%;justify-content:center;padding-left:0;padding-right:0}
+.side-actions .btn>span:not(.side-icon){display:none}
+.mobile-sidebar-toggle,.mobile-sidebar-backdrop{display:none}
+.mobile-utility{display:none}
+.utility-cluster{display:flex;flex-direction:column;align-items:center;gap:var(--sidebar-icon-gap);width:100%;padding:0;border:0;background:transparent;box-shadow:none}
+.sidebar-utilities{display:grid;align-items:center;gap:var(--sidebar-icon-gap);width:100%;margin-top:var(--sidebar-icon-gap)}
+.utility-icon{display:flex;align-items:center;width:100%;height:2.35rem;gap:.65rem;padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted);font:1.05rem Arial,'Segoe UI',sans-serif;text-decoration:none;cursor:pointer;box-shadow:none}
+.utility-label{display:inline;min-width:0;overflow:hidden;color:var(--text);font:600 .8rem Arial,'Segoe UI',sans-serif;line-height:1.25;text-align:left;text-overflow:ellipsis;white-space:nowrap}
+.mobile-sidebar-toggle{display:none}
+.utility-icon:nth-child(1){color:#f2bd3d}.utility-icon:nth-child(2){color:#5e3b8f}.utility-icon:nth-child(3){color:#e9af2e}.utility-icon:nth-child(4){color:#b9add7}.utility-icon:nth-child(5){color:var(--red)}
+.utility-symbol{display:grid;place-items:center;width:2.35rem;height:2.35rem;flex:0 0 2.35rem;border:1px solid var(--line);border-radius:10px;background:var(--paper);box-shadow:0 1px 4px rgba(17,24,39,.04)}
+.utility-icon:hover .utility-symbol{background:#fff8e7}.utility-icon[aria-pressed="true"] .utility-symbol{border-color:#111827;box-shadow:0 0 0 1px #111827}
+.utility-symbol svg,.btn svg{width:1.05rem;height:1.05rem;stroke-width:2}
+@media (min-width:768px){.utility-icon{justify-content:flex-start}}
+body.sidebar-collapsed .sidebar{width:76px;padding-left:.65rem;padding-right:.65rem}
+body.sidebar-collapsed .page{margin-left:98px}
+body.sidebar-collapsed .brand{justify-content:center;padding-left:0;padding-right:0}
+body.sidebar-collapsed .brand>div{display:none}
+body.sidebar-collapsed .side-link{justify-content:center;padding-left:0;padding-right:0}
+body.sidebar-collapsed .side-link>span:not(.side-icon){display:none}
+body.sidebar-collapsed .utility-icon{width:2.35rem;justify-content:center;gap:0}
+body.sidebar-collapsed .utility-label{display:none}
+.header{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:2rem;padding-bottom:1rem;border-bottom:2px solid var(--line)}
+h1{margin:0;font-size:1.8rem;color:var(--text)}
+.actions{display:flex;gap:.5rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.3rem;min-height:2.5rem;padding:.45rem 1rem;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--text);font:600 .9rem Arial,'Segoe UI',sans-serif;text-decoration:none;cursor:pointer;transition:all .18s ease}
+.btn:hover{background:var(--hover);border-color:#fecaca;transform:translateY(-1px)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.btn.primary:hover{background:#b91c1c;border-color:#b91c1c}
+.week-info{padding:1rem;background:linear-gradient(120deg,#fff 0%,#fff7f7 100%);border:1px solid #fecaca;border-radius:12px;margin-bottom:1.5rem}
+.week-info h2{margin:0 0 .5rem;font-size:1.3rem;color:var(--red)}
+.week-info p{margin:0;color:var(--muted);font-size:.9rem}
+.schedule-wrap{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(17,24,39,.05)}
+.schedule{width:100%;border-collapse:collapse;min-width:900px}
+.schedule th,.schedule td{padding:.75rem .5rem;border:1px solid var(--line);text-align:center;vertical-align:middle}
+.schedule thead th{background:var(--head);color:var(--ink);font-weight:700;font-size:.85rem;position:sticky;top:0;z-index:10}
+.schedule tbody tr:hover td{background:var(--hover)}
+.schedule .day-col{min-width:140px;background:#fff}
+.schedule .period-label{font-weight:700;color:var(--red);font-size:.9rem;min-width:60px;background:var(--soft)}
+.schedule input,.schedule select{width:100%;min-width:120px;padding:.5rem .4rem;border:1px solid transparent;border-radius:7px;background:transparent;font:inherit;font-size:.9rem;text-align:center;transition:all .18s ease}
+.schedule input:hover,.schedule select:hover{border-color:#fecaca;background:var(--field)}
+.schedule input:focus,.schedule select:focus{background:var(--field);border-color:var(--red);outline:0;box-shadow:0 0 0 3px #fee2e2}
+.schedule .empty{color:var(--muted);font-style:italic}
+.status{margin:1rem 0;padding:1rem;border-radius:8px;font-size:.9rem}
+.status.success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
+.status.error{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
+.legend{display:flex;flex-wrap:wrap;gap:1rem;margin-top:1rem;padding:1rem;background:var(--field);border-radius:8px;font-size:.85rem}
+.legend-item{display:flex;align-items:center;gap:.5rem}
+.account-dialog{width:min(420px,calc(100% - 2rem));padding:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--text);box-shadow:0 20px 50px rgba(17,24,39,.18)}
+.account-dialog::backdrop{background:rgba(17,24,39,.45)}
+.account-dialog-body{padding:1.25rem}.account-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem;border-bottom:1px solid var(--line)}
+.account-dialog-head h2{margin:0;font-size:1.15rem}.account-details{display:grid;gap:.65rem;margin:0}.account-details div{display:flex;justify-content:space-between;gap:1rem}.account-details dt{color:var(--muted)}.account-details dd{margin:0;font-weight:700;text-align:right}
+.activity-dialog{width:min(560px,calc(100% - 2rem));max-height:min(680px,calc(100% - 2rem));padding:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--text);box-shadow:0 20px 50px rgba(17,24,39,.18)}
+.activity-dialog::backdrop{background:rgba(17,24,39,.45)}.activity-list{display:grid;gap:.55rem;max-height:28rem;overflow:auto;padding:1.1rem 1.25rem}.activity-item{display:grid;gap:.15rem;padding:.7rem .8rem;border:1px solid var(--line);border-radius:9px;background:var(--field)}.activity-main{display:flex;justify-content:space-between;gap:.8rem}.activity-main strong{font-size:.85rem}.activity-time{color:var(--muted);font-size:.75rem;white-space:nowrap}.activity-detail{color:var(--muted);font-size:.8rem}.activity-empty{padding:2rem 1rem;color:var(--muted);text-align:center}
+@media (max-width:767px){
+  .mobile-utility{position:fixed;top:.75rem;right:.75rem;z-index:40;display:flex;align-items:center;padding:.18rem;border-radius:12px;background:transparent}
+  .utility-cluster{flex-direction:column;align-items:stretch;width:100%}
+  .mobile-sidebar-toggle{display:grid;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:none}.mobile-sidebar-toggle img{width:1.85rem;height:1.85rem;object-fit:contain}
+  .utility-icon{width:100%;justify-content:flex-start;gap:.55rem;padding:0 .55rem}.utility-icon .utility-label{display:inline}
+  .mobile-sidebar-backdrop{position:fixed;inset:0;z-index:20;background:rgba(17,24,39,.28)}
+  .sidebar{width:248px;padding:1.25rem 1rem;overflow-x:hidden;transform:translateX(-110%);transition:transform .22s ease;box-shadow:12px 0 32px rgba(17,24,39,.14)}
+  body.mobile-sidebar-open .sidebar{transform:translateX(0)}
+  body.mobile-sidebar-open .mobile-sidebar-backdrop{display:block}
+  .brand{display:flex;justify-content:flex-start;padding:.25rem .35rem 1.25rem}
+  .brand>div{display:block}
+  .side-nav{display:grid}
+  .side-link{justify-content:flex-start;padding:0}
+  .side-link>span:not(.side-icon),.side-actions .btn>span:not(.side-icon){display:inline}
+  .side-actions .btn{justify-content:flex-start;padding:.45rem 1rem}
+  .page{margin-left:0;padding:4.5rem .75rem 3rem}
+  body.sidebar-collapsed .sidebar{width:248px;padding-left:1rem;padding-right:1rem}
+  body.sidebar-collapsed .page{margin-left:0}
+  .header{align-items:flex-start;flex-direction:column}
+  .actions{width:100%;flex-wrap:wrap}
+}
+</style>
+<style>html,body,button,input,select,textarea,summary,table{font-family:'Inter',system-ui,sans-serif!important}</style>
+</head>
+<body>
+<div class="mobile-utility">
+  <button class="mobile-sidebar-toggle" id="mobile-sidebar-toggle" type="button" aria-label="Ẩn hoặc hiện menu" title="Ẩn hoặc hiện menu"><img src="logo.png" alt=""></button>
+</div>
+<div class="mobile-sidebar-backdrop" id="mobile-sidebar-backdrop"></div>
+<aside class="sidebar">
+  <div class="brand" title="Mở trang chính">
+    <img class="brand-mark" src="logo.png" alt="Quản lí nề nếp">
+    <div><strong>Quản lí nề nếp</strong><small>Quản lí nề nếp lớp</small></div>
+  </div>
+  <nav class="side-nav" aria-label="Điều hướng chính">
+    <a class="side-link" href="index.html" aria-label="Trang chủ" title="Trang chủ"><span class="side-icon" aria-hidden="true"><i data-lucide="house"></i></span><span>Trang chủ</span></a>
+    <a class="side-link" href="records.html#matrix" aria-label="Bảng tổng hợp" title="Bảng tổng hợp"><span class="side-icon" aria-hidden="true"><i data-lucide="table-2"></i></span><span>Bảng tổng hợp</span></a>
+    <a class="side-link" href="truc-nhat.html" aria-current="page" aria-label="Phân công trực nhật" title="Phân công trực nhật"><span class="side-icon" aria-hidden="true"><i data-lucide="clipboard-check"></i></span><span>Phân công trực nhật</span></a>
+  </nav>
+  <div class="sidebar-utilities">
+    <div class="utility-cluster" aria-label="Tiện ích nhanh">
+      <button class="utility-icon" id="utility-notifications" type="button" aria-label="Lịch sử chỉnh sửa" title="Lịch sử chỉnh sửa"><span class="utility-symbol" aria-hidden="true"><i data-lucide="bell"></i></span><span class="utility-label">Lịch sử chỉnh sửa</span></button>
+      <button class="utility-icon" id="utility-account" type="button" aria-label="Tài khoản" title="Tài khoản"><span class="utility-symbol" aria-hidden="true"><i data-lucide="user-round"></i></span><span class="utility-label">Tài khoản</span></button>
+      <button class="utility-icon" id="utility-theme" type="button" aria-label="Dark mode / Light mode" title="Dark mode / Light mode" aria-pressed="true"><span class="utility-symbol" aria-hidden="true"><i data-lucide="moon"></i></span><span class="utility-label">Dark mode / Light mode</span></button>
+      <a class="utility-icon" href="index.html" aria-label="Cài đặt" title="Cài đặt"><span class="utility-symbol" aria-hidden="true"><i data-lucide="settings-2"></i></span><span class="utility-label">Cài đặt</span></a>
+    </div>
+  </div>
+</aside>
+<dialog class="account-dialog" id="account-dialog" aria-labelledby="account-dialog-title">
+  <div class="account-dialog-head"><h2 id="account-dialog-title">Tài khoản</h2><button class="btn" id="account-dialog-close" type="button">Đóng</button></div>
+  <div class="account-dialog-body"><dl class="account-details"><div><dt>Họ tên</dt><dd id="account-dialog-name">Đang tải...</dd></div><div><dt>Email</dt><dd id="account-dialog-email">Đang tải...</dd></div><div><dt>Chức vụ</dt><dd id="account-dialog-role">Đang tải...</dd></div></dl></div>
+</dialog>
+<dialog class="activity-dialog" id="activity-dialog" aria-labelledby="activity-dialog-title">
+  <div class="account-dialog-head"><h2 id="activity-dialog-title">Nhật ký hoạt động</h2><button class="btn" id="activity-dialog-close" type="button">Đóng</button></div>
+  <div class="activity-list" id="activity-list"><div class="activity-empty">Đang tải nhật ký...</div></div>
+</dialog>
+<main class="page"><div class="container">
+  <header class="header">
+    <h1><i data-lucide="clipboard-check" aria-hidden="true"></i> Phân công trực nhật</h1>
+    <div class="actions">
+      <button class="btn" id="export-excel" type="button"><i data-lucide="file-spreadsheet" aria-hidden="true"></i> Xuất Excel</button>
+      <button class="btn" id="save" type="button"><i data-lucide="save" aria-hidden="true"></i> Lưu</button>
+      <a class="btn" href="index.html"><i data-lucide="arrow-left" aria-hidden="true"></i> Về trang chính</a>
+    </div>
+  </header>
+
+  <div class="week-info">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:1rem">
+        <button class="btn" id="prev-week" type="button" title="Tuần trước" aria-label="Tuần trước"><i data-lucide="chevron-left" aria-hidden="true"></i></button>
+        <div>
+          <h2 id="week-title" style="margin:0 0 .5rem">Tuần 1 · 7/9 – 13/9/2026</h2>
+          <p style="margin:0;color:var(--muted);font-size:.9rem">Lịch trực nhật từ Thứ 2 đến Thứ 6</p>
+        </div>
+        <button class="btn" id="next-week" type="button" title="Tuần sau" aria-label="Tuần sau"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:.3rem;font-size:.85rem;font-weight:600;color:var(--muted)">Buổi:</label>
+        <select id="session-filter" style="min-width:140px;padding:.6rem .8rem;border:1px solid var(--line);border-radius:10px;background:var(--field);font:inherit;font-size:.95rem;font-weight:700;color:var(--red);cursor:pointer">
+          <option value="morning">Sáng</option>
+          <option value="afternoon">Chiều</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="status" class="status" hidden></div>
+
+  <div class="schedule-wrap">
+    <table class="schedule">
+      <thead>
+        <tr>
+          <th>Tiết</th>
+          <th>Thứ 2</th>
+          <th>Thứ 3</th>
+          <th>Thứ 4</th>
+          <th>Thứ 5</th>
+          <th>Thứ 6</th>
+        </tr>
+      </thead>
+      <tbody id="schedule-body">
+        <!-- JavaScript sẽ render bảng -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <span>Gợi ý: Nhập tên học sinh hoặc chọn từ danh sách</span>
+    </div>
+  </div>
+</div></main>
+
+<datalist id="student-list"></datalist>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="supabase-config.js"></script>
+<script>
+(function(){
+'use strict';
+if(window.lucide)window.lucide.createIcons();
+
+const client = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
+const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri'];
+const DAY_NAMES = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
+
+// Cấu trúc dữ liệu: { week_start: 'YYYY-MM-DD', schedule: { morning: { mon: [...], ... }, afternoon: { mon: [...], ... } } }
+let scheduleData = {
+  week_start: getCurrentWeekStart(),
+  schedule: initEmptySchedule()
+};
+
+let studentList = [];
+let hasChanges = false;
+let currentSession = 'morning'; // Buổi hiện tại đang hiển thị
+
+async function logActivity(action, details) {
+  try {
+    const session = (await client.auth.getSession()).data.session;
+    if (!session) return;
+    const profile = await client.from('profiles').select('display_name, role').eq('id', session.user.id).maybeSingle();
+    if (profile.error) return;
+    await client.from('activity_logs').insert({class_id:'main', actor_id:session.user.id, actor_name:profile.data && profile.data.display_name || session.user.email || session.user.id, actor_role:profile.data && profile.data.role || '', action, details:details || ''});
+  } catch (err) { console.warn('Khong ghi duoc nhat ky hoat dong', err); }
+}
+
+function getCurrentWeekStart() {
+  const today = new Date();
+  const day = today.getDay();
+  const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Thứ 2
+  const monday = new Date(today.setDate(diff));
+  return monday.toISOString().split('T')[0];
+}
+
+function initEmptySchedule() {
+  const schedule = { morning: {}, afternoon: {} };
+  ['morning', 'afternoon'].forEach(session => {
+    DAYS.forEach(day => {
+      schedule[session][day] = ['', '', '', '', ''];
+    });
+  });
+  return schedule;
+}
+
+function formatWeekTitle(weekStart) {
+  const start = new Date(weekStart);
+  const end = new Date(weekStart);
+  end.setDate(end.getDate() + 6);
+  
+  const weekNum = Math.floor((start - new Date(2026, 8, 7)) / (7 * 24 * 60 * 60 * 1000)) + 1;
+  
+  return `Tuần ${weekNum} · ${start.getDate()}/${start.getMonth() + 1} – ${end.getDate()}/${end.getMonth() + 1}/${end.getFullYear()}`;
+}
+
+function renderSchedule() {
+  const tbody = document.getElementById('schedule-body');
+  tbody.innerHTML = '';
+  
+  // Render 5 tiết theo buổi hiện tại
+  for (let period = 0; period < 5; period++) {
+    const tr = document.createElement('tr');
+    
+    // Cột tiết
+    const periodCell = document.createElement('td');
+    periodCell.className = 'period-label';
+    periodCell.textContent = `Tiết ${period + 1}`;
+    tr.appendChild(periodCell);
+    
+    // Các cột thứ (chỉ có input tên)
+    DAYS.forEach(day => {
+      const td = document.createElement('td');
+      td.className = 'day-col';
+      
+      // Input tên học sinh
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Nhập tên...';
+      input.value = scheduleData.schedule[currentSession][day][period] || '';
+      input.dataset.day = day;
+      input.dataset.period = period;
+      input.setAttribute('list', 'student-list');
+      input.addEventListener('input', onInputChange);
+      
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+    
+    tbody.appendChild(tr);
+  }
+}
+
+function onInputChange(e) {
+  const { day, period } = e.target.dataset;
+  const periodIndex = parseInt(period);
+  scheduleData.schedule[currentSession][day][periodIndex] = e.target.value.trim();
+  hasChanges = true;
+}
+
+function switchSession(session) {
+  currentSession = session;
+  document.getElementById('session-filter').value = session;
+  renderSchedule();
+}
+
+function changeWeek(offset) {
+  // Save current data before switching
+  if (hasChanges) {
+    if (!confirm('Bạn có thay đổi chưa lưu. Có muốn chuyển tuần không?')) {
+      return;
+    }
+  }
+  
+  const currentDate = new Date(scheduleData.week_start);
+  currentDate.setDate(currentDate.getDate() + (offset * 7));
+  scheduleData.week_start = currentDate.toISOString().split('T')[0];
+  
+  hasChanges = false;
+  scheduleData.schedule = initEmptySchedule();
+  
+  document.getElementById('week-title').textContent = formatWeekTitle(scheduleData.week_start);
+  loadSchedule();
+}
+
+function exportToExcel() {
+  try {
+    // Tạo workbook mới
+    const wb = XLSX.utils.book_new();
+    
+    // Tạo data cho sheet Sáng
+    const morningData = [
+      ['Phân công trực nhật - BUỔI SÁNG'],
+      [formatWeekTitle(scheduleData.week_start)],
+      [],
+      ['Tiết', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6']
+    ];
+    
+    for (let i = 0; i < 5; i++) {
+      const row = [`Tiết ${i + 1}`];
+      DAYS.forEach(day => {
+        row.push(scheduleData.schedule.morning[day][i] || '');
+      });
+      morningData.push(row);
+    }
+    
+    // Tạo data cho sheet Chiều
+    const afternoonData = [
+      ['Phân công trực nhật - BUỔI CHIỀU'],
+      [formatWeekTitle(scheduleData.week_start)],
+      [],
+      ['Tiết', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6']
+    ];
+    
+    for (let i = 0; i < 5; i++) {
+      const row = [`Tiết ${i + 1}`];
+      DAYS.forEach(day => {
+        row.push(scheduleData.schedule.afternoon[day][i] || '');
+      });
+      afternoonData.push(row);
+    }
+    
+    // Tạo sheets
+    const wsMorning = XLSX.utils.aoa_to_sheet(morningData);
+    const wsAfternoon = XLSX.utils.aoa_to_sheet(afternoonData);
+    
+    // Set column widths
+    wsMorning['!cols'] = [{wch:10}, {wch:20}, {wch:20}, {wch:20}, {wch:20}, {wch:20}];
+    wsAfternoon['!cols'] = [{wch:10}, {wch:20}, {wch:20}, {wch:20}, {wch:20}, {wch:20}];
+    
+    // Add sheets to workbook
+    XLSX.utils.book_append_sheet(wb, wsMorning, 'Buổi Sáng');
+    XLSX.utils.book_append_sheet(wb, wsAfternoon, 'Buổi Chiều');
+    
+    // Generate filename
+    const weekStart = new Date(scheduleData.week_start);
+    const filename = `Truc-nhat-tuan-${weekStart.getDate()}-${weekStart.getMonth()+1}-${weekStart.getFullYear()}.xlsx`;
+    
+    // Download
+    XLSX.writeFile(wb, filename);
+    
+    showStatus('✅ Đã xuất file Excel thành công!', 'success');
+  } catch (err) {
+    console.error('Lỗi xuất Excel:', err);
+    showStatus('❌ Lỗi xuất Excel: ' + err.message, 'error');
+  }
+}
+
+async function loadStudents() {
+  try {
+    const result = await client.from('students').select('name').eq('class_id', 'main').order('sort_order');
+    if (result.error) throw result.error;
+    
+    studentList = result.data.map(s => s.name);
+    
+    // Render datalist
+    const datalist = document.getElementById('student-list');
+    datalist.innerHTML = '';
+    studentList.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      datalist.appendChild(option);
+    });
+  } catch (err) {
+    console.error('Lỗi tải danh sách học sinh:', err);
+  }
+}
+
+async function loadSchedule() {
+  try {
+    const result = await client
+      .from('duty_schedules')
+      .select('*')
+      .eq('week_start', scheduleData.week_start)
+      .maybeSingle();
+    
+    if (result.error && result.error.code !== 'PGRST116') throw result.error;
+    
+    if (result.data && result.data.schedule) {
+      const loadedSchedule = result.data.schedule;
+      
+      // Check if old format and migrate
+      if (loadedSchedule.mon && !loadedSchedule.morning && !loadedSchedule.afternoon) {
+        // Old format: { mon: [{session, student}, ...], ... }
+        scheduleData.schedule = { morning: {}, afternoon: {} };
+        DAYS.forEach(day => {
+          scheduleData.schedule.morning[day] = [];
+          scheduleData.schedule.afternoon[day] = [];
+          
+          if (Array.isArray(loadedSchedule[day])) {
+            loadedSchedule[day].forEach(item => {
+              if (item.session === 'morning' && scheduleData.schedule.morning[day].length < 5) {
+                scheduleData.schedule.morning[day].push(item.student || '');
+              } else if (item.session === 'afternoon' && scheduleData.schedule.afternoon[day].length < 5) {
+                scheduleData.schedule.afternoon[day].push(item.student || '');
+              }
+            });
+          }
+          
+          // Fill remaining slots
+          while (scheduleData.schedule.morning[day].length < 5) scheduleData.schedule.morning[day].push('');
+          while (scheduleData.schedule.afternoon[day].length < 5) scheduleData.schedule.afternoon[day].push('');
+        });
+      } else if (loadedSchedule.morning || loadedSchedule.afternoon) {
+        // New format
+        scheduleData.schedule = loadedSchedule;
+      }
+    }
+    
+    renderSchedule();
+    
+  } catch (err) {
+    console.error('Lỗi tải lịch trực:', err);
+    showStatus('Lỗi tải dữ liệu: ' + err.message, 'error');
+  }
+}
+
+async function saveSchedule() {
+  const btn = document.getElementById('save');
+  btn.disabled = true;
+  btn.textContent = 'Đang lưu...';
+  
+  try {
+    const result = await client
+      .from('duty_schedules')
+      .upsert({
+        week_start: scheduleData.week_start,
+        schedule: scheduleData.schedule,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'week_start' });
+    
+    if (result.error) throw result.error;
+    
+    hasChanges = false;
+    await logActivity('Lưu phân công trực nhật', 'Tuần '+formatWeekTitle(scheduleData.week_start));
+    showStatus('✅ Đã lưu thành công!', 'success');
+  } catch (err) {
+    console.error('Lỗi lưu:', err);
+    showStatus('❌ Lỗi: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="save" aria-hidden="true"></i> Lưu';
+    if (window.lucide) window.lucide.createIcons();
+  }
+}
+
+function showStatus(message, type) {
+  const status = document.getElementById('status');
+  status.textContent = message;
+  status.className = 'status ' + type;
+  status.hidden = false;
+  setTimeout(() => {
+    status.hidden = true;
+  }, 3000);
+}
+
+// Check quyền
+client.auth.getSession().then(async (result) => {
+  if (!result.data.session) {
+    window.location.replace('login.html');
+    return;
+  }
+  
+  const profile = await client.from('profiles').select('role').eq('id', result.data.session.user.id).maybeSingle();
+  if (profile.error || !profile.data || !['teacher', 'class_monitor', 'academic_monitor', 'secretary'].includes(profile.data.role)) {
+    showStatus('Bạn không có quyền chỉnh sửa lịch trực nhật.', 'error');
+    document.querySelectorAll('input').forEach(input => input.disabled = true);
+    document.getElementById('save').disabled = true;
+    return;
+  }
+  
+  // Load data
+  await loadStudents();
+  await loadSchedule();
+  
+  document.getElementById('week-title').textContent = formatWeekTitle(scheduleData.week_start);
+});
+
+// Save button
+document.getElementById('save').addEventListener('click', saveSchedule);
+
+// Export Excel button
+document.getElementById('export-excel').addEventListener('click', exportToExcel);
+
+// Week navigation
+document.getElementById('prev-week').addEventListener('click', function() {
+  changeWeek(-1);
+});
+
+document.getElementById('next-week').addEventListener('click', function() {
+  changeWeek(1);
+});
+
+// Session filter
+document.getElementById('session-filter').addEventListener('change', function(e) {
+  switchSession(e.target.value);
+});
+
+// Cảnh báo khi thoát có thay đổi
+window.addEventListener('beforeunload', (e) => {
+  if (hasChanges) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+const sidebarCollapsed = localStorage.getItem('cm:sidebar-collapsed-v3') === '1';
+document.body.classList.toggle('sidebar-collapsed', sidebarCollapsed);
+document.querySelector('.brand').title = sidebarCollapsed ? 'Mở sidebar' : 'Thu gọn sidebar';
+document.querySelector('.brand').addEventListener('click', function() {
+  if (window.innerWidth <= 767) {
+    document.body.classList.remove('mobile-sidebar-open');
+    return;
+  }
+  const next = !document.body.classList.contains('sidebar-collapsed');
+  document.body.classList.toggle('sidebar-collapsed', next);
+  localStorage.setItem('cm:sidebar-collapsed-v3', next ? '1' : '0');
+  this.title = next ? 'Mở sidebar' : 'Thu gọn sidebar';
+});
+document.getElementById('mobile-sidebar-toggle').addEventListener('click', function() {
+  if (window.innerWidth <= 767) document.body.classList.toggle('mobile-sidebar-open');
+  else {
+    const next = !document.body.classList.contains('sidebar-collapsed');
+    document.body.classList.toggle('sidebar-collapsed', next);
+    localStorage.setItem('cm:sidebar-collapsed-v3', next ? '1' : '0');
+  }
+});
+document.getElementById('mobile-sidebar-backdrop').addEventListener('click', function() {
+  document.body.classList.remove('mobile-sidebar-open');
+});
+async function loadActivityLog() {
+  const list = document.getElementById('activity-list');
+  list.innerHTML = '<div class="activity-empty">Đang tải nhật ký...</div>';
+  const result = await client.from('activity_logs').select('actor_name,actor_role,action,details,created_at').eq('class_id','main').order('created_at',{ascending:false}).limit(50);
+  if (result.error) { list.innerHTML = '<div class="activity-empty">Không tải được nhật ký hoạt động.</div>'; return; }
+  if (!result.data || !result.data.length) { list.innerHTML = '<div class="activity-empty">Chưa có thao tác nào được ghi lại.</div>'; return; }
+  list.replaceChildren();
+  result.data.forEach(item => {
+    const row = document.createElement('div'); row.className = 'activity-item';
+    const main = document.createElement('div'); main.className = 'activity-main';
+    const roleLabels = {teacher:'Giáo viên', class_monitor:'Lớp trưởng', academic_monitor:'Lớp phó học tập', secretary:'Bí thư đoàn', student:'Thành viên'};
+    const who = document.createElement('strong'); who.textContent = item.actor_name+' · '+(roleLabels[item.actor_role] || 'Thành viên'); main.appendChild(who);
+    const time = document.createElement('span'); time.className = 'activity-time'; time.textContent = new Date(item.created_at).toLocaleString('vi-VN'); main.appendChild(time);
+    row.appendChild(main);
+    const action = document.createElement('div'); action.textContent = item.action; row.appendChild(action);
+    if (item.details) { const detail = document.createElement('div'); detail.className = 'activity-detail'; detail.textContent = item.details; row.appendChild(detail); }
+    list.appendChild(row);
+  });
+}
+document.getElementById('utility-notifications').addEventListener('click', function() {
+  loadActivityLog(); const dialog = document.getElementById('activity-dialog');
+  if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open', '');
+});
+document.getElementById('activity-dialog-close').addEventListener('click', function() {
+  const dialog = document.getElementById('activity-dialog'); if (dialog.close) dialog.close(); else dialog.removeAttribute('open');
+});
+document.getElementById('utility-account').addEventListener('click', async function() {
+  const session = (await client.auth.getSession()).data.session;
+  if (session) {
+    const profile = await client.from('profiles').select('display_name, role').eq('id', session.user.id).maybeSingle();
+    const labels = {teacher:'Giáo viên', class_monitor:'Lớp trưởng', academic_monitor:'Lớp phó học tập', secretary:'Bí thư đoàn', student:'Thành viên'};
+    document.getElementById('account-dialog-name').textContent = profile.data && profile.data.display_name || session.user.email || '';
+    document.getElementById('account-dialog-email').textContent = session.user.email || '';
+    document.getElementById('account-dialog-role').textContent = profile.data && labels[profile.data.role] || profile.data && profile.data.role || '';
+  }
+  const dialog = document.getElementById('account-dialog');
+  if (typeof dialog.showModal === 'function') dialog.showModal(); else dialog.setAttribute('open', '');
+});
+document.getElementById('account-dialog-close').addEventListener('click', function() {
+  const dialog = document.getElementById('account-dialog');
+  if (dialog.close) dialog.close(); else dialog.removeAttribute('open');
+});
+function applyTheme(isDark) {
+  const button = document.getElementById('utility-theme');
+  document.body.classList.toggle('theme-dark', isDark);
+  button.setAttribute('aria-pressed', String(isDark));
+  const icon = button.querySelector('.utility-symbol');
+  icon.replaceChildren();
+  const iconElement = document.createElement('i');
+  iconElement.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+  icon.appendChild(iconElement);
+  if (window.lucide) window.lucide.createIcons();
+  localStorage.setItem('cm:theme', isDark ? 'dark' : 'light');
+}
+applyTheme(localStorage.getItem('cm:theme') === 'dark');
+document.getElementById('utility-theme').addEventListener('click', function() {
+  const isDark = !document.body.classList.contains('theme-dark');
+  applyTheme(isDark);
+  showStatus(isDark ? 'Đã bật chế độ ban đêm.' : 'Đã chuyển về giao diện sáng.', 'success');
+});
+
+})();
+</script>
+</body>
+</html>
