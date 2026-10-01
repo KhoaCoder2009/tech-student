@@ -334,6 +334,7 @@ body.sidebar-collapsed .utility-icon{width:2.35rem;justify-content:center;gap:0}
     <div class="utility-cluster" aria-label="Tiện ích nhanh">
       <button class="utility-icon" id="utility-notifications" type="button" aria-label="Lịch sử chỉnh sửa" title="Lịch sử chỉnh sửa"><span class="utility-symbol" aria-hidden="true"><i data-lucide="bell"></i></span><span class="utility-label">Lịch sử chỉnh sửa</span></button>
       <button class="utility-icon" id="utility-account" type="button" aria-label="Tài khoản" title="Tài khoản"><span class="utility-symbol" aria-hidden="true"><i data-lucide="user-round"></i></span><span class="utility-label">Tài khoản</span></button>
+      <button class="utility-icon" id="utility-logout" type="button" aria-label="Đăng xuất" title="Đăng xuất"><span class="utility-symbol" aria-hidden="true"><i data-lucide="log-out"></i></span><span class="utility-label">Đăng xuất</span></button>
       <button class="utility-icon" id="utility-theme" type="button" aria-label="Dark mode / Light mode" title="Dark mode / Light mode" aria-pressed="true"><span class="utility-symbol" aria-hidden="true"><i data-lucide="moon"></i></span><span class="utility-label">Dark mode / Light mode</span></button>
       <button class="utility-icon" id="utility-settings" type="button" aria-label="Cài đặt" title="Cài đặt"><span class="utility-symbol" aria-hidden="true"><i data-lucide="settings-2"></i></span><span class="utility-label">Cài đặt</span></button>
     </div>
@@ -1420,6 +1421,7 @@ function bindUI(){
     var dialog=$('#account-dialog');if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
   });
   $('#account-dialog-close').addEventListener('click',function(){var dialog=$('#account-dialog');if(dialog.close)dialog.close();else dialog.removeAttribute('open');});
+  $('#utility-logout').addEventListener('click',signOut);
   $('#utility-settings').addEventListener('click',openSettings);
   function applyTheme(isDark){
     var button=$('#utility-theme');

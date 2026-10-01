@@ -137,6 +137,7 @@ h1{margin:0;font-size:1.8rem;color:var(--text)}
     <div class="utility-cluster" aria-label="Tiện ích nhanh">
       <button class="utility-icon" id="utility-notifications" type="button" aria-label="Lịch sử chỉnh sửa" title="Lịch sử chỉnh sửa"><span class="utility-symbol" aria-hidden="true"><i data-lucide="bell"></i></span><span class="utility-label">Lịch sử chỉnh sửa</span></button>
       <button class="utility-icon" id="utility-account" type="button" aria-label="Tài khoản" title="Tài khoản"><span class="utility-symbol" aria-hidden="true"><i data-lucide="user-round"></i></span><span class="utility-label">Tài khoản</span></button>
+      <button class="utility-icon" id="utility-logout" type="button" aria-label="Đăng xuất" title="Đăng xuất"><span class="utility-symbol" aria-hidden="true"><i data-lucide="log-out"></i></span><span class="utility-label">Đăng xuất</span></button>
       <button class="utility-icon" id="utility-theme" type="button" aria-label="Dark mode / Light mode" title="Dark mode / Light mode" aria-pressed="true"><span class="utility-symbol" aria-hidden="true"><i data-lucide="moon"></i></span><span class="utility-label">Dark mode / Light mode</span></button>
       <a class="utility-icon" href="index.html" aria-label="Cài đặt" title="Cài đặt"><span class="utility-symbol" aria-hidden="true"><i data-lucide="settings-2"></i></span><span class="utility-label">Cài đặt</span></a>
     </div>
@@ -625,6 +626,11 @@ document.getElementById('utility-account').addEventListener('click', async funct
 document.getElementById('account-dialog-close').addEventListener('click', function() {
   const dialog = document.getElementById('account-dialog');
   if (dialog.close) dialog.close(); else dialog.removeAttribute('open');
+});
+document.getElementById('utility-logout').addEventListener('click', async function() {
+  const result = await client.auth.signOut();
+  if (result.error) { showStatus('Không thể đăng xuất.', 'error'); return; }
+  window.location.replace('login.html');
 });
 function applyTheme(isDark) {
   const button = document.getElementById('utility-theme');
