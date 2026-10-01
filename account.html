@@ -26,7 +26,7 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script>
 <script>
-(function(){'use strict';var labels={teacher:'Giáo viên',class_monitor:'Lớp trưởng',academic_monitor:'Lớp phó học tập',secretary:'Bí thư đoàn',student:'Thành viên'},client=window.supabase.createClient(window.SUPABASE_CONFIG.url,window.SUPABASE_CONFIG.anonKey),error=document.querySelector('#error');
+(function(){'use strict';var labels={teacher:'Giáo viên',class_monitor:'Lớp trưởng',academic_monitor:'Lớp phó học tập',secretary:'Bí thư',labor_monitor:'Lớp phó lao động',student:'Thành viên'},client=window.supabase.createClient(window.SUPABASE_CONFIG.url,window.SUPABASE_CONFIG.anonKey),error=document.querySelector('#error');
 client.auth.getSession().then(async function(result){if(!result.data.session){window.location.replace('login.html');return;}var profile=await client.from('profiles').select('display_name,role').eq('id',result.data.session.user.id).maybeSingle();if(profile.error||!profile.data){error.textContent='Không tải được thông tin tài khoản.';return;}document.querySelector('#name').textContent=profile.data.display_name;document.querySelector('#email').textContent=result.data.session.user.email||'';document.querySelector('#role').textContent=labels[profile.data.role]||profile.data.role;});
 document.querySelector('#logout').addEventListener('click',async function(){this.disabled=true;var result=await client.auth.signOut();if(result.error){error.textContent='Không thể đăng xuất.';this.disabled=false;return;}window.location.replace('login.html');});})();
 </script>

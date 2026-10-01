@@ -39,7 +39,8 @@ body.theme-dark .fld input:focus,body.theme-dark .fld textarea:focus,body.theme-
 /* sidebar */
 .sidebar{position:fixed;inset:0 auto 0 0;z-index:10;display:flex;flex-direction:column;width:248px;padding:1.5rem 1rem;background:rgba(255,255,255,.84);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:1px solid rgba(229,231,235,.82);box-shadow:8px 0 28px rgba(17,24,39,.06)}
 .brand{display:flex;align-items:center;gap:.7rem;padding:.25rem .35rem 1.5rem;border-bottom:1px solid var(--line);cursor:pointer}
-.brand-mark{display:block;width:2.6rem;height:2.6rem;border-radius:9px;object-fit:contain;background:#fff}
+.brand-mark{display:block;width:2.6rem;height:2.6rem;border-radius:50%;object-fit:cover;background:#fff}
+.welcome-art img{border-radius:50%;object-fit:cover}
 .brand strong{display:block;color:var(--text);font-size:.85rem;letter-spacing:.03em;white-space:nowrap}
 .side-account{display:grid;gap:.55rem;padding:1rem .35rem}.side-account .account{display:flex;flex-wrap:wrap}.side-account .status{min-width:0;text-align:left;font-size:.75rem}
 .side-nav{display:grid;align-items:center;gap:var(--sidebar-icon-gap);width:100%;padding:0;border:0;background:transparent;box-shadow:none}
@@ -294,7 +295,7 @@ body.sidebar-collapsed .utility-icon{width:2.35rem;justify-content:center;gap:0}
 @media (max-width:767px){
   .mobile-utility{position:fixed;top:.75rem;right:.75rem;z-index:40;display:flex;align-items:center;padding:.18rem;border-radius:12px;background:transparent}
   .utility-cluster{flex-direction:column;align-items:stretch;width:100%}
-  .mobile-sidebar-toggle{display:grid;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:none}.mobile-sidebar-toggle img{width:1.85rem;height:1.85rem;object-fit:contain}
+  .mobile-sidebar-toggle{display:grid;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:none}.mobile-sidebar-toggle img{width:1.85rem;height:1.85rem;border-radius:50%;object-fit:cover}
   .utility-icon{width:100%;justify-content:flex-start;gap:.55rem;padding:0}.utility-icon .utility-label{display:inline}
   .mobile-sidebar-backdrop{position:fixed;inset:0;z-index:20;background:rgba(17,24,39,.28)}
   .sidebar{top:0;bottom:0;left:0;width:248px;padding:1.25rem 1rem;overflow-x:hidden;transform:translateX(-110%);transition:transform .22s ease;z-index:30;box-shadow:12px 0 32px rgba(17,24,39,.14)}
@@ -680,7 +681,7 @@ async function setUser(user){
   var r=await store.db.from('profiles').select('display_name,role').eq('id',user.id).maybeSingle();
   if(r.error)throw r.error;
   store.displayName=r.data&&r.data.display_name||user.email||user.id;S.role=r.data&&r.data.role||'';
-  if(!['teacher','class_monitor','academic_monitor','secretary','student'].includes(S.role))throw new Error('Tài khoản chưa được gán vai trò hợp lệ.');
+  if(!['teacher','class_monitor','academic_monitor','secretary','labor_monitor','student'].includes(S.role))throw new Error('Tài khoản chưa được gán vai trò hợp lệ.');
   // Nếu là thành viên (student), chuyển sang trang xem điểm
   if(S.role==='student'){window.location.replace('student-view.html');return;}
   renderAccount();
@@ -697,7 +698,7 @@ function renderAccount(){
   var profile=document.createElement('a');profile.href='account.html';profile.className='profile-link';profile.title='Mở trang tài khoản';
   var n=document.createElement('strong');n.textContent=store.displayName||S.user.email;profile.appendChild(n);
   var t=document.createElement('span');t.className='tag';
-  var labels={teacher:'Giáo viên',class_monitor:'Lớp trưởng',academic_monitor:'Lớp phó học tập',secretary:'Bí thư đoàn',student:'Thành viên'};t.textContent=labels[S.role]||S.role;profile.appendChild(t);a.appendChild(profile);
+  var labels={teacher:'Giáo viên',class_monitor:'Lớp trưởng',academic_monitor:'Lớp phó học tập',secretary:'Bí thư',labor_monitor:'Lớp phó lao động',student:'Thành viên'};t.textContent=labels[S.role]||S.role;profile.appendChild(t);a.appendChild(profile);
 }
 
 /* ================= lưu tự động ================= */
@@ -1399,7 +1400,7 @@ function bindUI(){
     list.replaceChildren();result.data.forEach(function(item){
       var row=document.createElement('div');row.className='activity-item';row.tabIndex=0;row.setAttribute('role','button');row.setAttribute('aria-expanded','false');
       var main=document.createElement('div');main.className='activity-main';
-      var roleLabels={teacher:'Giáo viên',class_monitor:'Lớp trưởng',academic_monitor:'Lớp phó học tập',secretary:'Bí thư đoàn',student:'Thành viên'};
+      var roleLabels={teacher:'Giáo viên',class_monitor:'Lớp trưởng',academic_monitor:'Lớp phó học tập',secretary:'Bí thư',labor_monitor:'Lớp phó lao động',student:'Thành viên'};
       var who=document.createElement('strong');who.textContent=item.actor_name+' · '+(roleLabels[item.actor_role]||'Thành viên');main.appendChild(who);
       var time=document.createElement('span');time.className='activity-time';time.textContent=new Date(item.created_at).toLocaleString('vi-VN');main.appendChild(time);
       var action=document.createElement('div');action.textContent=item.action;row.appendChild(main);row.appendChild(action);
@@ -1412,7 +1413,7 @@ function bindUI(){
   $('#utility-notifications').addEventListener('click',function(){loadActivityLog();var dialog=$('#activity-dialog');if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');});
   $('#activity-dialog-close').addEventListener('click',function(){var dialog=$('#activity-dialog');if(dialog.close)dialog.close();else dialog.removeAttribute('open');});
   $('#utility-account').addEventListener('click',function(){
-    var labels={teacher:'Giáo viên',class_monitor:'Lớp trưởng',academic_monitor:'Lớp phó học tập',secretary:'Bí thư đoàn',student:'Thành viên'};
+    var labels={teacher:'Giáo viên',class_monitor:'Lớp trưởng',academic_monitor:'Lớp phó học tập',secretary:'Bí thư',labor_monitor:'Lớp phó lao động',student:'Thành viên'};
     $('#account-dialog-name').textContent=store.displayName||S.user&&S.user.email||'Chưa đăng nhập';
     $('#account-dialog-email').textContent=S.user&&S.user.email||'';
     $('#account-dialog-role').textContent=labels[S.role]||S.role||'Chưa xác định';

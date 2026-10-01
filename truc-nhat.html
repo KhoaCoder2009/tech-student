@@ -30,7 +30,7 @@ body.theme-dark .status.error{background:#4a2d35;color:#ffc0b7;border-color:#8a5
 .container{max-width:1200px;margin:0 auto}
 .sidebar{position:fixed;inset:0 auto 0 0;z-index:20;display:flex;flex-direction:column;width:248px;padding:1.5rem 1rem;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:1px solid rgba(229,231,235,.9);box-shadow:8px 0 24px rgba(17,24,39,.06)}
 .brand{display:flex;align-items:center;gap:.7rem;padding:.25rem .35rem 1.25rem;border-bottom:1px solid var(--line);cursor:pointer}
-.brand-mark{display:block;width:2.6rem;height:2.6rem;object-fit:contain}
+.brand-mark{display:block;width:2.6rem;height:2.6rem;border-radius:50%;object-fit:cover}
 .brand>div{display:block}
 .side-nav{display:grid;align-items:center;gap:var(--sidebar-icon-gap);width:100%;padding:0;border:0;background:transparent;box-shadow:none}
 .side-link{display:flex;align-items:center;justify-content:flex-start;gap:.65rem;width:100%;min-height:2.35rem;padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted);font:600 .9rem Arial,'Segoe UI',sans-serif;text-decoration:none;text-align:left;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
@@ -97,7 +97,7 @@ h1{margin:0;font-size:1.8rem;color:var(--text)}
 @media (max-width:767px){
   .mobile-utility{position:fixed;top:.75rem;right:.75rem;z-index:40;display:flex;align-items:center;padding:.18rem;border-radius:12px;background:transparent}
   .utility-cluster{flex-direction:column;align-items:stretch;width:100%}
-  .mobile-sidebar-toggle{display:grid;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:none}.mobile-sidebar-toggle img{width:1.85rem;height:1.85rem;object-fit:contain}
+  .mobile-sidebar-toggle{display:grid;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:none}.mobile-sidebar-toggle img{width:1.85rem;height:1.85rem;border-radius:50%;object-fit:cover}
   .utility-icon{width:100%;justify-content:flex-start;gap:.55rem;padding:0 .55rem}.utility-icon .utility-label{display:inline}
   .mobile-sidebar-backdrop{position:fixed;inset:0;z-index:20;background:rgba(17,24,39,.28)}
   .sidebar{width:248px;padding:1.25rem 1rem;overflow-x:hidden;transform:translateX(-110%);transition:transform .22s ease;box-shadow:12px 0 32px rgba(17,24,39,.14)}
@@ -518,7 +518,7 @@ client.auth.getSession().then(async (result) => {
   }
   
   const profile = await client.from('profiles').select('role').eq('id', result.data.session.user.id).maybeSingle();
-  if (profile.error || !profile.data || !['teacher', 'class_monitor', 'academic_monitor', 'secretary'].includes(profile.data.role)) {
+  if (profile.error || !profile.data || !['teacher', 'class_monitor', 'academic_monitor', 'secretary', 'labor_monitor'].includes(profile.data.role)) {
     showStatus('Bạn không có quyền chỉnh sửa lịch trực nhật.', 'error');
     document.querySelectorAll('input').forEach(input => input.disabled = true);
     document.getElementById('save').disabled = true;
@@ -594,7 +594,7 @@ async function loadActivityLog() {
   result.data.forEach(item => {
     const row = document.createElement('div'); row.className = 'activity-item';
     const main = document.createElement('div'); main.className = 'activity-main';
-    const roleLabels = {teacher:'Giáo viên', class_monitor:'Lớp trưởng', academic_monitor:'Lớp phó học tập', secretary:'Bí thư đoàn', student:'Thành viên'};
+    const roleLabels = {teacher:'Giáo viên', class_monitor:'Lớp trưởng', academic_monitor:'Lớp phó học tập', secretary:'Bí thư', labor_monitor:'Lớp phó lao động', student:'Thành viên'};
     const who = document.createElement('strong'); who.textContent = item.actor_name+' · '+(roleLabels[item.actor_role] || 'Thành viên'); main.appendChild(who);
     const time = document.createElement('span'); time.className = 'activity-time'; time.textContent = new Date(item.created_at).toLocaleString('vi-VN'); main.appendChild(time);
     row.appendChild(main);
@@ -614,7 +614,7 @@ document.getElementById('utility-account').addEventListener('click', async funct
   const session = (await client.auth.getSession()).data.session;
   if (session) {
     const profile = await client.from('profiles').select('display_name, role').eq('id', session.user.id).maybeSingle();
-    const labels = {teacher:'Giáo viên', class_monitor:'Lớp trưởng', academic_monitor:'Lớp phó học tập', secretary:'Bí thư đoàn', student:'Thành viên'};
+    const labels = {teacher:'Giáo viên', class_monitor:'Lớp trưởng', academic_monitor:'Lớp phó học tập', secretary:'Bí thư', labor_monitor:'Lớp phó lao động', student:'Thành viên'};
     document.getElementById('account-dialog-name').textContent = profile.data && profile.data.display_name || session.user.email || '';
     document.getElementById('account-dialog-email').textContent = session.user.email || '';
     document.getElementById('account-dialog-role').textContent = profile.data && labels[profile.data.role] || profile.data && profile.data.role || '';

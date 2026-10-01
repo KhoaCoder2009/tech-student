@@ -7,7 +7,8 @@
 | **Giáo viên** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
 | **Lớp trưởng** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
 | **Lớp phó học tập** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
-| **Bí thư đoàn** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
+| **Bí thư** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
+| **Lớp phó lao động** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
 | **Thành viên** | 👀 Chỉ xem | Chỉ xem điểm của bản thân |
 
 ---
@@ -78,6 +79,18 @@ INSERT INTO public.profiles (id, display_name, role)
 SELECT id, 'Nguyễn Văn A', 'secretary'
 FROM auth.users
 WHERE email = 'secretary@school.edu.vn';
+
+INSERT INTO public.profiles (id, display_name, role)
+SELECT id, 'Nguyễn Thị Anh Đào', 'secretary'
+FROM auth.users
+WHERE email = 'anhdao@edu.vn'
+ON CONFLICT (id) DO UPDATE SET display_name = excluded.display_name, role = excluded.role;
+
+INSERT INTO public.profiles (id, display_name, role)
+SELECT id, 'Phạm Tấn Lực', 'labor_monitor'
+FROM auth.users
+WHERE email = 'tanluc@edu.vn'
+ON CONFLICT (id) DO UPDATE SET display_name = excluded.display_name, role = excluded.role;
 ```
 
 ---

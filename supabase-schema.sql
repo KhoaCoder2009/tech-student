@@ -3,8 +3,12 @@
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null,
-  role text not null check (role in ('teacher', 'class_monitor', 'academic_monitor', 'secretary', 'student'))
+  role text not null check (role in ('teacher', 'class_monitor', 'academic_monitor', 'secretary', 'labor_monitor', 'student'))
 );
+
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check
+  check (role in ('teacher', 'class_monitor', 'academic_monitor', 'secretary', 'labor_monitor', 'student'));
 
 create table if not exists public.class_settings (
   class_id text primary key,
@@ -164,8 +168,8 @@ create trigger update_points_on_delete
   for each row
   execute function update_student_points();
 
--- Tao 3 user trong Authentication truoc, sau do thay 3 email ben duoi
--- bang email thuc te va chay khoi lenh nay de gan vai tro.
+-- Tao user trong Authentication truoc, sau do chay cac lenh ben duoi
+-- de gan vai tro cho profile.
 insert into public.profiles (id, display_name, role)
 select id, 'Trần Đăng Khoa', 'class_monitor'
 from auth.users
@@ -182,6 +186,18 @@ insert into public.profiles (id, display_name, role)
 select id, 'Hồ Quỳnh Kim Thủy', 'academic_monitor'
 from auth.users
 where email = 'kimthuy@edu.vn'
+on conflict (id) do update set display_name = excluded.display_name, role = excluded.role;
+
+insert into public.profiles (id, display_name, role)
+select id, 'Nguyễn Thị Anh Đào', 'secretary'
+from auth.users
+where email = 'anhdao@edu.vn'
+on conflict (id) do update set display_name = excluded.display_name, role = excluded.role;
+
+insert into public.profiles (id, display_name, role)
+select id, 'Phạm Tấn Lực', 'labor_monitor'
+from auth.users
+where email = 'tanluc@edu.vn'
 on conflict (id) do update set display_name = excluded.display_name, role = excluded.role;
 
 -- Duty schedules table (Bảng phân công trực nhật)

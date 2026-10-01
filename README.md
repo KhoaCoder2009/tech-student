@@ -8,7 +8,8 @@ Hệ thống có 5 vai trò:
 2. **Lớp trưởng** (`class_monitor`) - Toàn quyền: xem, chỉnh sửa, tạo tài khoản
 3. **Lớp phó học tập** (`academic_monitor`) - Toàn quyền: xem, chỉnh sửa, tạo tài khoản
 4. **Bí thư đoàn** (`secretary`) - Toàn quyền: xem, chỉnh sửa, tạo tài khoản
-5. **Thành viên** (`student`) - Chỉ xem điểm của bản thân, không chỉnh sửa
+5. **Lớp phó lao động** (`labor_monitor`) - Toàn quyền: xem, chỉnh sửa, tạo tài khoản
+6. **Thành viên** (`student`) - Chỉ xem điểm của bản thân, không chỉnh sửa
 
 ## Tạo tài khoản học sinh tự động
 
@@ -59,7 +60,7 @@ Các ví dụ khác:
 
 - Mở `login.html` để đăng nhập
 - `index.html` sẽ tự chuyển hướng sang trang đăng nhập nếu chưa có phiên
-- Nút `Tạo tài khoản` chỉ xuất hiện với 4 vai trò quản lý (teacher, class_monitor, academic_monitor, secretary)
+- Nút `Tạo tài khoản` chỉ xuất hiện với 5 vai trò quản lý (teacher, class_monitor, academic_monitor, secretary, labor_monitor)
 - Edge Function `supabase/functions/create-account/index.ts` kiểm tra vai trò ở server trước khi tạo tài khoản Auth và hồ sơ `profiles`
 
 Function sử dụng các biến môi trường mặc định của Supabase, bao gồm `SUPABASE_URL`, `SUPABASE_ANON_KEY` và `SUPABASE_SERVICE_ROLE_KEY`. Không đưa service role key vào HTML hoặc JavaScript phía trình duyệt.
@@ -72,7 +73,7 @@ Function sử dụng các biến môi trường mặc định của Supabase, ba
 - `has_account`: Đã tạo tài khoản chưa
 
 ### Bảng `profiles`
-- `role`: teacher, class_monitor, academic_monitor, secretary, student
+- `role`: teacher, class_monitor, academic_monitor, secretary, labor_monitor, student
 - `student_id`: Liên kết với bảng students (nếu là student)
 
 ## Lưu ý bảo mật
