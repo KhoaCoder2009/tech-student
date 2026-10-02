@@ -157,6 +157,27 @@ table.log{width:100%;border-collapse:collapse;table-layout:fixed}
 .addrow{display:flex;width:100%;justify-content:center;align-items:center;gap:.4rem;font:inherit;font-weight:700;color:var(--red);background:var(--paper);border:0;border-top:1px dashed var(--line);padding:.9rem;cursor:pointer;min-height:3.2rem;transition:background .18s ease}
 .addrow:hover:not(:disabled){background:var(--hover)}
 .addrow:disabled{opacity:.5;cursor:default}
+.log-actions{display:grid;grid-template-columns:1fr 1fr;border-top:1px dashed var(--line)}
+.log-actions .addrow{border-top:0}.log-actions .addrow+.addrow{border-left:1px dashed var(--line)}
+.bulk-dialog{width:min(620px,calc(100% - 2rem));max-height:calc(100% - 2rem);padding:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--text);box-shadow:0 20px 50px rgba(17,24,39,.16)}
+.bulk-dialog::backdrop{background:var(--backdrop)}
+.bulk-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem;border-bottom:1px solid var(--line)}
+.bulk-head h2{margin:0;font-size:1.15rem}
+.bulk-body{display:grid;gap:.85rem;padding:1rem 1.25rem 1.25rem;overflow:auto}
+.bulk-fields{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.65rem}
+.bulk-fields label,.bulk-note{display:grid;gap:.3rem;color:var(--text);font-size:.83rem;font-weight:600}
+.bulk-fields select,.bulk-fields input,.bulk-note input,.bulk-search{width:100%;min-height:2.5rem;padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--text);font:inherit}
+.bulk-roster-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+.bulk-roster-head strong{font-size:.9rem}
+.bulk-roster-tools{display:flex;gap:.4rem}
+.bulk-roster-tools button{padding:.25rem .45rem;border:0;background:transparent;color:var(--red);font:600 .8rem Arial,sans-serif;cursor:pointer}
+.bulk-student-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35rem;max-height:14rem;overflow:auto;padding:.5rem;border:1px solid var(--line);border-radius:8px;background:var(--field)}
+.bulk-student{display:flex;align-items:center;gap:.5rem;min-width:0;padding:.4rem .5rem;border-radius:6px;background:var(--paper);font-size:.82rem;cursor:pointer}
+.bulk-student input{width:1rem;height:1rem;flex:0 0 auto;accent-color:var(--primary)}
+.bulk-student span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bulk-footer{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+.bulk-selected{color:var(--muted);font-size:.85rem}
+@media(max-width:560px){.log-actions{grid-template-columns:1fr}.log-actions .addrow+.addrow{border-left:0;border-top:1px dashed var(--line)}.bulk-fields{grid-template-columns:1fr 1fr}.bulk-fields label:first-child{grid-column:1/-1}.bulk-student-list{grid-template-columns:1fr}}
 
 /* matrix */
 .tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem 1rem;margin-bottom:.75rem;color:var(--muted);font-size:.9rem}
@@ -237,6 +258,7 @@ dialog::backdrop{background:var(--backdrop)}
 .home-page .weeknav,.home-page .summary,.home-page .tabs,.home-page #panel-log,.home-page #panel-mx{display:none!important}
 .records-page .overview,.records-page .analytics{display:none}
 .records-page .tabs{display:flex!important}
+.academic-monitor-page #side-mx,.academic-monitor-page #tab-mx,.academic-monitor-page .week-actions,.academic-monitor-page #utility-settings{display:none!important}
 .mobile-utility{display:none}
 .utility-cluster{display:flex;flex-direction:column;align-items:center;gap:var(--sidebar-icon-gap);width:100%;padding:0;border:0;background:transparent;box-shadow:none}
 .sidebar-utilities{display:grid;align-items:center;gap:var(--sidebar-icon-gap);width:100%;margin-top:var(--sidebar-icon-gap)}
@@ -439,7 +461,10 @@ body.page-leaving{animation:page-leave .16s ease-in both;pointer-events:none}
         </thead>
         <tbody id="log-body"></tbody>
       </table>
-      <button class="addrow" id="add" type="button">+ Thêm dòng</button>
+      <div class="log-actions">
+        <button class="addrow" id="add" type="button">+ Thêm dòng</button>
+        <button class="addrow" id="bulk-open" type="button"><i data-lucide="users-round" aria-hidden="true"></i> Ghi nhận nhiều học sinh</button>
+      </div>
     </div>
     <p class="note">Điểm tự điền theo lỗi đã chọn. Bạn có thể sửa điểm ở từng dòng, ví dụ với lỗi thuộc nhóm “Vi phạm khác”.</p>
   </section>
@@ -455,6 +480,22 @@ body.page-leaving{animation:page-leave .16s ease-in both;pointer-events:none}
 </div>
 
 <datalist id="hs-list"></datalist>
+
+<dialog class="bulk-dialog" id="bulk-dialog" aria-labelledby="bulk-title">
+  <div class="bulk-head"><h2 id="bulk-title">Ghi nhận nhiều học sinh</h2><button class="btn" id="bulk-close" type="button">Đóng</button></div>
+  <div class="bulk-body">
+    <div class="bulk-fields">
+      <label>Vi phạm<select id="bulk-violation"></select></label>
+      <label>Ngày<input id="bulk-date" type="date"></label>
+      <label>Buổi<select id="bulk-session"><option value="Sáng">Sáng</option><option value="Chiều">Chiều</option></select></label>
+    </div>
+    <label class="bulk-note">Ghi chú<input id="bulk-note" type="text" placeholder="Ghi chú dùng chung (không bắt buộc)" autocomplete="off"></label>
+    <input class="bulk-search" id="bulk-search" type="search" placeholder="Tìm học sinh..." aria-label="Tìm học sinh">
+    <div class="bulk-roster-head"><strong>Chọn học sinh</strong><div class="bulk-roster-tools"><button id="bulk-select-all" type="button">Chọn tất cả</button><button id="bulk-clear-all" type="button">Bỏ chọn</button></div></div>
+    <div class="bulk-student-list" id="bulk-student-list"></div>
+    <div class="bulk-footer"><span class="bulk-selected" id="bulk-selected-count">Đã chọn 0 học sinh</span><button class="btn primary" id="bulk-submit" type="button">Tạo ghi nhận</button></div>
+  </div>
+</dialog>
 
 <dialog id="dlg" aria-labelledby="dlg-title">
   <div class="dlg-head">
@@ -535,6 +576,7 @@ var DEFAULTS=[
 
 /* ================= tiện ích ================= */
 function $(s,r){return (r||document).querySelector(s);}
+function $$(s,r){return Array.from((r||document).querySelectorAll(s));}
 function clone(o){return JSON.parse(JSON.stringify(o));}
 function uid(){return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);}
 function pad(n){return String(n).padStart(2,'0');}
@@ -698,6 +740,11 @@ async function setUser(user){
   if(!['teacher','class_monitor','academic_monitor','secretary','labor_monitor','student'].includes(S.role))throw new Error('Tài khoản chưa được gán vai trò hợp lệ.');
   // Nếu là thành viên (student), chuyển sang trang xem điểm
   if(S.role==='student'){window.location.replace('student-view.html');return;}
+  if(S.role==='labor_monitor'){window.location.replace('truc-nhat.html');return;}
+  if(S.role==='academic_monitor'){
+    if(VIEW!=='records'){window.location.replace('index.html?view=records');return;}
+    S.tab='log';document.body.classList.add('academic-monitor-page');
+  }
   renderAccount();
 }
 function openAuth(){window.location.replace('login.html');}
@@ -717,6 +764,7 @@ function renderAccount(){
 
 /* ================= lưu tự động ================= */
 var saveTimer=null,saving=false,savePending=false,retryTimer=null;
+var bulkSelectedNames=new Set();
 function setStatus(kind){
   var el=$('#status');el.classList.remove('err');
   if(kind==='saving'){el.textContent='Đang lưu…';}
@@ -783,6 +831,7 @@ function renderChrome(){
   S.settings.roster.forEach(function(n){var o=document.createElement('option');o.value=n;datalist.appendChild(o);});
 }
 function renderPanels(){
+  if(S.role==='academic_monitor')S.tab='log';
   $('#panel-log').hidden=(S.tab!=='log');
   $('#panel-mx').hidden=(S.tab!=='mx');
   $('#tab-log').setAttribute('aria-selected',S.tab==='log');
@@ -931,6 +980,7 @@ function renderLog(){
   var tb=$('#log-body');tb.replaceChildren();
   var list=cur();
   $('#add').disabled=!list;
+  $('#bulk-open').disabled=!list;
   if(!list){
     if(S.loadErrWeek===S.week){
       var b=document.createElement('button');b.type='button';b.className='btn';b.textContent='Thử lại';
@@ -942,7 +992,7 @@ function renderLog(){
     return;
   }
   if(!list.length){
-    tb.appendChild(msgRow('Tuần này chưa có dòng nào. Bấm “Thêm dòng” để ghi lỗi đầu tiên.'));
+    tb.appendChild(msgRow('Tuần này chưa có dòng nào. Thêm một dòng hoặc ghi nhận cùng vi phạm cho nhiều học sinh.'));
     return;
   }
   list.forEach(function(e,i){tb.appendChild(rowEl(e,i));});
@@ -961,6 +1011,57 @@ function addEntry(){
   var rows=$('#log-body').children,r=rows[rows.length-1];
   var s=r&&r.querySelector('[data-f=vt]');
   if(s){s.focus();if(s.scrollIntoView)s.scrollIntoView({block:'nearest'});}
+}
+function updateBulkSelectionCount(){
+  $('#bulk-selected-count').textContent='Đã chọn '+bulkSelectedNames.size+' học sinh';
+}
+function renderBulkStudents(filter){
+  var list=$('#bulk-student-list');
+  list.replaceChildren();
+  var query=keyOf(filter||'');
+  var names=S.settings.roster.filter(function(name){return !query||keyOf(name).includes(query);});
+  if(!names.length){var empty=document.createElement('div');empty.className='roster-empty';empty.textContent=query?'Không tìm thấy học sinh.':'Chưa có danh sách học sinh trong cài đặt.';list.appendChild(empty);}
+  names.forEach(function(name){
+    var label=document.createElement('label');label.className='bulk-student';
+    var checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=name;checkbox.checked=bulkSelectedNames.has(name);
+    var text=document.createElement('span');text.textContent=name;
+    label.appendChild(checkbox);label.appendChild(text);list.appendChild(label);
+  });
+  updateBulkSelectionCount();
+}
+function openBulkDialog(){
+  var dialog=$('#bulk-dialog'),select=$('#bulk-violation');
+  select.replaceChildren(new Option('Chọn vi phạm…',''));
+  GROUPS.forEach(function(group){
+    var items=S.settings.catalog.filter(function(item){return item.g===group.id;});
+    if(!items.length)return;
+    var optgroup=document.createElement('optgroup');optgroup.label=group.name;
+    items.forEach(function(item){optgroup.appendChild(new Option(item.n+' ('+fmtPts(item.p)+')',item.id));});
+    select.appendChild(optgroup);
+  });
+  var today=toISO(new Date()),date=today>=S.week&&today<=addDays(S.week,6)?today:S.week;
+  $('#bulk-date').value=date;$('#bulk-date').min=S.week;$('#bulk-date').max=addDays(S.week,6);
+  $('#bulk-session').value=new Date().getHours()<12?'Sáng':'Chiều';
+  $('#bulk-note').value='';$('#bulk-search').value='';bulkSelectedNames.clear();$('#bulk-student-list').replaceChildren();
+  renderBulkStudents('');
+  if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
+}
+function submitBulkEntries(){
+  var list=cur(),violation=catById($('#bulk-violation').value);
+  var students=Array.from(bulkSelectedNames);
+  var date=$('#bulk-date').value;
+  if(!list){toast('Tuần đang xem chưa tải xong.');return;}
+  if(!violation){toast('Hãy chọn vi phạm cần ghi nhận.');return;}
+  if(!students.length){toast('Hãy chọn ít nhất một học sinh.');return;}
+  if(!date||date<S.week||date>addDays(S.week,6)){toast('Ngày ghi nhận phải nằm trong tuần đang xem.');return;}
+  var note=norm($('#bulk-note').value),session=$('#bulk-session').value,recordedBy=store.displayName||'';
+  students.forEach(function(name){
+    list.push({id:uid(),vt:violation.id,vn:violation.n,g:violation.g,pts:Number(violation.p)||0,hs:name,date:date,buoi:session,note:note,recordedBy:recordedBy});
+  });
+  markDirty(S.week);renderLog();updateSummary();renderAnalytics();
+  logActivity('Ghi nhận hàng loạt',violation.n+' · '+students.length+' học sinh · '+dmy(date));
+  var dialog=$('#bulk-dialog');if(typeof dialog.close==='function'&&dialog.open)dialog.close();else dialog.removeAttribute('open');
+  toast('Đã tạo '+students.length+' dòng ghi nhận.');
 }
 function deleteEntry(id){
   var list=cur();if(!list)return;
@@ -1313,6 +1414,18 @@ function bindUI(){
     if(tr&&tr===tb.lastElementChild){ev.preventDefault();addEntry();}
   });
   $('#add').addEventListener('click',addEntry);
+  $('#bulk-open').addEventListener('click',openBulkDialog);
+  $('#bulk-close').addEventListener('click',function(){var dialog=$('#bulk-dialog');if(dialog.close)dialog.close();else dialog.removeAttribute('open');});
+  $('#bulk-submit').addEventListener('click',submitBulkEntries);
+  $('#bulk-search').addEventListener('input',function(event){renderBulkStudents(event.target.value);});
+  $('#bulk-student-list').addEventListener('change',function(event){
+    var input=event.target.closest('input[type="checkbox"]');if(!input)return;
+    if(input.checked)bulkSelectedNames.add(input.value);else bulkSelectedNames.delete(input.value);
+    updateBulkSelectionCount();
+  });
+  $('#bulk-select-all').addEventListener('click',function(){$$('.bulk-student input[type="checkbox"]').forEach(function(input){bulkSelectedNames.add(input.value);input.checked=true;});updateBulkSelectionCount();});
+  $('#bulk-clear-all').addEventListener('click',function(){bulkSelectedNames.clear();$$('#bulk-student-list input[type="checkbox"]').forEach(function(input){input.checked=false;});updateBulkSelectionCount();});
+  $('#bulk-dialog').addEventListener('click',function(event){if(event.target===this){if(this.close)this.close();else this.removeAttribute('open');}});
   $('#prev').addEventListener('click',function(){gotoWeek(addDays(S.week,-7));});
   $('#next').addEventListener('click',function(){gotoWeek(addDays(S.week,7));});
   $('#today').addEventListener('click',function(){gotoWeek(schoolWeekStart(new Date()));});

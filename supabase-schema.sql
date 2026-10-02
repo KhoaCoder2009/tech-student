@@ -1,5 +1,5 @@
 -- Chay trong Supabase SQL Editor.
--- Tao ba tai khoan trong Authentication truoc, sau do gan id vao profiles.
+-- Tao cac tai khoan trong Authentication truoc, sau do gan role vao profiles.
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null,
@@ -61,24 +61,85 @@ alter table public.students enable row level security;
 alter table public.violation_types enable row level security;
 alter table public.violation_records enable row level security;
 
+create or replace function public.current_app_role()
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select p.role from public.profiles as p where p.id = auth.uid()
+$$;
+
+create or replace function public.current_app_display_name()
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select p.display_name from public.profiles as p where p.id = auth.uid()
+$$;
+
+revoke all on function public.current_app_role() from public;
+revoke all on function public.current_app_display_name() from public;
+grant execute on function public.current_app_role() to authenticated;
+grant execute on function public.current_app_display_name() to authenticated;
+
 drop policy if exists "signed in users can read profiles" on public.profiles;
 create policy "signed in users can read profiles"
   on public.profiles for select to authenticated using (true);
+
 drop policy if exists "signed in users can read class settings" on public.class_settings;
-create policy "signed in users can read class settings"
-  on public.class_settings for select to authenticated using (true);
 drop policy if exists "signed in users can write class settings" on public.class_settings;
-create policy "signed in users can write class settings"
-  on public.class_settings for all to authenticated using (true) with check (true);
+drop policy if exists "managers can manage class settings" on public.class_settings;
+drop policy if exists "recorders can read class settings" on public.class_settings;
+create policy "managers can manage class settings"
+  on public.class_settings for all to authenticated
+  using (public.current_app_role() in ('teacher', 'class_monitor', 'secretary'))
+  with check (public.current_app_role() in ('teacher', 'class_monitor', 'secretary'));
+create policy "recorders can read class settings"
+  on public.class_settings for select to authenticated
+  using (public.current_app_role() = 'academic_monitor');
+
 drop policy if exists "signed in users can manage students" on public.students;
-create policy "signed in users can manage students"
-  on public.students for all to authenticated using (true) with check (true);
+drop policy if exists "managers can manage students" on public.students;
+drop policy if exists "recorders can read students" on public.students;
+create policy "managers can manage students"
+  on public.students for all to authenticated
+  using (public.current_app_role() in ('teacher', 'class_monitor', 'secretary'))
+  with check (public.current_app_role() in ('teacher', 'class_monitor', 'secretary'));
+create policy "recorders can read students"
+  on public.students for select to authenticated
+  using (public.current_app_role() = 'academic_monitor');
+
 drop policy if exists "signed in users can manage violation types" on public.violation_types;
-create policy "signed in users can manage violation types"
-  on public.violation_types for all to authenticated using (true) with check (true);
+drop policy if exists "managers can manage violation types" on public.violation_types;
+drop policy if exists "recorders can read violation types" on public.violation_types;
+create policy "managers can manage violation types"
+  on public.violation_types for all to authenticated
+  using (public.current_app_role() in ('teacher', 'class_monitor', 'secretary'))
+  with check (public.current_app_role() in ('teacher', 'class_monitor', 'secretary'));
+create policy "recorders can read violation types"
+  on public.violation_types for select to authenticated
+  using (public.current_app_role() = 'academic_monitor');
+
 drop policy if exists "signed in users can manage records" on public.violation_records;
-create policy "signed in users can manage records"
-  on public.violation_records for all to authenticated using (true) with check (true);
+drop policy if exists "recorders can manage violation records" on public.violation_records;
+drop policy if exists "authorized users can read violation records" on public.violation_records;
+create policy "recorders can manage violation records"
+  on public.violation_records for all to authenticated
+  using (public.current_app_role() in ('teacher', 'class_monitor', 'secretary', 'academic_monitor'))
+  with check (public.current_app_role() in ('teacher', 'class_monitor', 'secretary', 'academic_monitor'));
+create policy "authorized users can read violation records"
+  on public.violation_records for select to authenticated
+  using (
+    public.current_app_role() in ('labor_monitor', 'teacher', 'class_monitor', 'secretary', 'academic_monitor')
+    or (
+      public.current_app_role() = 'student'
+      and student_name = public.current_app_display_name()
+    )
+  );
 
 insert into public.class_settings (class_id, class_name)
 values ('main', '')
@@ -230,8 +291,14 @@ create index if not exists activity_logs_created_at_idx
 alter table public.activity_logs enable row level security;
 
 drop policy if exists "signed in users can read activity logs" on public.activity_logs;
-create policy "signed in users can read activity logs"
-  on public.activity_logs for select to authenticated using (true);
+drop policy if exists "authorized roles can read activity logs" on public.activity_logs;
+create policy "authorized roles can read activity logs"
+  on public.activity_logs for select to authenticated
+  using (
+    public.current_app_role() in ('teacher', 'class_monitor', 'secretary')
+    or (public.current_app_role() = 'academic_monitor' and action in ('Sửa ghi nhận', 'Xóa ghi nhận', 'Ghi nhận hàng loạt'))
+    or (public.current_app_role() = 'labor_monitor' and action = 'Lưu phân công trực nhật')
+  );
 drop policy if exists "signed in users can write activity logs" on public.activity_logs;
 create policy "signed in users can write activity logs"
   on public.activity_logs for insert to authenticated with check (auth.uid() = actor_id);
@@ -239,5 +306,8 @@ create policy "signed in users can write activity logs"
 alter table public.duty_schedules enable row level security;
 
 drop policy if exists "signed in users can manage duty schedules" on public.duty_schedules;
-create policy "signed in users can manage duty schedules"
-  on public.duty_schedules for all to authenticated using (true) with check (true);
+drop policy if exists "authorized staff can manage duty schedules" on public.duty_schedules;
+create policy "authorized staff can manage duty schedules"
+  on public.duty_schedules for all to authenticated
+  using (public.current_app_role() in ('teacher', 'class_monitor', 'secretary', 'labor_monitor'))
+  with check (public.current_app_role() in ('teacher', 'class_monitor', 'secretary', 'labor_monitor'));

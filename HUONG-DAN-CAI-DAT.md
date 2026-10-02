@@ -4,11 +4,11 @@
 
 | Vai trò | Quyền hạn | Mô tả |
 |---------|-----------|-------|
-| **Giáo viên** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
-| **Lớp trưởng** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
-| **Lớp phó học tập** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
-| **Bí thư** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
-| **Lớp phó lao động** | ✅ Toàn quyền | Xem, chỉnh sửa, tạo tài khoản |
+| **Giáo viên** | ✅ Toàn quyền | Quản lý lớp, ghi nhận nề nếp, phân công trực nhật |
+| **Lớp trưởng** | ✅ Toàn quyền | Quản lý lớp, ghi nhận nề nếp, phân công trực nhật |
+| **Bí thư** | ✅ Toàn quyền | Quản lý lớp, ghi nhận nề nếp, phân công trực nhật |
+| **Lớp phó học tập** | 📝 Ghi nhận nề nếp | Thêm, sửa, xóa ghi nhận vi phạm |
+| **Lớp phó lao động** | 📋 Phân công trực nhật | Xem vi phạm làm căn cứ, quản lý lịch trực |
 | **Thành viên** | 👀 Chỉ xem | Chỉ xem điểm của bản thân |
 
 ---
@@ -18,7 +18,7 @@
 ```sql
 -- Chạy file supabase-schema.sql trong Supabase SQL Editor
 -- File này sẽ tạo:
--- ✅ Bảng profiles với 5 vai trò
+-- ✅ Bảng profiles với 6 vai trò
 -- ✅ Bảng students với student_id
 -- ✅ Bảng class_settings, violation_types, violation_records
 -- ✅ Row Level Security policies
@@ -98,7 +98,7 @@ ON CONFLICT (id) DO UPDATE SET display_name = excluded.display_name, role = excl
 ## 👥 Bước 4: Tạo tài khoản học sinh hàng loạt
 
 ### 4.1. Đăng nhập
-- Mở `login.html` với tài khoản **Giáo viên/Lớp trưởng/Lớp phó/Bí thư**
+- Mở `login.html` với tài khoản **Giáo viên/Lớp trưởng/Bí thư**
 
 ### 4.2. Tạo tài khoản hàng loạt
 1. Nhấn nút **"👥 TK học sinh"** trong sidebar
@@ -146,8 +146,8 @@ Hệ thống tự động tạo tài khoản theo công thức:
 
 ### Đăng nhập
 1. Mở `login.html`
-2. Nhập tài khoản của **Giáo viên/Lớp trưởng/Lớp phó/Bí thư**
-3. Tự động vào trang chính `index.html`
+2. Nhập tài khoản quản lý.
+3. Giáo viên, Lớp trưởng, Bí thư vào trang quản lý; Lớp phó học tập vào sổ ghi nhận; Lớp phó lao động vào phân công trực nhật.
 
 ### Ghi nhận vi phạm
 1. Chọn tuần (nút ◀ ▶)
@@ -160,6 +160,7 @@ Hệ thống tự động tạo tài khoản theo công thức:
 3. Hệ thống tự động lưu
 
 ### Xem báo cáo
+- Chỉ Giáo viên, Lớp trưởng và Bí thư được xem dashboard, bảng tổng hợp và xuất Excel.
 - **Dashboard**: Thống kê tổng quan
 - **Biểu đồ xu hướng**: Theo tuần/tháng
 - **Xếp hạng**: Top 5 học sinh
@@ -170,6 +171,10 @@ Hệ thống tự động tạo tài khoản theo công thức:
 - Chọn:
   - **Tuần đang xem**: Chỉ tuần hiện tại
   - **Tất cả các tuần**: Toàn bộ năm học
+
+### Phân công trực nhật
+- Giáo viên, Lớp trưởng, Bí thư và Lớp phó lao động được quản lý lịch trực.
+- Lớp phó lao động không được thêm, sửa hoặc xóa ghi nhận nề nếp.
 
 ---
 

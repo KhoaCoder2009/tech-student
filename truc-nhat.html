@@ -72,22 +72,48 @@ h1{margin:0;font-size:1.8rem;color:var(--text)}
 .week-info{padding:1rem;background:linear-gradient(120deg,#fff 0%,#fff7f7 100%);border:1px solid #fecaca;border-radius:12px;margin-bottom:1.5rem}
 .week-info h2{margin:0 0 .5rem;font-size:1.3rem;color:var(--red)}
 .week-info p{margin:0;color:var(--muted);font-size:.9rem}
-.schedule-wrap{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(17,24,39,.05)}
-.schedule{width:100%;border-collapse:collapse;min-width:900px}
-.schedule th,.schedule td{padding:.75rem .5rem;border:1px solid var(--line);text-align:center;vertical-align:middle}
-.schedule thead th{background:var(--head);color:var(--ink);font-weight:700;font-size:.85rem;position:sticky;top:0;z-index:10}
-.schedule tbody tr:hover td{background:var(--hover)}
-.schedule .day-col{min-width:140px;background:#fff}
-.schedule .period-label{font-weight:700;color:var(--red);font-size:.9rem;min-width:60px;background:var(--soft)}
-.schedule input,.schedule select{width:100%;min-width:120px;padding:.5rem .4rem;border:1px solid transparent;border-radius:7px;background:transparent;font:inherit;font-size:.9rem;text-align:center;transition:all .18s ease}
-.schedule input:hover,.schedule select:hover{border-color:#fecaca;background:var(--field)}
-.schedule input:focus,.schedule select:focus{background:var(--field);border-color:var(--red);outline:0;box-shadow:0 0 0 3px #fee2e2}
-.schedule .empty{color:var(--muted);font-style:italic}
+.duty-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem}
+.duty-panel{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(17,24,39,.05);overflow:hidden}
+.duty-panel-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:1rem 1.1rem;border-bottom:1px solid var(--line)}
+.duty-panel-head h2{margin:0;font-size:1.05rem;color:var(--text)}
+.duty-panel-head p{margin:.2rem 0 0;color:var(--muted);font-size:.8rem}
+.duty-count{flex:0 0 auto;padding:.2rem .55rem;border-radius:999px;background:var(--head);color:var(--red);font-size:.78rem;font-weight:800}
+.duty-controls{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:1rem 1.1rem;border-bottom:1px solid var(--line)}
+.duty-controls select,.duty-controls input{min-width:0;min-height:2.55rem;padding:.5rem .65rem;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--text);font:inherit}
+.duty-controls select{flex:1}
+.duty-controls input{width:4.5rem;text-align:center}
+.duty-limit{display:flex;align-items:center;gap:.55rem;color:var(--text);font-size:.85rem;font-weight:600}
+.duty-limit input{width:4.5rem;text-align:center}
+.duty-list{display:grid;gap:.5rem;max-height:30rem;overflow:auto;padding:.75rem}
+.week-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6rem;padding:.75rem;overflow-x:auto}
+.weekday-column{min-width:9rem;min-height:9rem;border:1px solid var(--line);border-radius:8px;background:var(--field)}
+.weekday-head{display:flex;align-items:center;justify-content:space-between;gap:.35rem;padding:.65rem;border-bottom:1px solid var(--line);font-size:.85rem;font-weight:800;color:var(--text)}
+.weekday-list{display:grid;align-content:start;gap:.4rem;padding:.45rem}
+.weekday-empty{padding:.8rem .25rem;color:var(--muted);font-size:.76rem;text-align:center}
+.assigned-student{display:grid;gap:.4rem;padding:.55rem;border:1px solid var(--line);border-radius:7px;background:var(--paper);cursor:grab}
+.assigned-student:active{cursor:grabbing}.assigned-student.is-dragging{opacity:.45}
+.weekday-column.drag-over{outline:2px dashed var(--red);outline-offset:2px;background:var(--hover)}
+.assigned-student strong{font-size:.8rem;overflow-wrap:anywhere}
+.assigned-student small{color:var(--muted);font-size:.72rem;line-height:1.35}
+.assigned-actions{display:flex;align-items:center;gap:.3rem}
+.assigned-actions select{width:100%;min-width:0;height:2rem;padding:.2rem;border:1px solid var(--line);border-radius:6px;background:var(--field);color:var(--text);font:inherit;font-size:.72rem}
+.assigned-actions .duty-remove{width:2rem;height:2rem;flex:0 0 2rem}
+.duty-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.75rem;padding:.75rem;border:1px solid var(--line);border-radius:8px;background:var(--field)}
+.duty-row-main{min-width:0}.duty-row-main strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.duty-row-meta{display:flex;flex-wrap:wrap;gap:.35rem .75rem;margin-top:.25rem;color:var(--muted);font-size:.78rem}
+.duty-empty{padding:2rem 1rem;color:var(--muted);font-size:.9rem;text-align:center}
+.duty-remove{display:grid;place-items:center;width:2.2rem;height:2.2rem;border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--muted);cursor:pointer}
+.duty-remove:hover{color:var(--red);border-color:var(--red)}
+.duty-remove svg{width:1rem;height:1rem}
 .status{margin:1rem 0;padding:1rem;border-radius:8px;font-size:.9rem}
 .status.success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
 .status.error{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
 .legend{display:flex;flex-wrap:wrap;gap:1rem;margin-top:1rem;padding:1rem;background:var(--field);border-radius:8px;font-size:.85rem}
 .legend-item{display:flex;align-items:center;gap:.5rem}
+@media(max-width:1000px){.week-grid{grid-template-columns:repeat(3,minmax(9rem,1fr))}}
+@media(max-width:850px){.duty-list{max-height:24rem}}
+@media(max-width:560px){.week-grid{grid-template-columns:repeat(2,minmax(9rem,1fr))}}
+@media(max-width:380px){.week-grid{grid-template-columns:minmax(0,1fr)}}
 .account-dialog{width:min(420px,calc(100% - 2rem));padding:0;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--text);box-shadow:0 20px 50px rgba(17,24,39,.18)}
 .account-dialog::backdrop{background:rgba(17,24,39,.45)}
 .account-dialog-body{padding:1.25rem}.account-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem;border-bottom:1px solid var(--line)}
@@ -180,48 +206,37 @@ body.page-leaving{animation:page-leave .16s ease-in both;pointer-events:none}
         <button class="btn" id="prev-week" type="button" title="Tuần trước" aria-label="Tuần trước"><i data-lucide="chevron-left" aria-hidden="true"></i></button>
         <div>
           <h2 id="week-title" style="margin:0 0 .5rem">Tuần 1 · 7/9 – 13/9/2026</h2>
-          <p style="margin:0;color:var(--muted);font-size:.9rem">Lịch trực nhật từ Thứ 2 đến Thứ 6</p>
+          <p style="margin:0;color:var(--muted);font-size:.9rem">Danh sách phân công lấy từ học sinh có vi phạm trong tuần</p>
         </div>
         <button class="btn" id="next-week" type="button" title="Tuần sau" aria-label="Tuần sau"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
-      </div>
-      <div>
-        <label style="display:block;margin-bottom:.3rem;font-size:.85rem;font-weight:600;color:var(--muted)">Buổi:</label>
-        <select id="session-filter" style="min-width:140px;padding:.6rem .8rem;border:1px solid var(--line);border-radius:10px;background:var(--field);font:inherit;font-size:.95rem;font-weight:700;color:var(--red);cursor:pointer">
-          <option value="morning">Sáng</option>
-          <option value="afternoon">Chiều</option>
-        </select>
       </div>
     </div>
   </div>
 
   <div id="status" class="status" hidden></div>
 
-  <div class="schedule-wrap">
-    <table class="schedule">
-      <thead>
-        <tr>
-          <th>Tiết</th>
-          <th>Thứ 2</th>
-          <th>Thứ 3</th>
-          <th>Thứ 4</th>
-          <th>Thứ 5</th>
-          <th>Thứ 6</th>
-        </tr>
-      </thead>
-      <tbody id="schedule-body">
-        <!-- JavaScript sẽ render bảng -->
-      </tbody>
-    </table>
-  </div>
-
-  <div class="legend">
-    <div class="legend-item">
-      <span>Gợi ý: Nhập tên học sinh hoặc chọn từ danh sách</span>
-    </div>
+  <div class="duty-layout">
+    <section class="duty-panel" aria-labelledby="violators-title">
+      <div class="duty-panel-head"><div><h2 id="violators-title">Học sinh vi phạm</h2><p>Thống kê từ sổ ghi nhận trong tuần đang xem</p></div><span class="duty-count" id="violator-count">0</span></div>
+      <div class="duty-list" id="violator-list"><div class="duty-empty">Đang tải dữ liệu vi phạm...</div></div>
+    </section>
+    <section class="duty-panel" aria-labelledby="assigned-title">
+      <div class="duty-panel-head"><div><h2 id="assigned-title">Danh sách trực nhật</h2><p>Kéo thẻ chỉ đổi ngày, không thêm lượt. “Thêm” hoặc random sẽ tạo lượt trực mới.</p></div><span class="duty-count" id="assigned-count">0</span></div>
+      <div class="duty-controls">
+        <select id="manual-student" aria-label="Chọn học sinh để thêm thủ công"><option value="">Chọn học sinh vi phạm...</option></select>
+        <select id="manual-weekday" aria-label="Chọn ngày trực">
+          <option value="mon">Thứ 2</option><option value="tue">Thứ 3</option><option value="wed">Thứ 4</option><option value="thu">Thứ 5</option><option value="fri">Thứ 6</option>
+        </select>
+        <button class="btn" id="add-manual" type="button" title="Tạo thêm một lượt trực"><i data-lucide="user-round-plus" aria-hidden="true"></i> Thêm lượt</button>
+      </div>
+      <div class="duty-controls">
+        <button class="btn primary" id="random-assign" type="button"><i data-lucide="shuffle" aria-hidden="true"></i> Xếp tất cả ngẫu nhiên</button>
+        <label class="duty-limit" for="max-per-day">Tối đa mỗi ngày<input id="max-per-day" type="number" min="1" max="20" value="5"></label>
+      </div>
+      <div class="week-grid" id="assigned-list"><div class="duty-empty">Chưa có học sinh được phân công.</div></div>
+    </section>
   </div>
 </div></main>
-
-<datalist id="student-list"></datalist>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
@@ -233,18 +248,15 @@ body.page-leaving{animation:page-leave .16s ease-in both;pointer-events:none}
 if(window.lucide)window.lucide.createIcons();
 
 const client = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
-const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri'];
-const DAY_NAMES = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'];
-
-// Cấu trúc dữ liệu: { week_start: 'YYYY-MM-DD', schedule: { morning: { mon: [...], ... }, afternoon: { mon: [...], ... } } }
-let scheduleData = {
-  week_start: getCurrentWeekStart(),
-  schedule: initEmptySchedule()
-};
-
-let studentList = [];
+const WEEKDAYS = [{id:'mon',label:'Thứ 2'},{id:'tue',label:'Thứ 3'},{id:'wed',label:'Thứ 4'},{id:'thu',label:'Thứ 5'},{id:'fri',label:'Thứ 6'}];
+let scheduleData = {week_start:getCurrentWeekStart(),schedule:{assignments:[],maxPerDay:5}};
+let violationStudents = [];
 let hasChanges = false;
-let currentSession = 'morning'; // Buổi hiện tại đang hiển thị
+let scheduleSaveTimer = null;
+let scheduleSavePromise = null;
+let saveQueued = false;
+let statusTimer = null;
+let scheduleSaveNotice = '';
 
 async function logActivity(action, details) {
   try {
@@ -260,23 +272,14 @@ function getCurrentWeekStart() {
   const today = new Date();
   const day = today.getDay();
   const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Thứ 2
-  const monday = new Date(today.setDate(diff));
-  return monday.toISOString().split('T')[0];
-}
-
-function initEmptySchedule() {
-  const schedule = { morning: {}, afternoon: {} };
-  ['morning', 'afternoon'].forEach(session => {
-    DAYS.forEach(day => {
-      schedule[session][day] = ['', '', '', '', ''];
-    });
-  });
-  return schedule;
+  const monday = new Date(today.getFullYear(),today.getMonth(),diff);
+  return [monday.getFullYear(),String(monday.getMonth()+1).padStart(2,'0'),String(monday.getDate()).padStart(2,'0')].join('-');
 }
 
 function formatWeekTitle(weekStart) {
-  const start = new Date(weekStart);
-  const end = new Date(weekStart);
+  const [year, month, day] = weekStart.split('-').map(Number);
+  const start = new Date(year, month - 1, day);
+  const end = new Date(year,month-1,day);
   end.setDate(end.getDate() + 6);
   
   const weekNum = Math.floor((start - new Date(2026, 8, 7)) / (7 * 24 * 60 * 60 * 1000)) + 1;
@@ -284,242 +287,255 @@ function formatWeekTitle(weekStart) {
   return `Tuần ${weekNum} · ${start.getDate()}/${start.getMonth() + 1} – ${end.getDate()}/${end.getMonth() + 1}/${end.getFullYear()}`;
 }
 
-function renderSchedule() {
-  const tbody = document.getElementById('schedule-body');
-  tbody.innerHTML = '';
+async function changeWeek(offset) {
+  if (hasChanges && !(await saveSchedule())) return;
   
-  // Render 5 tiết theo buổi hiện tại
-  for (let period = 0; period < 5; period++) {
-    const tr = document.createElement('tr');
-    
-    // Cột tiết
-    const periodCell = document.createElement('td');
-    periodCell.className = 'period-label';
-    periodCell.textContent = `Tiết ${period + 1}`;
-    tr.appendChild(periodCell);
-    
-    // Các cột thứ (chỉ có input tên)
-    DAYS.forEach(day => {
-      const td = document.createElement('td');
-      td.className = 'day-col';
-      
-      // Input tên học sinh
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Nhập tên...';
-      input.value = scheduleData.schedule[currentSession][day][period] || '';
-      input.dataset.day = day;
-      input.dataset.period = period;
-      input.setAttribute('list', 'student-list');
-      input.addEventListener('input', onInputChange);
-      
-      td.appendChild(input);
-      tr.appendChild(td);
-    });
-    
-    tbody.appendChild(tr);
-  }
-}
-
-function onInputChange(e) {
-  const { day, period } = e.target.dataset;
-  const periodIndex = parseInt(period);
-  scheduleData.schedule[currentSession][day][periodIndex] = e.target.value.trim();
-  hasChanges = true;
-}
-
-function switchSession(session) {
-  currentSession = session;
-  document.getElementById('session-filter').value = session;
-  renderSchedule();
-}
-
-function changeWeek(offset) {
-  // Save current data before switching
-  if (hasChanges) {
-    if (!confirm('Bạn có thay đổi chưa lưu. Có muốn chuyển tuần không?')) {
-      return;
-    }
-  }
-  
-  const currentDate = new Date(scheduleData.week_start);
+  const [year, month, day] = scheduleData.week_start.split('-').map(Number);
+  const currentDate = new Date(year, month - 1, day);
   currentDate.setDate(currentDate.getDate() + (offset * 7));
-  scheduleData.week_start = currentDate.toISOString().split('T')[0];
+  scheduleData.week_start = [currentDate.getFullYear(),String(currentDate.getMonth()+1).padStart(2,'0'),String(currentDate.getDate()).padStart(2,'0')].join('-');
   
   hasChanges = false;
-  scheduleData.schedule = initEmptySchedule();
+  scheduleData.schedule = {assignments:[],maxPerDay:5};
   
   document.getElementById('week-title').textContent = formatWeekTitle(scheduleData.week_start);
-  loadSchedule();
+  await loadSchedule();
 }
 
 function exportToExcel() {
   try {
-    // Tạo workbook mới
     const wb = XLSX.utils.book_new();
-    
-    // Tạo data cho sheet Sáng
-    const morningData = [
-      ['Phân công trực nhật - BUỔI SÁNG'],
-      [formatWeekTitle(scheduleData.week_start)],
-      [],
-      ['Tiết', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6']
-    ];
-    
-    for (let i = 0; i < 5; i++) {
-      const row = [`Tiết ${i + 1}`];
-      DAYS.forEach(day => {
-        row.push(scheduleData.schedule.morning[day][i] || '');
-      });
-      morningData.push(row);
-    }
-    
-    // Tạo data cho sheet Chiều
-    const afternoonData = [
-      ['Phân công trực nhật - BUỔI CHIỀU'],
-      [formatWeekTitle(scheduleData.week_start)],
-      [],
-      ['Tiết', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6']
-    ];
-    
-    for (let i = 0; i < 5; i++) {
-      const row = [`Tiết ${i + 1}`];
-      DAYS.forEach(day => {
-        row.push(scheduleData.schedule.afternoon[day][i] || '');
-      });
-      afternoonData.push(row);
-    }
-    
-    // Tạo sheets
-    const wsMorning = XLSX.utils.aoa_to_sheet(morningData);
-    const wsAfternoon = XLSX.utils.aoa_to_sheet(afternoonData);
-    
-    // Set column widths
-    wsMorning['!cols'] = [{wch:10}, {wch:20}, {wch:20}, {wch:20}, {wch:20}, {wch:20}];
-    wsAfternoon['!cols'] = [{wch:10}, {wch:20}, {wch:20}, {wch:20}, {wch:20}, {wch:20}];
-    
-    // Add sheets to workbook
-    XLSX.utils.book_append_sheet(wb, wsMorning, 'Buổi Sáng');
-    XLSX.utils.book_append_sheet(wb, wsAfternoon, 'Buổi Chiều');
-    
-    // Generate filename
-    const weekStart = new Date(scheduleData.week_start);
-    const filename = `Truc-nhat-tuan-${weekStart.getDate()}-${weekStart.getMonth()+1}-${weekStart.getFullYear()}.xlsx`;
-    
-    // Download
+    const rows = [['Tuần',formatWeekTitle(scheduleData.week_start)],[],['Ngày trực','Học sinh','Số lượt vi phạm','Tổng điểm vi phạm','Nội dung vi phạm','Cách phân công']];
+    scheduleData.schedule.assignments.forEach(assignment => {
+      const student = violationStudents.find(item => item.key === normalizeName(assignment.student));
+      const weekday = WEEKDAYS.find(day => day.id === assignment.weekday);
+      rows.push([weekday ? weekday.label : 'Thứ 2',assignment.student,student ? student.count : 0,student ? student.points : 0,student ? student.reasons.join('; ') : '',assignment.method === 'random' ? 'Ngẫu nhiên' : 'Thủ công']);
+    });
+    const sheet = XLSX.utils.aoa_to_sheet(rows);
+    sheet['!cols'] = [{wch:14},{wch:28},{wch:18},{wch:22},{wch:60},{wch:18}];
+    XLSX.utils.book_append_sheet(wb,sheet,'Phân công trực nhật');
+    const [year, month, day] = scheduleData.week_start.split('-');
+    const filename = `Truc-nhat-tuan-${day}-${month}-${year}.xlsx`;
     XLSX.writeFile(wb, filename);
-    
-    showStatus('✅ Đã xuất file Excel thành công!', 'success');
+    showStatus('Đã xuất file Excel thành công!', 'success');
   } catch (err) {
     console.error('Lỗi xuất Excel:', err);
-    showStatus('❌ Lỗi xuất Excel: ' + err.message, 'error');
+    showStatus('Lỗi xuất Excel: ' + err.message, 'error');
   }
 }
 
-async function loadStudents() {
-  try {
-    const result = await client.from('students').select('name').eq('class_id', 'main').order('sort_order');
-    if (result.error) throw result.error;
-    
-    studentList = result.data.map(s => s.name);
-    
-    // Render datalist
-    const datalist = document.getElementById('student-list');
-    datalist.innerHTML = '';
-    studentList.forEach(name => {
-      const option = document.createElement('option');
-      option.value = name;
-      datalist.appendChild(option);
-    });
-  } catch (err) {
-    console.error('Lỗi tải danh sách học sinh:', err);
-  }
+function normalizeName(value) {
+  return String(value || '').trim().replace(/\s+/g,' ').toLocaleLowerCase('vi');
+}
+
+function weekdayStudentCount(weekday,skipIndex) {
+  const students=new Set();
+  scheduleData.schedule.assignments.forEach((item,index) => {
+    if(index!==skipIndex&&item.weekday===weekday)students.add(normalizeName(item.student));
+  });
+  return students.size;
+}
+
+function canAssignToDay(student,weekday,skipIndex) {
+  const alreadyThere=scheduleData.schedule.assignments.some((item,index) => index!==skipIndex&&item.weekday===weekday&&normalizeName(item.student)===normalizeName(student));
+  const limit=Number(scheduleData.schedule.maxPerDay)||5;
+  return alreadyThere||weekdayStudentCount(weekday,skipIndex)<limit;
 }
 
 async function loadSchedule() {
   try {
-    const result = await client
-      .from('duty_schedules')
-      .select('*')
-      .eq('week_start', scheduleData.week_start)
-      .maybeSingle();
-    
-    if (result.error && result.error.code !== 'PGRST116') throw result.error;
-    
-    if (result.data && result.data.schedule) {
-      const loadedSchedule = result.data.schedule;
-      
-      // Check if old format and migrate
-      if (loadedSchedule.mon && !loadedSchedule.morning && !loadedSchedule.afternoon) {
-        // Old format: { mon: [{session, student}, ...], ... }
-        scheduleData.schedule = { morning: {}, afternoon: {} };
-        DAYS.forEach(day => {
-          scheduleData.schedule.morning[day] = [];
-          scheduleData.schedule.afternoon[day] = [];
-          
-          if (Array.isArray(loadedSchedule[day])) {
-            loadedSchedule[day].forEach(item => {
-              if (item.session === 'morning' && scheduleData.schedule.morning[day].length < 5) {
-                scheduleData.schedule.morning[day].push(item.student || '');
-              } else if (item.session === 'afternoon' && scheduleData.schedule.afternoon[day].length < 5) {
-                scheduleData.schedule.afternoon[day].push(item.student || '');
-              }
-            });
-          }
-          
-          // Fill remaining slots
-          while (scheduleData.schedule.morning[day].length < 5) scheduleData.schedule.morning[day].push('');
-          while (scheduleData.schedule.afternoon[day].length < 5) scheduleData.schedule.afternoon[day].push('');
-        });
-      } else if (loadedSchedule.morning || loadedSchedule.afternoon) {
-        // New format
-        scheduleData.schedule = loadedSchedule;
-      }
-    }
-    
-    renderSchedule();
-    
+    const [year, month, day] = scheduleData.week_start.split('-').map(Number);
+    const legacyDate = new Date(year,month-1,day-2);
+    const legacyKey = [legacyDate.getFullYear(),String(legacyDate.getMonth()+1).padStart(2,'0'),String(legacyDate.getDate()).padStart(2,'0')].join('-');
+    const [saved, records] = await Promise.all([
+      client.from('duty_schedules').select('schedule').eq('week_start',scheduleData.week_start).maybeSingle(),
+      client.from('violation_records').select('id,violation_name,group_id,points,student_name').eq('class_id','main').in('week_start',[scheduleData.week_start,legacyKey]).order('created_at')
+    ]);
+    if(saved.error)throw saved.error;
+    if(records.error)throw records.error;
+    const loaded = saved.data && saved.data.schedule;
+    scheduleData.schedule = {assignments:Array.isArray(loaded && loaded.assignments) ? loaded.assignments.map((item,index) => ({...item,weekday:WEEKDAYS.some(day => day.id === item.weekday) ? item.weekday : WEEKDAYS[index % WEEKDAYS.length].id,method:item.method || 'manual'})) : [],maxPerDay:Math.max(1,Math.min(20,Number(loaded && loaded.maxPerDay)||5))};
+    document.getElementById('max-per-day').value=scheduleData.schedule.maxPerDay;
+    const students = new Map();
+    (records.data || []).forEach(record => {
+      const name = String(record.student_name || '').trim().replace(/\s+/g,' ');
+      if(!name || record.group_id === 'cong')return;
+      const key = normalizeName(name);
+      const student = students.get(key) || {key,name,count:0,points:0,reasons:[]};
+      student.count += 1;
+      student.points += Number(record.points) || 0;
+      const reason = record.violation_name || 'Vi phạm';
+      if(!student.reasons.includes(reason))student.reasons.push(reason);
+      students.set(key,student);
+    });
+    violationStudents = Array.from(students.values()).sort((a,b) => a.name.localeCompare(b.name,'vi'));
+    renderDutyLists();
   } catch (err) {
     console.error('Lỗi tải lịch trực:', err);
-    showStatus('Lỗi tải dữ liệu: ' + err.message, 'error');
+    showStatus('Không tải được phân công hoặc ghi nhận vi phạm: ' + err.message, 'error');
   }
 }
 
+function renderDutyLists() {
+  const violatorList = document.getElementById('violator-list');
+  const assignedList = document.getElementById('assigned-list');
+  const select = document.getElementById('manual-student');
+  const assignedCounts = new Map();
+  scheduleData.schedule.assignments.forEach(item => {
+    const key=normalizeName(item.student);assignedCounts.set(key,(assignedCounts.get(key)||0)+1);
+  });
+  document.getElementById('violator-count').textContent = violationStudents.length;
+  document.getElementById('assigned-count').textContent = scheduleData.schedule.assignments.length;
+  violatorList.replaceChildren();
+  if(!violationStudents.length) {
+    const empty = document.createElement('div'); empty.className='duty-empty';
+    empty.textContent='Tuần này chưa có học sinh nào được ghi nhận vi phạm.'; violatorList.appendChild(empty);
+  }
+  violationStudents.forEach(student => {
+    const row = document.createElement('div'); row.className='duty-row';
+    const main = document.createElement('div'); main.className='duty-row-main';
+    const name = document.createElement('strong'); name.textContent=student.name; main.appendChild(name);
+    const meta = document.createElement('div'); meta.className='duty-row-meta';
+    const count = document.createElement('span'); count.textContent=student.count+' lượt vi phạm'; meta.appendChild(count);
+    const points = document.createElement('span'); points.textContent='Điểm: '+student.points; meta.appendChild(points);
+    const reasons = document.createElement('span'); reasons.textContent=student.reasons.join(', '); meta.appendChild(reasons);
+    main.appendChild(meta); row.appendChild(main);
+    const state = document.createElement('span'); state.className='duty-count'; state.textContent=(assignedCounts.get(student.key)||0)+'/'+student.count+' lượt xếp'; row.appendChild(state);
+    violatorList.appendChild(row);
+  });
+  select.replaceChildren(new Option('Chọn học sinh vi phạm...',''));
+  violationStudents.forEach(student => {
+    select.add(new Option(student.name+' · '+student.count+' lượt',student.name));
+  });
+  assignedList.replaceChildren();
+  WEEKDAYS.forEach(day => {
+    const assignments=scheduleData.schedule.assignments.map((item,index) => ({item,index})).filter(entry => entry.item.weekday===day.id);
+    const column=document.createElement('section'); column.className='weekday-column';column.dataset.weekday=day.id;
+    const heading=document.createElement('div'); heading.className='weekday-head';
+    const label=document.createElement('span'); label.textContent=day.label; heading.appendChild(label);
+    const count=document.createElement('span'); count.className='duty-count'; count.textContent=new Set(assignments.map(entry => normalizeName(entry.item.student))).size; heading.appendChild(count);
+    column.appendChild(heading);
+    const list=document.createElement('div'); list.className='weekday-list';
+    if(!assignments.length){const empty=document.createElement('div');empty.className='weekday-empty';empty.textContent='Chưa có người trực';list.appendChild(empty);}
+    assignments.forEach(({item,index}) => {
+      const student=violationStudents.find(entry => entry.key===normalizeName(item.student));
+      const card=document.createElement('article');card.className='assigned-student';card.draggable=true;card.dataset.assignmentIndex=index;
+      const name=document.createElement('strong');name.textContent=item.student;card.appendChild(name);
+      const reason=document.createElement('small');reason.textContent=student ? student.reasons.join(', ')+' · '+student.count+' lượt' : 'Không còn ghi nhận trong tuần';card.appendChild(reason);
+      const actions=document.createElement('div');actions.className='assigned-actions';
+      const daySelect=document.createElement('select');daySelect.dataset.dayIndex=index;daySelect.setAttribute('aria-label','Đổi ngày trực của '+item.student);
+      WEEKDAYS.forEach(optionDay => daySelect.add(new Option(optionDay.label,optionDay.id)));
+      daySelect.value=item.weekday;actions.appendChild(daySelect);
+      const remove=document.createElement('button');remove.type='button';remove.className='duty-remove';remove.dataset.removeIndex=index;remove.setAttribute('aria-label','Gỡ '+item.student);remove.title='Gỡ phân công';
+      const icon=document.createElement('i');icon.setAttribute('data-lucide','x');remove.appendChild(icon);actions.appendChild(remove);
+      card.appendChild(actions);list.appendChild(card);
+    });
+    column.appendChild(list);assignedList.appendChild(column);
+  });
+  if(window.lucide)window.lucide.createIcons();
+}
+
+function addManualStudent() {
+  const select=document.getElementById('manual-student');
+  const name=select.value;
+  if(!name)return;
+  const weekday=document.getElementById('manual-weekday').value;
+  if(!canAssignToDay(name,weekday)){showStatus('Ngày này đã đủ '+scheduleData.schedule.maxPerDay+' học sinh trực.','error');return;}
+  scheduleData.schedule.assignments.push({student:name,weekday,method:'manual'});
+  renderDutyLists();queueScheduleSave();
+}
+
+function randomAssign() {
+  const assignedCounts=new Map();
+  scheduleData.schedule.assignments.forEach(item => {
+    const key=normalizeName(item.student);assignedCounts.set(key,(assignedCounts.get(key)||0)+1);
+  });
+  const candidates=violationStudents.map(student => ({student,remaining:Math.max(0,student.count-(assignedCounts.get(student.key)||0))})).filter(item => item.remaining>0);
+  if(!candidates.length){showStatus('Không còn học sinh vi phạm nào chưa được xếp.','error');return;}
+  // Randomize ties, then create one duty for each unassigned violation.
+  for(let index=candidates.length-1;index>0;index--){const swap=Math.floor(Math.random()*(index+1));[candidates[index],candidates[swap]]=[candidates[swap],candidates[index]];}
+  candidates.sort((first,second) => second.student.count-first.student.count);
+  const weekdayCounts=Object.fromEntries(WEEKDAYS.map(day => [day.id,scheduleData.schedule.assignments.filter(item => item.weekday===day.id).length]));
+  const studentDayCounts=new Map();
+  let unassigned=0,added=0;
+  scheduleData.schedule.assignments.forEach(item => {
+    const key=normalizeName(item.student),counts=studentDayCounts.get(key)||Object.fromEntries(WEEKDAYS.map(day => [day.id,0]));
+    counts[item.weekday]=(counts[item.weekday]||0)+1;studentDayCounts.set(key,counts);
+  });
+  candidates.forEach(({student,remaining}) => {
+    const counts=studentDayCounts.get(student.key)||Object.fromEntries(WEEKDAYS.map(day => [day.id,0]));
+    for(let assignment=0;assignment<remaining;assignment++){
+      const availableDays=WEEKDAYS.filter(day => canAssignToDay(student.name,day.id));
+      if(!availableDays.length){unassigned += remaining-assignment;break;}
+      const leastForStudent=Math.min(...availableDays.map(day => counts[day.id]||0));
+      const studentDays=availableDays.filter(day => (counts[day.id]||0)===leastForStudent);
+      const leastOverall=Math.min(...studentDays.map(day => weekdayCounts[day.id]));
+      const available=studentDays.filter(day => weekdayCounts[day.id]===leastOverall);
+      const weekday=available[Math.floor(Math.random()*available.length)].id;
+      scheduleData.schedule.assignments.push({student:student.name,weekday,method:'random'});
+      counts[weekday]=(counts[weekday]||0)+1;weekdayCounts[weekday]+=1;added+=1;
+    }
+    studentDayCounts.set(student.key,counts);
+  });
+  if(!added){showStatus('Các ngày đã đủ giới hạn '+scheduleData.schedule.maxPerDay+' học sinh.','error');return;}
+  renderDutyLists();queueScheduleSave(unassigned ? 'Đã xếp '+added+' lượt; còn '+unassigned+' lượt chưa xếp do giới hạn '+scheduleData.schedule.maxPerDay+' học sinh/ngày.' : '');
+}
+
+function updateDailyLimit() {
+  const input=document.getElementById('max-per-day');
+  const value=Math.max(1,Math.min(20,Math.floor(Number(input.value)||5)));
+  const busiest=Math.max(...WEEKDAYS.map(day => weekdayStudentCount(day.id)));
+  if(value<busiest){input.value=scheduleData.schedule.maxPerDay;showStatus('Không thể đặt giới hạn thấp hơn '+busiest+' học sinh đã xếp trong một ngày.','error');return;}
+  input.value=value;scheduleData.schedule.maxPerDay=value;queueScheduleSave();
+}
+
+function queueScheduleSave(notice) {
+  hasChanges=true;clearTimeout(scheduleSaveTimer);
+  scheduleSaveNotice=notice||'';
+  showStatus(scheduleSaveNotice||'Thay đổi sẽ tự động lưu…',scheduleSaveNotice?'error':'success');
+  scheduleSaveTimer=setTimeout(saveSchedule,700);
+}
+
 async function saveSchedule() {
+  clearTimeout(scheduleSaveTimer);
+  if(scheduleSavePromise){saveQueued=true;return scheduleSavePromise;}
   const btn = document.getElementById('save');
   btn.disabled = true;
   btn.textContent = 'Đang lưu...';
-  
+  scheduleSavePromise=(async function(){
   try {
-    const result = await client
-      .from('duty_schedules')
-      .upsert({
-        week_start: scheduleData.week_start,
-        schedule: scheduleData.schedule,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'week_start' });
-    
-    if (result.error) throw result.error;
-    
-    hasChanges = false;
-    await logActivity('Lưu phân công trực nhật', 'Tuần '+formatWeekTitle(scheduleData.week_start));
-    showStatus('✅ Đã lưu thành công!', 'success');
+    do {
+      saveQueued=false;
+      const weekStart=scheduleData.week_start;
+      const snapshot=JSON.parse(JSON.stringify(scheduleData.schedule));
+      const result=await client.from('duty_schedules').upsert({week_start:weekStart,schedule:snapshot,updated_at:new Date().toISOString()},{onConflict:'week_start'});
+      if(result.error)throw result.error;
+      await logActivity('Lưu phân công trực nhật','Tuần '+formatWeekTitle(weekStart));
+      if(scheduleData.week_start===weekStart&&JSON.stringify(scheduleData.schedule)===JSON.stringify(snapshot))hasChanges=false;
+    } while(saveQueued);
+    showStatus(scheduleSaveNotice||'Đã tự động lưu lịch trực nhật.',scheduleSaveNotice?'error':'success');
+    scheduleSaveNotice='';
+    return true;
   } catch (err) {
     console.error('Lỗi lưu:', err);
-    showStatus('❌ Lỗi: ' + err.message, 'error');
+    showStatus('Lỗi: ' + err.message, 'error');
+    return false;
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i data-lucide="save" aria-hidden="true"></i> Lưu';
     if (window.lucide) window.lucide.createIcons();
   }
+  })();
+  try{return await scheduleSavePromise;}finally{scheduleSavePromise=null;}
 }
 
 function showStatus(message, type) {
+  clearTimeout(statusTimer);
   const status = document.getElementById('status');
   status.textContent = message;
   status.className = 'status ' + type;
   status.hidden = false;
-  setTimeout(() => {
+  statusTimer=setTimeout(() => {
     status.hidden = true;
   }, 3000);
 }
@@ -532,15 +548,17 @@ client.auth.getSession().then(async (result) => {
   }
   
   const profile = await client.from('profiles').select('role').eq('id', result.data.session.user.id).maybeSingle();
-  if (profile.error || !profile.data || !['teacher', 'class_monitor', 'academic_monitor', 'secretary', 'labor_monitor'].includes(profile.data.role)) {
+  if (!profile.error && profile.data && profile.data.role === 'academic_monitor') {
+    window.location.replace('index.html?view=records');
+    return;
+  }
+  if (profile.error || !profile.data || !['teacher', 'class_monitor', 'secretary', 'labor_monitor'].includes(profile.data.role)) {
     showStatus('Bạn không có quyền chỉnh sửa lịch trực nhật.', 'error');
-    document.querySelectorAll('input').forEach(input => input.disabled = true);
-    document.getElementById('save').disabled = true;
+    document.querySelectorAll('input,select,button').forEach(control => control.disabled = true);
     return;
   }
   
   // Load data
-  await loadStudents();
   await loadSchedule();
   
   document.getElementById('week-title').textContent = formatWeekTitle(scheduleData.week_start);
@@ -561,9 +579,53 @@ document.getElementById('next-week').addEventListener('click', function() {
   changeWeek(1);
 });
 
-// Session filter
-document.getElementById('session-filter').addEventListener('change', function(e) {
-  switchSession(e.target.value);
+document.getElementById('add-manual').addEventListener('click',addManualStudent);
+document.getElementById('random-assign').addEventListener('click',randomAssign);
+document.getElementById('max-per-day').addEventListener('change',updateDailyLimit);
+document.getElementById('assigned-list').addEventListener('click',function(event) {
+  const remove=event.target.closest('[data-remove-index]');
+  if(!remove)return;
+  scheduleData.schedule.assignments.splice(Number(remove.dataset.removeIndex),1);
+  renderDutyLists();queueScheduleSave();
+});
+document.getElementById('assigned-list').addEventListener('change',function(event) {
+  const select=event.target.closest('[data-day-index]');
+  if(!select)return;
+  const assignment=scheduleData.schedule.assignments[Number(select.dataset.dayIndex)];
+  if(!assignment)return;
+  if(!canAssignToDay(assignment.student,select.value,Number(select.dataset.dayIndex))){showStatus('Ngày này đã đủ '+scheduleData.schedule.maxPerDay+' học sinh trực.','error');renderDutyLists();return;}
+  assignment.weekday=select.value;renderDutyLists();queueScheduleSave();
+});
+document.getElementById('assigned-list').addEventListener('dragstart',function(event) {
+  const card=event.target.closest('[data-assignment-index]');
+  if(!card||!event.dataTransfer)return;
+  event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',card.dataset.assignmentIndex);
+  card.classList.add('is-dragging');
+});
+document.getElementById('assigned-list').addEventListener('dragend',function(event) {
+  const card=event.target.closest('[data-assignment-index]');if(card)card.classList.remove('is-dragging');
+  document.querySelectorAll('.weekday-column.drag-over').forEach(column => column.classList.remove('drag-over'));
+});
+document.getElementById('assigned-list').addEventListener('dragover',function(event) {
+  const column=event.target.closest('[data-weekday]');if(!column)return;
+  event.preventDefault();if(event.dataTransfer)event.dataTransfer.dropEffect='move';
+  column.classList.add('drag-over');
+});
+document.getElementById('assigned-list').addEventListener('dragleave',function(event) {
+  const column=event.target.closest('[data-weekday]');
+  if(column&&!column.contains(event.relatedTarget))column.classList.remove('drag-over');
+});
+document.getElementById('assigned-list').addEventListener('drop',function(event) {
+  const column=event.target.closest('[data-weekday]');if(!column)return;
+  event.preventDefault();column.classList.remove('drag-over');
+  const transferValue=event.dataTransfer&&event.dataTransfer.getData('text/plain');
+  if(transferValue===undefined||transferValue==='')return;
+  const index=Number(transferValue);
+  if(!Number.isInteger(index)||index<0)return;
+  const assignment=scheduleData.schedule.assignments[index];
+  if(!assignment||assignment.weekday===column.dataset.weekday)return;
+  if(!canAssignToDay(assignment.student,column.dataset.weekday,index)){showStatus('Ngày này đã đủ '+scheduleData.schedule.maxPerDay+' học sinh trực.','error');return;}
+  assignment.weekday=column.dataset.weekday;renderDutyLists();queueScheduleSave();
 });
 
 // Cảnh báo khi thoát có thay đổi
