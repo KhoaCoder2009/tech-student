@@ -72,6 +72,10 @@ h1{margin:0;font-size:1.8rem;color:var(--text)}
 .week-info{padding:1rem;background:linear-gradient(120deg,#fff 0%,#fff7f7 100%);border:1px solid #fecaca;border-radius:12px;margin-bottom:1.5rem}
 .week-info h2{margin:0 0 .5rem;font-size:1.3rem;color:var(--red)}
 .week-info p{margin:0;color:var(--muted);font-size:.9rem}
+.access-denied{display:grid;justify-items:start;gap:.65rem;max-width:38rem;margin:3rem auto;padding:2rem;border:1px solid var(--line);border-left:4px solid var(--red);border-radius:10px;background:var(--paper);box-shadow:0 8px 24px rgba(17,24,39,.05)}
+.access-denied>svg{width:2rem;height:2rem;color:var(--red)}
+.access-denied h2{margin:0;color:var(--text);font-size:1.25rem}
+.access-denied p{margin:0 0 .5rem;color:var(--muted)}
 .duty-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem}
 .duty-panel{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(17,24,39,.05);overflow:hidden}
 .duty-panel-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:1rem 1.1rem;border-bottom:1px solid var(--line)}
@@ -236,7 +240,14 @@ body.page-leaving{animation:page-leave .16s ease-in both;pointer-events:none}
       <div class="week-grid" id="assigned-list"><div class="duty-empty">Chưa có học sinh được phân công.</div></div>
     </section>
   </div>
-</div></main>
+</div>
+<section class="access-denied" id="access-denied" aria-labelledby="access-denied-title" hidden>
+  <i data-lucide="shield-x" aria-hidden="true"></i>
+  <h2 id="access-denied-title">Không có quyền truy cập</h2>
+  <p>Bạn không có quyền truy cập vào phân công trực nhật.</p>
+  <a class="btn" href="index.html"><i data-lucide="arrow-left" aria-hidden="true"></i> Về trang chính</a>
+</section>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
@@ -548,13 +559,10 @@ client.auth.getSession().then(async (result) => {
   }
   
   const profile = await client.from('profiles').select('role').eq('id', result.data.session.user.id).maybeSingle();
-  if (!profile.error && profile.data && profile.data.role === 'academic_monitor') {
-    window.location.replace('index.html?view=records');
-    return;
-  }
   if (profile.error || !profile.data || !['teacher', 'class_monitor', 'secretary', 'labor_monitor'].includes(profile.data.role)) {
-    showStatus('Bạn không có quyền chỉnh sửa lịch trực nhật.', 'error');
-    document.querySelectorAll('input,select,button').forEach(control => control.disabled = true);
+    document.querySelector('.container').hidden = true;
+    document.getElementById('access-denied').hidden = false;
+    if (window.lucide) window.lucide.createIcons();
     return;
   }
   

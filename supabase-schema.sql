@@ -24,6 +24,11 @@ create table if not exists public.students (
   primary key (class_id, name)
 );
 
+alter table public.students
+  add column if not exists sort_order integer not null default 0,
+  add column if not exists base_points integer not null default 100,
+  add column if not exists current_points integer not null default 100;
+
 create table if not exists public.violation_types (
   id text not null,
   class_id text not null,
