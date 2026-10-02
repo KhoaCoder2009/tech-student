@@ -35,6 +35,7 @@ body.theme-dark .status.error{background:#4a2d35;color:#ffc0b7;border-color:#8a5
 .side-nav{display:grid;align-items:center;gap:var(--sidebar-icon-gap);width:100%;padding:0;border:0;background:transparent;box-shadow:none}
 .side-link{display:flex;align-items:center;justify-content:flex-start;gap:.65rem;width:100%;min-height:2.35rem;padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted);font:600 .9rem Arial,'Segoe UI',sans-serif;text-decoration:none;text-align:left;cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s ease}
 .side-link:hover,.side-link[aria-current="page"]{background:var(--head);color:var(--red);transform:translateY(-1px)}
+.labor-monitor-page .side-link[href="records.html#matrix"],.labor-monitor-page .utility-cluster>a.utility-icon[aria-label="Cài đặt"]{display:none!important}
 .side-link>span:not(.side-icon){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .side-icon{display:grid;place-items:center;width:2.35rem;height:2.35rem;flex:0 0 2.35rem;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:currentColor;font-size:1rem;line-height:1;box-shadow:0 1px 4px rgba(17,24,39,.04)}
 .side-icon svg{width:1.15rem;height:1.15rem;stroke-width:2}
@@ -73,6 +74,7 @@ h1{margin:0;font-size:1.8rem;color:var(--text)}
 .week-info h2{margin:0 0 .5rem;font-size:1.3rem;color:var(--red)}
 .week-info p{margin:0;color:var(--muted);font-size:.9rem}
 .access-denied{display:grid;justify-items:start;gap:.65rem;max-width:38rem;margin:3rem auto;padding:2rem;border:1px solid var(--line);border-left:4px solid var(--red);border-radius:10px;background:var(--paper);box-shadow:0 8px 24px rgba(17,24,39,.05)}
+.access-denied[hidden]{display:none!important}
 .access-denied>svg{width:2rem;height:2rem;color:var(--red)}
 .access-denied h2{margin:0;color:var(--text);font-size:1.25rem}
 .access-denied p{margin:0 0 .5rem;color:var(--muted)}
@@ -81,6 +83,11 @@ h1{margin:0;font-size:1.8rem;color:var(--text)}
 .duty-panel-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:1rem 1.1rem;border-bottom:1px solid var(--line)}
 .duty-panel-head h2{margin:0;font-size:1.05rem;color:var(--text)}
 .duty-panel-head p{margin:.2rem 0 0;color:var(--muted);font-size:.8rem}
+.duty-panel-tools{display:flex;align-items:center;gap:.45rem}
+.clear-day{display:grid;place-items:center;width:2rem;height:2rem;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--muted);cursor:pointer}
+.clear-day:hover:not(:disabled){color:var(--red);border-color:var(--red)}
+.clear-day:disabled{opacity:.4;cursor:default}
+.clear-day svg{width:1rem;height:1rem}
 .duty-count{flex:0 0 auto;padding:.2rem .55rem;border-radius:999px;background:var(--head);color:var(--red);font-size:.78rem;font-weight:800}
 .duty-controls{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:1rem 1.1rem;border-bottom:1px solid var(--line)}
 .duty-controls select,.duty-controls input{min-width:0;min-height:2.55rem;padding:.5rem .65rem;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--text);font:inherit}
@@ -210,7 +217,7 @@ body.page-leaving{animation:page-leave .16s ease-in both;pointer-events:none}
         <button class="btn" id="prev-week" type="button" title="Tuần trước" aria-label="Tuần trước"><i data-lucide="chevron-left" aria-hidden="true"></i></button>
         <div>
           <h2 id="week-title" style="margin:0 0 .5rem">Tuần 1 · 7/9 – 13/9/2026</h2>
-          <p style="margin:0;color:var(--muted);font-size:.9rem">Danh sách phân công lấy từ học sinh có vi phạm trong tuần</p>
+          <p id="week-source" style="margin:0;color:var(--muted);font-size:.9rem">Lập lịch tuần kế tiếp theo vi phạm tuần trước</p>
         </div>
         <button class="btn" id="next-week" type="button" title="Tuần sau" aria-label="Tuần sau"><i data-lucide="chevron-right" aria-hidden="true"></i></button>
       </div>
@@ -225,7 +232,7 @@ body.page-leaving{animation:page-leave .16s ease-in both;pointer-events:none}
       <div class="duty-list" id="violator-list"><div class="duty-empty">Đang tải dữ liệu vi phạm...</div></div>
     </section>
     <section class="duty-panel" aria-labelledby="assigned-title">
-      <div class="duty-panel-head"><div><h2 id="assigned-title">Danh sách trực nhật</h2><p>Kéo thẻ chỉ đổi ngày, không thêm lượt. “Thêm” hoặc random sẽ tạo lượt trực mới.</p></div><span class="duty-count" id="assigned-count">0</span></div>
+      <div class="duty-panel-head"><div><h2 id="assigned-title">Danh sách trực nhật</h2><p>Kéo thẻ chỉ đổi ngày, không thêm lượt. “Thêm” hoặc random sẽ tạo lượt trực mới.</p></div><div class="duty-panel-tools"><span class="duty-count" id="assigned-count">0</span><button class="btn" id="clear-all" type="button" title="Xóa toàn bộ phân công tuần này" aria-label="Xóa toàn bộ phân công tuần này" disabled><i data-lucide="trash-2" aria-hidden="true"></i> Xóa tất cả</button></div></div>
       <div class="duty-controls">
         <select id="manual-student" aria-label="Chọn học sinh để thêm thủ công"><option value="">Chọn học sinh vi phạm...</option></select>
         <select id="manual-weekday" aria-label="Chọn ngày trực">
@@ -260,7 +267,7 @@ if(window.lucide)window.lucide.createIcons();
 
 const client = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
 const WEEKDAYS = [{id:'mon',label:'Thứ 2'},{id:'tue',label:'Thứ 3'},{id:'wed',label:'Thứ 4'},{id:'thu',label:'Thứ 5'},{id:'fri',label:'Thứ 6'}];
-let scheduleData = {week_start:getCurrentWeekStart(),schedule:{assignments:[],maxPerDay:5}};
+let scheduleData = {week_start:shiftDate(getCurrentWeekStart(),7),schedule:{assignments:[],maxPerDay:5}};
 let violationStudents = [];
 let hasChanges = false;
 let scheduleSaveTimer = null;
@@ -287,6 +294,12 @@ function getCurrentWeekStart() {
   return [monday.getFullYear(),String(monday.getMonth()+1).padStart(2,'0'),String(monday.getDate()).padStart(2,'0')].join('-');
 }
 
+function shiftDate(dateString,offset) {
+  const [year,month,day]=dateString.split('-').map(Number);
+  const date=new Date(year,month-1,day+offset);
+  return [date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('-');
+}
+
 function formatWeekTitle(weekStart) {
   const [year, month, day] = weekStart.split('-').map(Number);
   const start = new Date(year, month - 1, day);
@@ -300,30 +313,44 @@ function formatWeekTitle(weekStart) {
 
 async function changeWeek(offset) {
   if (hasChanges && !(await saveSchedule())) return;
-  
-  const [year, month, day] = scheduleData.week_start.split('-').map(Number);
-  const currentDate = new Date(year, month - 1, day);
-  currentDate.setDate(currentDate.getDate() + (offset * 7));
-  scheduleData.week_start = [currentDate.getFullYear(),String(currentDate.getMonth()+1).padStart(2,'0'),String(currentDate.getDate()).padStart(2,'0')].join('-');
+  scheduleData.week_start = shiftDate(scheduleData.week_start,offset*7);
   
   hasChanges = false;
   scheduleData.schedule = {assignments:[],maxPerDay:5};
-  
-  document.getElementById('week-title').textContent = formatWeekTitle(scheduleData.week_start);
+  renderWeekHeader();
   await loadSchedule();
+}
+
+function renderWeekHeader() {
+  document.getElementById('week-title').textContent=formatWeekTitle(scheduleData.week_start);
+  document.getElementById('week-source').textContent='Nguồn vi phạm: '+formatWeekTitle(shiftDate(scheduleData.week_start,-7));
 }
 
 function exportToExcel() {
   try {
     const wb = XLSX.utils.book_new();
-    const rows = [['Tuần',formatWeekTitle(scheduleData.week_start)],[],['Ngày trực','Học sinh','Số lượt vi phạm','Tổng điểm vi phạm','Nội dung vi phạm','Cách phân công']];
+    const byDay=Object.fromEntries(WEEKDAYS.map(day => [day.id,new Map()]));
     scheduleData.schedule.assignments.forEach(assignment => {
-      const student = violationStudents.find(item => item.key === normalizeName(assignment.student));
-      const weekday = WEEKDAYS.find(day => day.id === assignment.weekday);
-      rows.push([weekday ? weekday.label : 'Thứ 2',assignment.student,student ? student.count : 0,student ? student.points : 0,student ? student.reasons.join('; ') : '',assignment.method === 'random' ? 'Ngẫu nhiên' : 'Thủ công']);
+      const day=byDay[assignment.weekday];
+      if(!day)return;
+      const key=normalizeName(assignment.student),entry=day.get(key)||{name:assignment.student,count:0};
+      entry.count+=1;day.set(key,entry);
     });
+    const dailyStudents=WEEKDAYS.map(day => Array.from(byDay[day.id].values()).sort((first,second) => first.name.localeCompare(second.name,'vi')));
+    const rows=[
+      ['Tuần trực',formatWeekTitle(scheduleData.week_start)],
+      ['Nguồn vi phạm',formatWeekTitle(shiftDate(scheduleData.week_start,-7))],
+      [],
+      WEEKDAYS.map((day,index) => day.label+' ('+dailyStudents[index].length+')')
+    ];
+    const rowCount=Math.max(0,...dailyStudents.map(students => students.length));
+    for(let index=0;index<rowCount;index++){
+      rows.push(dailyStudents.map(students => {
+        const entry=students[index];return entry ? entry.name+(entry.count>1?' ×'+entry.count:'') : '';
+      }));
+    }
     const sheet = XLSX.utils.aoa_to_sheet(rows);
-    sheet['!cols'] = [{wch:14},{wch:28},{wch:18},{wch:22},{wch:60},{wch:18}];
+    sheet['!cols'] = WEEKDAYS.map(() => ({wch:28}));
     XLSX.utils.book_append_sheet(wb,sheet,'Phân công trực nhật');
     const [year, month, day] = scheduleData.week_start.split('-');
     const filename = `Truc-nhat-tuan-${day}-${month}-${year}.xlsx`;
@@ -355,12 +382,11 @@ function canAssignToDay(student,weekday,skipIndex) {
 
 async function loadSchedule() {
   try {
-    const [year, month, day] = scheduleData.week_start.split('-').map(Number);
-    const legacyDate = new Date(year,month-1,day-2);
-    const legacyKey = [legacyDate.getFullYear(),String(legacyDate.getMonth()+1).padStart(2,'0'),String(legacyDate.getDate()).padStart(2,'0')].join('-');
+    const violationWeekStart=shiftDate(scheduleData.week_start,-7);
+    const legacyKey=shiftDate(violationWeekStart,-2);
     const [saved, records] = await Promise.all([
       client.from('duty_schedules').select('schedule').eq('week_start',scheduleData.week_start).maybeSingle(),
-      client.from('violation_records').select('id,violation_name,group_id,points,student_name').eq('class_id','main').in('week_start',[scheduleData.week_start,legacyKey]).order('created_at')
+      client.from('violation_records').select('id,violation_name,group_id,points,student_name').eq('class_id','main').in('week_start',[violationWeekStart,legacyKey]).order('created_at')
     ]);
     if(saved.error)throw saved.error;
     if(records.error)throw records.error;
@@ -425,6 +451,8 @@ function renderDutyLists() {
     const heading=document.createElement('div'); heading.className='weekday-head';
     const label=document.createElement('span'); label.textContent=day.label; heading.appendChild(label);
     const count=document.createElement('span'); count.className='duty-count'; count.textContent=new Set(assignments.map(entry => normalizeName(entry.item.student))).size; heading.appendChild(count);
+    const clearDay=document.createElement('button');clearDay.type='button';clearDay.className='clear-day';clearDay.dataset.clearDay=day.id;clearDay.title='Xóa phân công '+day.label;clearDay.setAttribute('aria-label','Xóa phân công '+day.label);clearDay.disabled=!assignments.length;
+    const clearIcon=document.createElement('i');clearIcon.setAttribute('data-lucide','trash-2');clearDay.appendChild(clearIcon);heading.appendChild(clearDay);
     column.appendChild(heading);
     const list=document.createElement('div'); list.className='weekday-list';
     if(!assignments.length){const empty=document.createElement('div');empty.className='weekday-empty';empty.textContent='Chưa có người trực';list.appendChild(empty);}
@@ -443,6 +471,7 @@ function renderDutyLists() {
     });
     column.appendChild(list);assignedList.appendChild(column);
   });
+  document.getElementById('clear-all').disabled=!scheduleData.schedule.assignments.length;
   if(window.lucide)window.lucide.createIcons();
 }
 
@@ -565,11 +594,12 @@ client.auth.getSession().then(async (result) => {
     if (window.lucide) window.lucide.createIcons();
     return;
   }
+  if(profile.data.role==='labor_monitor')document.body.classList.add('labor-monitor-page');
   
   // Load data
   await loadSchedule();
   
-  document.getElementById('week-title').textContent = formatWeekTitle(scheduleData.week_start);
+  renderWeekHeader();
 });
 
 // Save button
@@ -591,10 +621,23 @@ document.getElementById('add-manual').addEventListener('click',addManualStudent)
 document.getElementById('random-assign').addEventListener('click',randomAssign);
 document.getElementById('max-per-day').addEventListener('change',updateDailyLimit);
 document.getElementById('assigned-list').addEventListener('click',function(event) {
+  const clearDay=event.target.closest('[data-clear-day]');
+  if(clearDay){
+    const weekday=clearDay.dataset.clearDay;
+    const label=WEEKDAYS.find(day => day.id===weekday).label;
+    if(!scheduleData.schedule.assignments.some(item => item.weekday===weekday)||!confirm('Xóa toàn bộ phân công '+label+'?'))return;
+    scheduleData.schedule.assignments=scheduleData.schedule.assignments.filter(item => item.weekday!==weekday);
+    renderDutyLists();queueScheduleSave();showStatus('Đã xóa phân công '+label+'.','success');return;
+  }
   const remove=event.target.closest('[data-remove-index]');
   if(!remove)return;
   scheduleData.schedule.assignments.splice(Number(remove.dataset.removeIndex),1);
   renderDutyLists();queueScheduleSave();
+});
+document.getElementById('clear-all').addEventListener('click',function(){
+  if(!scheduleData.schedule.assignments.length||!confirm('Xóa toàn bộ phân công tuần này?'))return;
+  scheduleData.schedule.assignments=[];renderDutyLists();queueScheduleSave();
+  showStatus('Đã xóa toàn bộ phân công tuần này.','success');
 });
 document.getElementById('assigned-list').addEventListener('change',function(event) {
   const select=event.target.closest('[data-day-index]');

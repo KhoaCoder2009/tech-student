@@ -99,6 +99,7 @@ drop policy if exists "signed in users can read class settings" on public.class_
 drop policy if exists "signed in users can write class settings" on public.class_settings;
 drop policy if exists "managers can manage class settings" on public.class_settings;
 drop policy if exists "recorders can read class settings" on public.class_settings;
+drop policy if exists "duty staff can read class settings" on public.class_settings;
 create policy "managers can manage class settings"
   on public.class_settings for all to authenticated
   using (public.current_app_role() in ('teacher', 'class_monitor', 'secretary'))
@@ -106,10 +107,14 @@ create policy "managers can manage class settings"
 create policy "recorders can read class settings"
   on public.class_settings for select to authenticated
   using (public.current_app_role() = 'academic_monitor');
+create policy "duty staff can read class settings"
+  on public.class_settings for select to authenticated
+  using (public.current_app_role() = 'labor_monitor');
 
 drop policy if exists "signed in users can manage students" on public.students;
 drop policy if exists "managers can manage students" on public.students;
 drop policy if exists "recorders can read students" on public.students;
+drop policy if exists "duty staff can read students" on public.students;
 create policy "managers can manage students"
   on public.students for all to authenticated
   using (public.current_app_role() in ('teacher', 'class_monitor', 'secretary'))
@@ -117,10 +122,14 @@ create policy "managers can manage students"
 create policy "recorders can read students"
   on public.students for select to authenticated
   using (public.current_app_role() = 'academic_monitor');
+create policy "duty staff can read students"
+  on public.students for select to authenticated
+  using (public.current_app_role() = 'labor_monitor');
 
 drop policy if exists "signed in users can manage violation types" on public.violation_types;
 drop policy if exists "managers can manage violation types" on public.violation_types;
 drop policy if exists "recorders can read violation types" on public.violation_types;
+drop policy if exists "duty staff can read violation types" on public.violation_types;
 create policy "managers can manage violation types"
   on public.violation_types for all to authenticated
   using (public.current_app_role() in ('teacher', 'class_monitor', 'secretary'))
@@ -128,6 +137,9 @@ create policy "managers can manage violation types"
 create policy "recorders can read violation types"
   on public.violation_types for select to authenticated
   using (public.current_app_role() = 'academic_monitor');
+create policy "duty staff can read violation types"
+  on public.violation_types for select to authenticated
+  using (public.current_app_role() = 'labor_monitor');
 
 drop policy if exists "signed in users can manage records" on public.violation_records;
 drop policy if exists "recorders can manage violation records" on public.violation_records;

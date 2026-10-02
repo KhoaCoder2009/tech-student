@@ -259,6 +259,9 @@ dialog::backdrop{background:var(--backdrop)}
 .records-page .overview,.records-page .analytics{display:none}
 .records-page .tabs{display:flex!important}
 .academic-monitor-page #side-mx,.academic-monitor-page #tab-mx,.academic-monitor-page .week-actions,.academic-monitor-page #utility-settings{display:none!important}
+.labor-monitor-page #side-mx,.labor-monitor-page #tab-mx,.labor-monitor-page .week-actions,.labor-monitor-page #utility-settings{display:none!important}
+.student-home-page #side-mx,.student-home-page .side-link[href="truc-nhat.html"],.student-home-page #utility-notifications,.student-home-page #utility-settings{display:none!important}
+.student-home-page .analytics-panel:nth-child(2){display:none}
 .mobile-utility{display:none}
 .utility-cluster{display:flex;flex-direction:column;align-items:center;gap:var(--sidebar-icon-gap);width:100%;padding:0;border:0;background:transparent;box-shadow:none}
 .sidebar-utilities{display:grid;align-items:center;gap:var(--sidebar-icon-gap);width:100%;margin-top:var(--sidebar-icon-gap)}
@@ -388,6 +391,7 @@ body.page-leaving{animation:page-leave .16s ease-in both;pointer-events:none}
         <p class="eyebrow">Tổng quan lớp học</p>
         <h2 id="welcome-title">Chào mừng đến Quản lí nề nếp</h2>
         <p id="welcome-copy">Theo dõi nề nếp, ghi nhận hoạt động và xem tiến độ lớp học trong một không gian tập trung.</p>
+        <a class="btn" id="student-history-link" href="student-view.html" hidden><i data-lucide="clipboard-list" aria-hidden="true"></i> Lịch sử ghi nhận của tôi</a>
       </div>
       <div class="welcome-art" aria-hidden="true"><img src="logo.png" alt=""></div>
     </div>
@@ -651,6 +655,7 @@ var store={
   kind:'local',db:null,uid:null,localOK:true,classId:'main',
   loadSettings:async function(){
     if(this.kind==='cloud'){
+      if(S.role==='student')return {cls:'',catalog:clone(DEFAULTS),roster:[]};
       var results=await Promise.all([
         this.db.from('class_settings').select('class_name').eq('class_id',this.classId).maybeSingle(),
         this.db.from('students').select('name').eq('class_id',this.classId).order('sort_order'),
@@ -683,7 +688,9 @@ var store={
   },
   loadWeek:async function(key){
     if(this.kind==='cloud'){
-      var r=await this.db.from('violation_records').select('id,violation_type_id,violation_name,group_id,points,student_name,occurred_on,session,note,recorded_by_name').eq('class_id',this.classId).in('week_start',[key,legacyWeekKey(key)]).order('occurred_on');
+      var query=this.db.from('violation_records').select('id,violation_type_id,violation_name,group_id,points,student_name,occurred_on,session,note,recorded_by_name').eq('class_id',this.classId).in('week_start',[key,legacyWeekKey(key)]);
+      if(S.role==='student')query=query.eq('student_name',this.displayName);
+      var r=await query.order('occurred_on');
       if(r.error)throw r.error;
       return (r.data||[]).map(function(e){return {id:e.id,vt:e.violation_type_id||'',vn:e.violation_name||'',g:e.group_id||'',pts:e.points,hs:e.student_name,date:e.occurred_on,buoi:e.session,note:e.note,recordedBy:e.recorded_by_name||''};});
     }
@@ -704,7 +711,9 @@ var store={
   loadAll:async function(){
     var out={};
     if(this.kind==='cloud'){
-      var r=await this.db.from('violation_records').select('week_start,violation_type_id,violation_name,group_id,points,student_name,occurred_on,session,note,recorded_by_name').eq('class_id',this.classId).order('week_start');
+      var query=this.db.from('violation_records').select('week_start,violation_type_id,violation_name,group_id,points,student_name,occurred_on,session,note,recorded_by_name').eq('class_id',this.classId);
+      if(S.role==='student')query=query.eq('student_name',this.displayName);
+      var r=await query.order('week_start');
       if(r.error)throw r.error;
       (r.data||[]).forEach(function(e){var key=canonicalWeekKey(e.week_start);(out[key]||(out[key]=[])).push({id:uid(),vt:e.violation_type_id||'',vn:e.violation_name||'',g:e.group_id||'',pts:e.points,hs:e.student_name,date:e.occurred_on,buoi:e.session,note:e.note,recordedBy:e.recorded_by_name||''});});
       return out;
@@ -738,12 +747,23 @@ async function setUser(user){
   if(r.error)throw r.error;
   store.displayName=r.data&&r.data.display_name||user.email||user.id;S.role=r.data&&r.data.role||'';
   if(!['teacher','class_monitor','academic_monitor','secretary','labor_monitor','student'].includes(S.role))throw new Error('Tài khoản chưa được gán vai trò hợp lệ.');
-  // Nếu là thành viên (student), chuyển sang trang xem điểm
-  if(S.role==='student'){window.location.replace('student-view.html');return;}
-  if(S.role==='labor_monitor'){window.location.replace('truc-nhat.html');return;}
+  if(S.role==='student'){
+    if(VIEW==='records'){window.location.replace('student-view.html');return;}
+    S.tab='log';document.body.classList.add('student-home-page');
+    $('#student-history-link').hidden=false;
+    $('#welcome-title').textContent='Xin chào, '+store.displayName;
+    $('#welcome-copy').textContent='Đây là tổng quan điểm nề nếp cá nhân của bạn.';
+    $('#metric-students').closest('.metric').hidden=true;
+    $('.analytics-panel:first-child h3').textContent='Xu hướng của bạn';
+    $('.analytics-panel:first-child p').textContent='Lượt ghi nhận theo thời gian';
+  }
+  if(S.role==='labor_monitor'){
+    if(VIEW==='records'){window.location.replace('truc-nhat.html');return;}
+    document.body.classList.add('labor-monitor-page');
+  }
   if(S.role==='academic_monitor'){
-    if(VIEW!=='records'){window.location.replace('index.html?view=records');return;}
-    S.tab='log';document.body.classList.add('academic-monitor-page');
+    if(VIEW==='records')S.tab='log';
+    document.body.classList.add('academic-monitor-page');
   }
   renderAccount();
 }
@@ -858,7 +878,7 @@ function updateSummary(){
 function renderOverview(){
   var list=cur()||[],valid=list.filter(function(e){return e.vt;}),score=valid.reduce(function(total,e){return total+(Number(e.pts)||0);},0);
   var cls=S.settings.cls?('Lớp '+S.settings.cls):'lớp học của bạn';
-  $('#welcome-title').textContent='Cùng quản lý '+cls;
+  $('#welcome-title').textContent=S.role==='student'?'Xin chào, '+store.displayName:'Cùng quản lý '+cls;
   $('#metric-students').textContent=S.settings.roster.length;
   $('#metric-records').textContent=valid.length;
   var scoreEl=$('#metric-score');scoreEl.textContent=fmtPts(score);scoreEl.classList.toggle('pos',score>0);scoreEl.classList.toggle('neg',score<0);
